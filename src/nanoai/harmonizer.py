@@ -91,6 +91,33 @@ class Harmonizer:
             raise StaleState("Dictionary content, review, vocabulary or implementation changed")
         return expected
 
+    def learning_view(self, task_id):
+        """Inspect attributed outcomes without adding evaluator targets to prompts.
+
+        Historical and currently eligible records keep their source status. This
+        projection performs no parameter update or candidate admission.
+        """
+        from .experience import Experience
+        memory = self.memory
+        with memory.locked():
+            task = deepcopy(memory.state["tasks"][task_id])
+            sequence = memory.sequence
+            selected = [row for row in memory.state["experiences"].values()
+                        if row["snapshot"]["task_id"] == task_id]
+            experience_ids = [row["id"] for row in selected]
+            used = {row["snapshot"].get("learner") for row in selected}
+            learners = [deepcopy(row) for key, row in memory.state["learners"].items() if key in used]
+            active = memory.state["active_learner"]
+        owner = Experience(memory)
+        experiences = [owner.export(key) for key in experience_ids]
+        with memory.locked():
+            if memory.sequence != sequence:
+                raise StaleState("Learning history changed during inspection; read the current view again")
+        return {"schema": "nanoai.learning-view.v1", "task": task,
+                "action_experiences": experiences, "learners": learners,
+                "active_learner": active, "parameter_updates": 0,
+                "use": "Inspection of recorded outcomes and current eligibility"}
+
     @staticmethod
     def quantity_menu(packet):
         return [{key: field[key] for key in ("ref", "source", "path", "value", "unit")}

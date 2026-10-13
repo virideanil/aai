@@ -1,6 +1,6 @@
 # Computation, memory and continuing agency
 
-Status: integrated research design, 13 October 2026. The governing joint-core synthesis is [System Zero and Quantum tokening](system-zero.md); [measured results](results.md) distinguish the working foundation from proposed neural computation.
+Status: implementation contract, 13 October 2026. The [consolidated whole architecture](../../NANOAI-ARCHITECTURE.md) governs the design. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
 
 ## Purpose
 
@@ -81,3 +81,21 @@ Exact work can outlive a producing core version. Numerical basis checks follow a
 The current exact work graph also carries finite joint alternatives through `relation.decode`, `relation.query`, `relation.refine`, `relation.extend` and `relation.map`. [The relation contract](relations.md) specifies syntax, limits and evidence. Shared variable identity remains intact; the visible ternary answer is a projection of this richer state. Conditional refinement and conservative extension keep their distinct meanings, and a hypothetical map grants no external effect.
 
 The shared neural core must learn useful questions, transitions and representations throughout the full architecture. Its predictions are preserved separately from executed relation images. Both-valued images can supply checked scoped targets; empty inconsistent models, missing evaluations and resource limits retain their different statuses. Current-source eligibility follows the same journal dependencies as other experience. Executor source identity now includes the relation module and is checked through inherited observation dependencies.
+
+
+## Developmental learning and the governing design correction
+
+The current experience owner records exact decision context, candidate actions, behavior policy and selection propensity, actual published artifact, independent byte readback and a scoped authored assessment. Its learning view excludes stale current-source examples while preserving failure history. The current candidate jointly trains a byte encoder, complete native-feature projection, recurrent workspace and evidence/action heads. The native BF16 generator supplies fixed all-layer features and remains unchanged. This is a bounded selection learner, with no language decoder or direct gradient into the generative backbone.
+
+The whole-design review assigns this learner an experimental role. Three recurrent seeds scored 13/17/19 of 32 held-out document choices versus lexical 18; none met admission. The preferred next learned integration trains memory and action use inside a capable generative path, with source-detail access, diverse language replay, causal observations and complete-state recovery. The original model, retrieval, disabled-memory and matched extra-compute controls precede any claim about benefit. Learned patching and nested capacity are introduced as separately testable parts of the shared core after that path has its executable data/resource packet.
+
+Historical experiences and current-source training have distinct eligibility. A source correction can invalidate an example as a current fact while leaving its original failure and repair useful for an explicitly historical lesson. Serving admission evaluates complete work, retention, conduct and cost. A demonstration that all parameters received gradients is insufficient for that decision.
+
+
+## Native generative memory port
+
+`torch_source.py` maps the complete qualified Qwen3.5 text source without changing original BF16/F32 tensors. `LowRankLinear` holds a separately saved BF16 candidate update. The installed `DynamicCache` supplies the recurrent and attention computation. An experimental replacement cache was removed after the actual native implementation produced the same forward values and writer gradients.
+
+`export_hybrid_state` and `restore_hybrid_state` carry all 18 recurrent matrices and convolution buffers plus six attention key/value pairs, native position and a source/model/runtime compatibility contract. The supported checkpoint boundary is before a known next input. Arbitrary interruption during an unfinished token decision requires additional pending-output state and is outside this port's contract.
+
+`tools/evaluate_recurrent_credit.py` connects a checked failed experience to a corrected generated answer, isolates the earlier native recurrent write as the only gradient path, performs an actual BF16 update, publishes source-bound text and reproduces later logits in a fresh process. The source snapshot is revalidated before state reuse. This is a causal-credit integration check; the selected full-loss probe slightly worsened and the candidate was retained as an experiment.

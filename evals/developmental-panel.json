@@ -1,0 +1,4809 @@
+{
+  "schema": "nanoai.developmental-corpus.v1",
+  "episodes": [
+    {
+      "id": "gallery-first",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "first",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "The gallery tour is in the east hall."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "gallery-second",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "second",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "The gallery tour is in the garden room."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "gallery-third",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "third",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "The gallery tour is in the upper studio."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "gallery-correction",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "correction",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "The gallery tour is in the east hall.",
+        "Correction, the earlier detail is superseded: The gallery tour is in the garden room."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "gallery-distraction",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "distraction",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "The gallery tour is in the east hall.",
+        "On an unrelated matter, the windows were cleaned.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "gallery-conflict",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "conflict",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "The gallery tour is in the east hall.",
+        "A second source from the same date says: The gallery tour is in the garden room."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "gallery-missing",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "missing",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "No information about this topic has been supplied yet.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "gallery-correction_back",
+      "family": "gallery",
+      "split": "train",
+      "language": "en",
+      "mode": "correction_back",
+      "question": "Which room hosts the gallery tour?",
+      "observations": [
+        "The gallery tour is in the garden room.",
+        "On an unrelated matter, the windows were cleaned.",
+        "Final correction: The gallery tour is in the east hall.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The gallery tour is in the east hall."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The gallery tour is in the garden room."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The gallery tour is in the upper studio."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-first",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "first",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "The parcel collection point is the front desk."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-second",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "second",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "The parcel collection point is the side entrance."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-third",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "third",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "The parcel collection point is the depot."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-correction",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "correction",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "The parcel collection point is the front desk.",
+        "Correction, the earlier detail is superseded: The parcel collection point is the side entrance."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-distraction",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "distraction",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "The parcel collection point is the front desk.",
+        "On an unrelated matter, the windows were cleaned.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-conflict",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "conflict",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "The parcel collection point is the front desk.",
+        "A second source from the same date says: The parcel collection point is the side entrance."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-missing",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "missing",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "No information about this topic has been supplied yet.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "parcel-correction_back",
+      "family": "parcel",
+      "split": "train",
+      "language": "en",
+      "mode": "correction_back",
+      "question": "Where should the parcel be collected?",
+      "observations": [
+        "The parcel collection point is the side entrance.",
+        "On an unrelated matter, the windows were cleaned.",
+        "Final correction: The parcel collection point is the front desk.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The parcel collection point is the depot."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The parcel collection point is the side entrance."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The parcel collection point is the front desk."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-first",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "first",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "The workshop begins at nine."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-second",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "second",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "The workshop begins at eleven."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-third",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "third",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "The workshop begins at two."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-correction",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "correction",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "The workshop begins at nine.",
+        "Correction, the earlier detail is superseded: The workshop begins at eleven."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-distraction",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "distraction",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "The workshop begins at nine.",
+        "On an unrelated matter, the windows were cleaned.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-conflict",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "conflict",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "The workshop begins at nine.",
+        "A second source from the same date says: The workshop begins at eleven."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-missing",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "missing",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "No information about this topic has been supplied yet.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "workshop-correction_back",
+      "family": "workshop",
+      "split": "train",
+      "language": "en",
+      "mode": "correction_back",
+      "question": "When does the workshop begin?",
+      "observations": [
+        "The workshop begins at eleven.",
+        "On an unrelated matter, the windows were cleaned.",
+        "Final correction: The workshop begins at nine.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The workshop begins at two."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The workshop begins at eleven."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The workshop begins at nine."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-first",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "first",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "The meal for the visit is vegetable soup."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-second",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "second",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "The meal for the visit is rice and beans."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-third",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "third",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "The meal for the visit is lentil stew."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-correction",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "correction",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "The meal for the visit is vegetable soup.",
+        "Correction, the earlier detail is superseded: The meal for the visit is rice and beans."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-distraction",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "distraction",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "The meal for the visit is vegetable soup.",
+        "On an unrelated matter, the windows were cleaned.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-conflict",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "conflict",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "The meal for the visit is vegetable soup.",
+        "A second source from the same date says: The meal for the visit is rice and beans."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-missing",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "missing",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "No information about this topic has been supplied yet.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "meal-correction_back",
+      "family": "meal",
+      "split": "train",
+      "language": "en",
+      "mode": "correction_back",
+      "question": "What is the meal for the visit?",
+      "observations": [
+        "The meal for the visit is rice and beans.",
+        "On an unrelated matter, the windows were cleaned.",
+        "Final correction: The meal for the visit is vegetable soup.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The meal for the visit is rice and beans."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The meal for the visit is lentil stew."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The meal for the visit is vegetable soup."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-first",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "first",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Etkinlik için kâğıt gerekli."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-second",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "second",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Etkinlik için ahşap gerekli."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-third",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "third",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Etkinlik için kumaş gerekli."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-correction",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "correction",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Etkinlik için kâğıt gerekli.",
+        "Düzeltme, önceki bilgi geçersiz: Etkinlik için ahşap gerekli."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-distraction",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "distraction",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Etkinlik için kâğıt gerekli.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-conflict",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "conflict",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Etkinlik için kâğıt gerekli.",
+        "Aynı tarihten ikinci kaynak şöyle diyor: Etkinlik için ahşap gerekli."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-missing",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "missing",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Bu konu hakkında henüz bilgi verilmedi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "kit-correction_back",
+      "family": "kit",
+      "split": "train",
+      "language": "tr",
+      "mode": "correction_back",
+      "question": "Etkinlik için hangi malzeme gerekli?",
+      "observations": [
+        "Etkinlik için ahşap gerekli.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Son düzeltme: Etkinlik için kâğıt gerekli.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Etkinlik için kumaş gerekli."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Etkinlik için kâğıt gerekli."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Etkinlik için ahşap gerekli."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-first",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "first",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Okuma mavi salonda yapılacak."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-second",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "second",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Okuma yeşil salonda yapılacak."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-third",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "third",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Okuma küçük odada yapılacak."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-correction",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "correction",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Okuma mavi salonda yapılacak.",
+        "Düzeltme, önceki bilgi geçersiz: Okuma yeşil salonda yapılacak."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-distraction",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "distraction",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Okuma mavi salonda yapılacak.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-conflict",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "conflict",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Okuma mavi salonda yapılacak.",
+        "Aynı tarihten ikinci kaynak şöyle diyor: Okuma yeşil salonda yapılacak."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-missing",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "missing",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Bu konu hakkında henüz bilgi verilmedi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "reading-correction_back",
+      "family": "reading",
+      "split": "train",
+      "language": "tr",
+      "mode": "correction_back",
+      "question": "Okuma hangi salonda yapılacak?",
+      "observations": [
+        "Okuma yeşil salonda yapılacak.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Son düzeltme: Okuma mavi salonda yapılacak.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Okuma küçük odada yapılacak."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Okuma mavi salonda yapılacak."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Okuma yeşil salonda yapılacak."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-first",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "first",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "The train uses platform one."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-second",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "second",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "The train uses platform four."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-third",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "third",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "The train uses platform seven."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-correction",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "correction",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "The train uses platform one.",
+        "Correction, the earlier detail is superseded: The train uses platform four."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-distraction",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "distraction",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "The train uses platform one.",
+        "On an unrelated matter, the windows were cleaned.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-conflict",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "conflict",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "The train uses platform one.",
+        "A second source from the same date says: The train uses platform four."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-missing",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "missing",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "No information about this topic has been supplied yet.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "train-correction_back",
+      "family": "train",
+      "split": "validation",
+      "language": "en",
+      "mode": "correction_back",
+      "question": "Which platform does the train use?",
+      "observations": [
+        "The train uses platform four.",
+        "On an unrelated matter, the windows were cleaned.",
+        "Final correction: The train uses platform one.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The train uses platform one."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The train uses platform four."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The train uses platform seven."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-first",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "first",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bahçe pazartesi açılıyor."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-second",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "second",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bahçe çarşamba açılıyor."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-third",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "third",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bahçe cumartesi açılıyor."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-correction",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "correction",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bahçe pazartesi açılıyor.",
+        "Düzeltme, önceki bilgi geçersiz: Bahçe çarşamba açılıyor."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-distraction",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "distraction",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bahçe pazartesi açılıyor.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-conflict",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "conflict",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bahçe pazartesi açılıyor.",
+        "Aynı tarihten ikinci kaynak şöyle diyor: Bahçe çarşamba açılıyor."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-missing",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "missing",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bu konu hakkında henüz bilgi verilmedi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "garden-correction_back",
+      "family": "garden",
+      "split": "validation",
+      "language": "tr",
+      "mode": "correction_back",
+      "question": "Bahçe hangi gün açılıyor?",
+      "observations": [
+        "Bahçe çarşamba açılıyor.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Son düzeltme: Bahçe pazartesi açılıyor.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Bahçe cumartesi açılıyor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Bahçe pazartesi açılıyor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Bahçe çarşamba açılıyor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-first",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "first",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "The library loan lasts one week."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-second",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "second",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "The library loan lasts two weeks."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-third",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "third",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "The library loan lasts three weeks."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-correction",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "correction",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "The library loan lasts one week.",
+        "Correction, the earlier detail is superseded: The library loan lasts two weeks."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-distraction",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "distraction",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "The library loan lasts one week.",
+        "On an unrelated matter, the windows were cleaned.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-conflict",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "conflict",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "The library loan lasts one week.",
+        "A second source from the same date says: The library loan lasts two weeks."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-missing",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "missing",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "No information about this topic has been supplied yet.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "library-correction_back",
+      "family": "library",
+      "split": "test",
+      "language": "en",
+      "mode": "correction_back",
+      "question": "How long may the library book be borrowed?",
+      "observations": [
+        "The library loan lasts two weeks.",
+        "On an unrelated matter, the windows were cleaned.",
+        "Final correction: The library loan lasts one week.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The library loan lasts three weeks."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The library loan lasts one week."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The library loan lasts two weeks."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-first",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "first",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "The rehearsal leader is Mira."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-second",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "second",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "The rehearsal leader is Jonas."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-third",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "third",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "The rehearsal leader is Selin."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-correction",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "correction",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "The rehearsal leader is Mira.",
+        "Correction, the earlier detail is superseded: The rehearsal leader is Jonas."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-distraction",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "distraction",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "The rehearsal leader is Mira.",
+        "On an unrelated matter, the windows were cleaned.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-conflict",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "conflict",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "The rehearsal leader is Mira.",
+        "A second source from the same date says: The rehearsal leader is Jonas."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-missing",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "missing",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "No information about this topic has been supplied yet.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "rehearsal-correction_back",
+      "family": "rehearsal",
+      "split": "test",
+      "language": "en",
+      "mode": "correction_back",
+      "question": "Who will lead the rehearsal?",
+      "observations": [
+        "The rehearsal leader is Jonas.",
+        "On an unrelated matter, the windows were cleaned.",
+        "Final correction: The rehearsal leader is Mira.",
+        "On an unrelated matter, the windows were cleaned."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "The rehearsal leader is Jonas."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "The rehearsal leader is Selin."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "The sources conflict; ask which account is current."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "The rehearsal leader is Mira."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "The information is missing; ask for the current detail."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-first",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "first",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Vapur kuzey iskelesinden hareket edecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-second",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "second",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Vapur eski limandan hareket edecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-third",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "third",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Vapur ada iskelesinden hareket edecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-correction",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "correction",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Vapur kuzey iskelesinden hareket edecek.",
+        "Düzeltme, önceki bilgi geçersiz: Vapur eski limandan hareket edecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-distraction",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "distraction",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Vapur kuzey iskelesinden hareket edecek.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-conflict",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "conflict",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Vapur kuzey iskelesinden hareket edecek.",
+        "Aynı tarihten ikinci kaynak şöyle diyor: Vapur eski limandan hareket edecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-missing",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "missing",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Bu konu hakkında henüz bilgi verilmedi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "ferry-correction_back",
+      "family": "ferry",
+      "split": "test",
+      "language": "tr",
+      "mode": "correction_back",
+      "question": "Vapur nereden hareket edecek?",
+      "observations": [
+        "Vapur eski limandan hareket edecek.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Son düzeltme: Vapur kuzey iskelesinden hareket edecek.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Vapur eski limandan hareket edecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Vapur ada iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Vapur kuzey iskelesinden hareket edecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-first",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "first",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Sergide deniz resmi gösterilecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-second",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "second",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Sergide taş heykel gösterilecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-third",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "third",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Sergide cam vazo gösterilecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-2",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "no",
+          "option-2": "yes",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-correction",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "correction",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Sergide deniz resmi gösterilecek.",
+        "Düzeltme, önceki bilgi geçersiz: Sergide taş heykel gösterilecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-1",
+        "verdicts": {
+          "option-0": "no",
+          "option-1": "yes",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-distraction",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "distraction",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Sergide deniz resmi gösterilecek.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-conflict",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "conflict",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Sergide deniz resmi gösterilecek.",
+        "Aynı tarihten ikinci kaynak şöyle diyor: Sergide taş heykel gösterilecek."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-4",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "yes"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-missing",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "missing",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Bu konu hakkında henüz bilgi verilmedi.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-3",
+        "verdicts": {
+          "option-0": "maybe",
+          "option-1": "maybe",
+          "option-2": "maybe",
+          "option-3": "yes",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    },
+    {
+      "id": "exhibition-correction_back",
+      "family": "exhibition",
+      "split": "test",
+      "language": "tr",
+      "mode": "correction_back",
+      "question": "Sergide hangi eser gösterilecek?",
+      "observations": [
+        "Sergide taş heykel gösterilecek.",
+        "Başka bir konuda: pencereler temizlendi.",
+        "Son düzeltme: Sergide deniz resmi gösterilecek.",
+        "Başka bir konuda: pencereler temizlendi."
+      ],
+      "candidates": [
+        {
+          "id": "option-0",
+          "kind": "answer",
+          "content": "Sergide deniz resmi gösterilecek."
+        },
+        {
+          "id": "option-2",
+          "kind": "answer",
+          "content": "Sergide cam vazo gösterilecek."
+        },
+        {
+          "id": "option-1",
+          "kind": "answer",
+          "content": "Sergide taş heykel gösterilecek."
+        },
+        {
+          "id": "option-4",
+          "kind": "inquire",
+          "content": "Kaynaklar çelişiyor; hangi bilginin geçerli olduğunu sor."
+        },
+        {
+          "id": "option-3",
+          "kind": "inquire",
+          "content": "Bilgi eksik; güncel bilgiyi sor."
+        }
+      ],
+      "rubric": {
+        "target_id": "option-0",
+        "verdicts": {
+          "option-0": "yes",
+          "option-1": "no",
+          "option-2": "no",
+          "option-3": "no",
+          "option-4": "no"
+        },
+        "scope": "Authored notice world and exact editable-document choice"
+      }
+    }
+  ],
+  "source": "Authored in this repository before model feature collection or training",
+  "split_unit": "Whole domain including question, values and every trajectory",
+  "precision": "Original BF16 backbone, original F32 outputs, new F32 candidate",
+  "identity": "shake256:e5cf45cdc030449b6587f776588e2cb5866d7d0aa420a10454e8d59d030dd523f224754fd6a2eaccac564b316aa7e4b82540dcaf3a12294d8a2da3d5c6fbbe2d"
+}

@@ -8,6 +8,7 @@ from __future__ import annotations
 import argparse
 import http.client
 import json
+import math
 import os
 from pathlib import Path
 import signal
@@ -17,7 +18,7 @@ import sys
 import tempfile
 import time
 
-from .core import file_digest
+from .core import file_digest, digest_bytes
 from .precision import PRECISION_PROFILE, inspect_bf16
 
 
@@ -49,6 +50,18 @@ def runtime_environment(profile, inherited=None):
     return environment, flags
 
 
+def representation_profile(value):
+    """A feature basis is explicit and distinct from the generation profile."""
+    if value is None:
+        return None
+    if (not isinstance(value, dict) or set(value) != {"kind", "dimensions", "max_tokens"}
+            or value["kind"] != "causal-last-f32-v1"
+            or type(value["dimensions"]) is not int or not 1 <= value["dimensions"] <= 32768
+            or type(value["max_tokens"]) is not int or not 1 <= value["max_tokens"] <= 128):
+        raise ValueError("Native representation profile")
+    return dict(value)
+
+
 class SocketHTTP(http.client.HTTPConnection):
     def __init__(self, path, timeout):
         super().__init__("localhost", timeout=timeout)
@@ -68,6 +81,7 @@ class NativeSession:
         self.pinned = []
         self.parameters = None
         self.group_interrupted = False
+        self.representation = None
 
     def http(self, path, payload=None, *, timeout=110):
         client = SocketHTTP(self.socket_path, timeout)
@@ -101,6 +115,7 @@ class NativeSession:
             raise ValueError("Native manifest schema")
         if manifest.get("precision_profile") != PRECISION_PROFILE:
             raise ValueError("Original BF16 model manifest required")
+        self.representation = representation_profile(manifest.get("representation"))
         entries = [manifest["model"], manifest["server"], *manifest.get("libraries", [])]
         if manifest.get("decoder"):
             entries.append(manifest["decoder"])
@@ -142,6 +157,8 @@ class NativeSession:
             "--cache-type-k", "bf16", "--cache-type-v", "bf16",
             "--no-webui", "--jinja", "--reasoning-budget", "0",
             "--chat-template-kwargs", '{"enable_thinking":false}']
+        if self.representation is not None:
+            arguments += ["--embeddings", "--pooling", "last", "--embd-normalize", "-1"]
         environment, runtime_flags = runtime_environment(manifest.get("runtime"))
         self.server = subprocess.Popen(arguments, env=environment, stdin=subprocess.DEVNULL, stdout=sys.stderr, stderr=sys.stderr)
         deadline = time.monotonic() + 100
@@ -162,10 +179,13 @@ class NativeSession:
             "source_storage": storage,
             "owned_temporary_directory": self.directory.name,
             "transport": "private Unix socket", "context_tokens": 4096,
+            "representation": self.representation,
             "cache_policy": "rebuild each request", "model_identity_read_warms_file_cache": True}
 
     def generate(self, request):
         self.check()
+        if self.representation is not None:
+            raise ValueError("The selected representation profile serves encode requests")
         messages = request.get("messages")
         limit = request.get("max_tokens", 384)
         if not isinstance(messages, list) or not 1 <= len(messages) <= 32 or type(limit) is not int or not 1 <= limit <= 512:
@@ -195,6 +215,39 @@ class NativeSession:
             "finish_reason": choice["finish_reason"], "elapsed_ms": (time.monotonic() - start) * 1000,
             "backend": "CPU", "cache_prompt": False, "timings": response.get("timings")}
 
+    def encode(self, request):
+        """Use all original layers and the native literal tokenizer, with no update."""
+        self.check()
+        if self.representation is None:
+            raise ValueError("Encoding requires a pinned representation profile")
+        text = request.get("text")
+        if not isinstance(text, str) or not text or len(text.encode("utf-8")) > 8192:
+            raise ValueError("Native representation text extent")
+        start = time.monotonic()
+        tokens = self.http("/tokenize", {"content": text, "add_special": True,
+                                         "parse_special": False})["tokens"]
+        if (not isinstance(tokens, list) or not 1 <= len(tokens) <= self.representation["max_tokens"]
+                or any(type(token) is not int or token < 0 for token in tokens)):
+            raise ValueError("Native representation token extent")
+        # Supplying the literal IDs avoids reparsing source control-looking text.
+        response = self.http("/embeddings", {"input": tokens, "embd_normalize": -1,
+                                              "cache_prompt": False})
+        if (not isinstance(response, list) or len(response) != 1
+                or response[0].get("index") != 0
+                or not isinstance(response[0].get("embedding"), list)
+                or len(response[0]["embedding"]) != 1):
+            raise ValueError("Native representation response shape")
+        vector = response[0]["embedding"][0]
+        if (not isinstance(vector, list) or len(vector) != self.representation["dimensions"]
+                or any(type(v) not in (int, float) or not math.isfinite(v) for v in vector)
+                or not any(vector)):
+            raise ValueError("Native representation is nonfinite, empty or incompatible")
+        self.check()
+        return {"parameters": self.parameters, "representation": self.representation,
+                "text_identity": digest_bytes(text.encode("utf-8")), "native_ids": tokens,
+                "vector": vector, "dtype": "float32", "elapsed_ms": (time.monotonic()-start)*1000,
+                "backend": "CPU", "cache_prompt": False}
+
     def call(self, request):
         command = request.get("command")
         if command == "init" and not self.initialized:
@@ -204,6 +257,8 @@ class NativeSession:
             return self.load(request)
         if command in ("generate", "propose"):
             return self.generate(request)
+        if command == "encode":
+            return self.encode(request)
         raise ValueError("Native command or state")
 
     def close(self):

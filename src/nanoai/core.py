@@ -188,6 +188,10 @@ class JsonlCore:
             fields["response_schema"] = schema
         return self.call("propose" if schema is not None else "generate", **fields)
 
+    def encode(self, text: str):
+        """Read a full-backbone representation under an explicit feature profile."""
+        return self.call("encode", text=text)
+
     def close(self):
         if self.closed:
             return

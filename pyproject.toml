@@ -11,6 +11,8 @@ dependencies = []
 
 [project.optional-dependencies]
 syszero = ["tokenizers==0.23.2", "tiktoken==0.12.0"]
+learning = ["numpy==2.5.3", "torch==2.14.0"]
+generative = ["torch==2.14.0", "transformers==5.19.0", "safetensors==0.8.0", "tokenizers==0.23.2"]
 
 [project.scripts]
 nanoai = "nanoai.cli:main"

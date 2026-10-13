@@ -115,6 +115,13 @@ def main():
     assessment.add_argument("node_id")
     experience = sub.add_parser("experiences")
     experience.add_argument("task_id")
+    sub.add_parser("learners")
+    trial = sub.add_parser("trial-act", help="Run a registered experimental candidate on the task's local document action")
+    trial.add_argument("task_id")
+    trial.add_argument("--source", required=True)
+    trial.add_argument("--candidate", required=True)
+    trial.add_argument("--features", type=Path, required=True)
+    trial.add_argument("--choices", type=Path, required=True)
     carrier = sub.add_parser("carry-judgments")
     carrier.add_argument("node_ids", nargs="+")
     calculation = sub.add_parser("calculate")
@@ -145,6 +152,27 @@ def main():
     elif args.command == "resume":
         memory.recover()
         output = memory.completed(args.task_id)
+    elif args.command == "learners":
+        from .core import file_digest
+        with memory.locked():
+            output = {"active_learner": memory.state["active_learner"], "candidates": [
+                {**row, "bytes_current": file_digest(memory._artifact_path(row["path"])) == row["id"]}
+                for row in memory.state["learners"].values()], "parameter_updates": 0}
+    elif args.command == "trial-act":
+        import torch
+        from .learning import Features, act, load_checkpoint
+        from .steps import strict_json
+        torch.set_num_threads(4)
+        features = Features(args.features)
+        with memory.locked():
+            candidate = memory.state["learners"][args.candidate]
+            checkpoint = memory._artifact_path(candidate["path"])
+        model, _ = load_checkpoint(checkpoint, expected=args.candidate, feature_basis=features.basis)
+        result = act(memory, features, model, args.task_id, args.source,
+                     strict_json(args.choices.read_text()), learner_id=args.candidate)
+        output = {**result, "artifact_path": str(memory.root/result["receipt"]["path"]),
+                  "mode": "experimental_candidate", "candidate_admitted": memory.state["active_learner"] == args.candidate,
+                  "parameter_updates": 0}
     elif args.command == "steps":
         from .steps import Steps
         output = Steps(memory).status()
@@ -199,7 +227,9 @@ def main():
         elif args.command == "assess-judgment":
             output = {"assessment": judgments.assess(args.node_id)}
         elif args.command == "experiences":
-            output = {"experiences": judgments.experiences(args.task_id), "parameter_updates": 0}
+            from .harmonizer import Harmonizer
+            output = {**Harmonizer(memory).learning_view(args.task_id),
+                      "experiences": judgments.experiences(args.task_id)}
         else:
             output = judgments.carry(args.node_ids)
             output["packed_hex"] = output.pop("packed").hex()

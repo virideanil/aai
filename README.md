@@ -2,6 +2,8 @@
 
 nano'ai develops a continuing learning agent that understands, reasons, creates, acts and learns from correction. The selected architecture connects **System Zero's exact knowledge/representation contracts, one jointly trained core, and an exact work graph**. Quantum patching, recurrent memory, nested BF16 capacity and action heads share that core's learning objective. Identity, character, perception, editable creation, hardware efficiency and the wider requirements retain their scope.
 
+The [whole architecture](../NANOAI-ARCHITECTURE.md) distinguishes the current generative instrument, bounded feature learner and destination byte/patch core. The preferred learning path joins generative memory and actions, then introduces chunking and capacity with matched controls. The current small selection experiment produced real parameter updates and artifacts but no reliable gain over its lexical control; no candidate was admitted.
+
 This repository implements the current research foundation: original-BF16 model admission, native generation, versioned evidence/task memory, typed operations, a common vocabulary bridge, modular working representations, judgments and checked experience, local artifact publication and observed recovery. The new joint neural core is a design and training research direction. Existing Qwen models supply complete experimental instruments; Qwen/Kimi mechanisms inform our own architecture.
 
 - [Complete System Zero and joint-core design](docs/system-zero.md)
@@ -14,6 +16,8 @@ This repository implements the current research foundation: original-BF16 model 
 ## Dependencies
 
 Use Python 3.14 or newer and the maintained SJQL package. Set `NANOAI_SJQL_SRC` to its `src` directory if it is not installed. The source tree is usable with `PYTHONPATH=src`; `python -m pip install -e .` adds the `nanoai` command. Vocabulary adapters additionally use the pinned `syszero` extra. The exact journal and core process client use the Python standard library; evaluation/benchmark scripts also need NumPy and safetensors where used.
+
+The optional `learning` extra pins the NumPy and PyTorch versions used for the F32 candidate. The `generative` extra pins the qualified CPU PyTorch/Transformers source adapter and tokenizer. Reuse a matching installed environment when available. Model payloads and feature caches have separate source manifests.
 
 Native generation requires an existing qualified `llama-server` build that supports Qwen3.5 and original BF16, plus its dependent libraries. Native codec compilation currently uses C++17 and macOS Accelerate; Linux/Windows compilation has not been qualified. `tools/build_harmony.py --help` gives the explicit compiler/output options. The optional codec is independent of ordinary raw-BF16 generation.
 
@@ -66,6 +70,29 @@ python -m nanoai.cli --state .local/work board-branch NODE_ID --reason "Keep thi
 `board-reserve`, `board-bind`, `board-add`, `board-revise`, `board-refine`, `board-reshape` and `board-latest` expose the structural operations. Their `--help` lists inputs. A revision preserves history and invalidates dependent work; exact refinement and tensor reshape enforce their declared invariants. The [scratchboard contract](docs/scratchboard.md) defines bounds, basis compatibility and the distinction between structural modularity and a learned editing policy.
 
 `judge`, `assess-judgment`, `carry-judgments` and `experiences` expose provisional judgments, independent numerical or joint-relation property checks, exact ternary/BF16 carriers and attributed feedback. A model can choose the wrong label or cause; the original prediction remains visible. Recording or packing an experience does not train the model. The `step` command also exposes admitted pure relation queries, conditional refinement, conservative extension and hypothetical state maps through JSON arguments. The [relation contract](docs/relations.md) defines the input and limits. `board-import` supports explicit cross-task reuse with current source dependencies and a recorded relevance judgment. Exact units retain provenance across core versions; tensor-dependent units require a compatible basis.
+
+## Developmental learning experiment
+
+The [frozen comparison](evals/developmental_contract.md) connects full original-model features and UTF-8 bytes to a jointly trained recurrent selection network, scoped evidence judgments, actual document choices and independent artifact assessment. The pretrained language backbone stays unchanged. Training consumes current checked experience from the same SJQL journal, including unsuccessful choices with their original observations. The authored menu supplies replayable alternative targets separately from the chosen action's observed consequence.
+
+`tools/encode_developmental.py` collects source-pinned features. `tools/evaluate_developmental.py` exposes collection, training and artifact phases. `tools/evaluate_developmental_native.py` runs the unchanged full-BF16 control. `tools/evaluate_developmental_recovery.py` checks fresh candidate/workspace restoration, real process interruption at publication and once-only recovery. Their `--help` lists required manifests, fresh output directories and sourced launch preflights. The recorded candidate and original model sources retain separate identities.
+
+For an existing experiment state, inspect recorded outcomes and registered candidates with:
+
+```sh
+python -m nanoai.cli --state /absolute/path/experiment-state experiences TASK_ID
+python -m nanoai.cli --state /absolute/path/experiment-state learners
+```
+
+The experience view keeps judgment-derived and action-derived records separate. It shows current eligibility and retained historical assessments without feeding evaluator targets into model prompts. Inspection changes no parameter or admission state.
+
+`trial-act TASK_ID --source SOURCE_ID --candidate CANDIDATE_ID --features FEATURE_DIRECTORY --choices CHOICES_JSON` executes a registered experimental candidate and publishes its chosen local document under the task's existing grant. The source contains `{"observations":["..."]}` and choices follow the frozen contract's `id`, `kind` and `content` fields. Every question, observation and choice text needs an exact feature-cache entry. The command identifies the experimental mode and admission status; it does not select a new default model. This menu consumer stays separate from the full-source generative memory experiment below.
+
+## Generative memory and learning controls
+
+`tools/evaluate_recurrent_credit.py` uses the complete local source model and its native recurrent cache. It takes a current checked experience, isolates an earlier recurrent write as the route for a later answer loss, changes a separately saved BF16 adapter, generates and publishes an actual local answer, then saves the complete hybrid state. `--reload-only` verifies the saved candidate and state in a fresh process, checks identical continuation, and exercises source correction and once-only recovery in that private experiment state. Use its `--help` for explicit source, experience, collection-state, output, source-manifest and launch-preflight inputs. Keep the model source unchanged and run under the documented resource guards.
+
+`tools/evaluate_outcome_learning.py` compares gradients from the actual chosen action's assessed success with the original rubric-supervised recipe. It records validation-selected and fixed final-epoch results, reproduces the original selected candidates, and publishes the new experimental candidates' actual documents. Training and validation information budgets are explicit in the [developmental contract](evals/developmental_contract.md). These tools retain failed candidates and do not change the default model. [Measured results](docs/results.md) describe the qualified scope.
 
 ## Verification
 

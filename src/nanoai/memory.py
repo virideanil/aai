@@ -87,7 +87,9 @@ class Memory:
         self.state = {"identity": None, "sources": {}, "source_history": {}, "tasks": {},
                       "proposals": {}, "rejections": [], "operations": {}, "receipts": {}, "source_epoch": 0,
                       "steps": {}, "step_observations": {}, "step_reviews": {}, "step_cache": {},
-                      "scratchboard": {}, "scratchboard_revisions": {}}
+                      "scratchboard": {}, "scratchboard_revisions": {},
+                      "experiences": {}, "experience_proposals": {}, "experience_assessments": {},
+                      "learners": {}, "active_learner": None}
         for _, transaction in self.journal.tail(self.segments, None, at_head=self.head):
             if transaction["previous"] != self.sequence or transaction["sequence"] != self.sequence + 1:
                 raise ValueError("Memory transaction sequence mismatch")
@@ -142,6 +144,9 @@ class Memory:
                 raise ValueError("Scratchboard revision lineage differs")
             self.state["scratchboard"][node["id"]] = node
             self.state["scratchboard_revisions"][revision["previous"]] = revision
+        elif kind.startswith("experience.") or kind.startswith("learner."):
+            from .experience import apply_event
+            apply_event(self.state, e)
         else:
             raise ValueError("Unknown memory event")
 
@@ -277,6 +282,12 @@ class Memory:
             raise StaleState("Proposal task revision is stale")
         if digest_bytes(canonical(self.state["identity"])) != snapshot["identity"]:
             raise StaleState("Proposal identity is stale")
+        if snapshot.get("learner") is not None:
+            learner = self.state["learners"].get(snapshot["learner"])
+            if learner is None or snapshot["core_identity"] != learner["id"]:
+                raise StaleState("Learned workspace candidate differs")
+            if file_digest(self._artifact_path(learner["path"])) != learner["id"]:
+                raise StaleState("Learned workspace checkpoint changed")
         if include_selection and not self._selection_current(snapshot):
             raise StaleState("Proposal evidence selection is stale")
         for name, expected in snapshot["sources"].items():
