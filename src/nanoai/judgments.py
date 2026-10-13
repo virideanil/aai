@@ -247,7 +247,7 @@ class Judgments:
         schema = {"type": "object", "properties": {"judgment": {"type": "string", "enum": list(CHOICES)},
                   "reason": {"type": "string", "minLength": 1, "maxLength": 256}},
                   "required": ["judgment", "reason"], "additionalProperties": False}
-        generated = core.generate(messages, max_tokens=128, schema=schema)
+        generated = core.generate(messages, schema=schema)
         try:
             output = strict_json(generated["output"])
             if generated.get("finish_reason") == "length" or not isinstance(output, dict) or set(output) != {"judgment", "reason"}:

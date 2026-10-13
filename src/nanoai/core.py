@@ -95,6 +95,8 @@ class JsonlCore:
         self.pending = b""
         self.child = None
         self.closed = False
+        self.cleanup_errors = []
+        self.primary_error = None
         self.selector = selectors.DefaultSelector()
         self.stderr_path = Path(stderr_path)
         self.log = Path(stderr_path).open("ab")
@@ -111,8 +113,8 @@ class JsonlCore:
             self.selector.register(self.child.stdout, selectors.EVENT_READ)
             self.call("init")
             self.load = self.call("load", path=config["manifest"], expected=self.manifest_identity)
-        except BaseException:
-            self.close()
+        except BaseException as error:
+            self.close(primary_error=error)
             raise
 
     def check_sources(self):
@@ -137,9 +139,9 @@ class JsonlCore:
         if self.swap_before is not None and sample["host_swap_bytes"] - self.swap_before > self.config.get("swap_growth_limit_bytes", 512 * 1024**2):
             raise RuntimeError("System swap-growth budget reached")
 
-    def _line(self, deadline: float) -> bytes:
+    def _line(self, deadline: float | None) -> bytes:
         while b"\n" not in self.pending:
-            if time.monotonic() >= deadline:
+            if deadline is not None and time.monotonic() >= deadline:
                 raise TimeoutError("Model request deadline reached")
             self._sample()
             if not self.selector.select(0.05):
@@ -169,7 +171,12 @@ class JsonlCore:
             self.trace.flush()
             self.child.stdin.write(raw)
             self.child.stdin.flush()
-            result = json.loads(self._line(time.monotonic() + self.config.get("request_seconds", 120)))
+            duration = (self.config.get("request_seconds") if command in {"generate", "propose"}
+                        else self.config.get("startup_seconds", 120))
+            if duration is not None and (isinstance(duration, bool) or not isinstance(duration, (int, float))
+                                         or not 0 < duration < float("inf")):
+                raise ValueError("Model request duration must be positive or null")
+            result = json.loads(self._line(None if duration is None else time.monotonic() + duration))
             self.trace.write(json.dumps({"event": "response", "response": result}, ensure_ascii=False) + "\n")
             self.trace.flush()
             if result.get("id") != self.sequence:
@@ -178,12 +185,16 @@ class JsonlCore:
                 raise RuntimeError(result.get("error", "Model worker failed"))
             self.check_sources()
             return result["result"]
-        except BaseException:
-            self.close()
+        except BaseException as error:
+            self.close(primary_error=error)
             raise
 
-    def generate(self, messages: list, *, max_tokens=256, schema=None):
+    def generate(self, messages: list, *, max_tokens=None, schema=None, trace=False):
         fields = {"messages": messages, "max_tokens": max_tokens}
+        if type(trace) is not bool:
+            raise ValueError("Generation trace choice must be Boolean")
+        if trace:
+            fields["return_trace"] = True
         if schema is not None:
             fields["response_schema"] = schema
         return self.call("propose" if schema is not None else "generate", **fields)
@@ -192,55 +203,86 @@ class JsonlCore:
         """Read a full-backbone representation under an explicit feature profile."""
         return self.call("encode", text=text)
 
-    def close(self):
+    def close(self, *, primary_error: BaseException | None = None):
         if self.closed:
             return
-        self.closed = True
-        remaining = []
-        if self.child is not None:
-            # The group belongs to this invocation (start_new_session=True).
-            # Signal it even if the leader has already exited: native inference
-            # can outlive a failed transport worker.
+        if primary_error is not None and self.primary_error is None:
+            self.primary_error = {"type": type(primary_error).__name__, "message": str(primary_error)}
+        errors = []
+        failed = object()
+
+        def attempt(stage, operation):
             try:
-                os.killpg(self.child.pid, signal.SIGTERM)
-            except ProcessLookupError:
-                pass
-            deadline = time.monotonic() + 3
-            while True:
-                self.child.poll()
-                remaining = live_group_members(self.child.pid)
-                if not remaining or time.monotonic() >= deadline:
-                    break
-                time.sleep(.025)
-            if remaining:
+                return operation()
+            except Exception as error:
+                errors.append(error)
+                self.cleanup_errors.append({"stage": stage, "type": type(error).__name__, "message": str(error)})
+                return failed
+
+        def observe_group():
+            result = attempt("observe_process_group", lambda: live_group_members(self.child.pid))
+            return None if result is failed else result
+
+        def signal_group(sig):
+            def send():
                 try:
-                    os.killpg(self.child.pid, signal.SIGKILL)
+                    os.killpg(self.child.pid, sig)
                 except ProcessLookupError:
                     pass
-            self.child.wait(timeout=3)
-            deadline = time.monotonic() + 1
+            if attempt(f"signal_process_group_{sig.name}", send) is failed:
+                # The directly owned process can remain signalable when a group
+                # operation fails. Its descendants still require observation.
+                attempt(f"signal_worker_{sig.name}", lambda: self.child.send_signal(sig))
+
+        remaining = []
+        child_reaped = None
+        if self.child is not None:
+            # Observe descendants even after their worker exits. An unavailable
+            # process inventory is unknown and still requires cleanup attempts.
+            remaining = observe_group()
+            if remaining != []:
+                signal_group(signal.SIGTERM)
+            deadline = time.monotonic() + 3
             while remaining and time.monotonic() < deadline:
-                remaining = live_group_members(self.child.pid)
-                if remaining:
-                    time.sleep(.025)
-            for stream in (self.child.stdin, self.child.stdout):
+                attempt("poll_worker", self.child.poll)
+                remaining = observe_group()
+                time.sleep(.025)
+            if remaining != []:
+                signal_group(signal.SIGKILL)
+            attempt("wait_worker", lambda: self.child.wait(timeout=3))
+            observed_exit = attempt("observe_worker_exit", self.child.poll)
+            child_reaped = None if observed_exit is failed else observed_exit is not None
+            deadline = time.monotonic() + 1
+            remaining = observe_group()
+            while remaining and time.monotonic() < deadline:
+                time.sleep(.025)
+                remaining = observe_group()
+            for name, stream in (("stdin", self.child.stdin), ("stdout", self.child.stdout)):
                 if stream:
-                    stream.close()
-        self.selector.close()
-        self.log.close()
-        self.trace.close()
-        self.stderr_path.with_suffix(".resources.json").write_text(json.dumps({
+                    attempt(f"close_{name}", stream.close)
+        for name, stream in (("selector", self.selector), ("log", self.log), ("trace", self.trace)):
+            attempt(f"close_{name}", stream.close)
+        receipt = {
             "swap_before_bytes": self.swap_before, "samples": self.samples,
-            "child_reaped": self.child is not None and self.child.poll() is not None,
+            "child_reaped": child_reaped,
             "exit_code": self.child.returncode if self.child else None,
-            "process_group_stopped": not remaining,
+            "process_group_stopped": None if remaining is None else not remaining,
             "remaining_processes": remaining,
-        }, indent=2) + "\n")
-        if remaining:
-            raise RuntimeError("Model process group did not stop within the cleanup bound")
+            "primary_error": self.primary_error, "cleanup_errors": self.cleanup_errors,
+        }
+        receipt_path = self.stderr_path.with_suffix(".resources.json")
+        attempt("write_resource_receipt", lambda: receipt_path.write_text(json.dumps(receipt, indent=2) + "\n"))
+        complete = remaining == [] and (self.child is None or child_reaped is True)
+        self.closed = complete and not errors
+        if errors or not complete:
+            detail = f"Model cleanup incomplete or reported errors; inspect {receipt_path}"
+            if primary_error is not None:
+                primary_error.add_note(detail)
+            else:
+                raise RuntimeError(detail) from (errors[0] if errors else None)
 
     def __enter__(self):
         return self
 
-    def __exit__(self, *args):
-        self.close()
+    def __exit__(self, exc_type, error, traceback):
+        self.close(primary_error=error)

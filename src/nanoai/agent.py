@@ -72,7 +72,7 @@ def context(memory: Memory, task_id: str, core_identity: str, *, source_count=4,
             "schema": schema, "snapshot": snapshot, "source_ids": [r["id"] for r in sources]}
 
 
-def run(memory, core, task_id, *, commit=False, source_count=4, selected_ids=None, observation_ids=(), scratchboard_ids=(), max_tokens=384, max_attempts=2):
+def run(memory, core, task_id, *, commit=False, source_count=4, selected_ids=None, observation_ids=(), scratchboard_ids=(), max_tokens=None, max_attempts=2):
     if type(max_attempts) is not int or not 1 <= max_attempts <= 3:
         raise ValueError("Proposal attempts must be bounded from one to three")
     memory.recover()
@@ -85,7 +85,7 @@ def run(memory, core, task_id, *, commit=False, source_count=4, selected_ids=Non
         attempts.append(metrics)
         try:
             if result.get("finish_reason") == "length":
-                raise ProposalError("Incomplete JSON reached the token budget. Return a shorter complete document and JSON object")
+                raise ProposalError("The generation ended before the document was complete. Resolve the reported context or caller limit and return a complete JSON document")
             output = json.loads(result["output"])
             if not isinstance(output, dict) or set(output) != {"filename", "content"} or not isinstance(output["content"], str):
                 raise ProposalError("Return exactly filename and document content")
@@ -109,7 +109,7 @@ def run(memory, core, task_id, *, commit=False, source_count=4, selected_ids=Non
         return {"proposal": proposal, "receipt": receipt, "artifact_path": str(memory.root / receipt["path"]) if receipt else None}
 
 
-def calculate(memory, core, task_id, *, selected_ids=None, max_tokens=192, domain="integer", max_attempts=2):
+def calculate(memory, core, task_id, *, selected_ids=None, max_tokens=None, domain="integer", max_attempts=2):
     """Let the actual core select a typed calculation over exact source fields."""
     from .steps import Steps, strict_json
     from .harmonizer import Harmonizer
@@ -168,7 +168,7 @@ def calculate(memory, core, task_id, *, selected_ids=None, max_tokens=192, domai
         attempts.append(generated)
         try:
             if generated.get("finish_reason") == "length":
-                raise ProposalError("The calculation plan reached its token budget")
+                raise ProposalError("The calculation plan ended before completion")
             plan = strict_json(generated["output"])
             if catalogue is not None:
                 if not isinstance(plan, dict) or set(plan) != {"operator", "fields"} or plan["operator"] not in {"multiply", "add"}:

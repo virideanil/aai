@@ -89,7 +89,7 @@ def main():
         # A generated document exercises the consumer of the judgment records.
         receipt = None
         try:
-            generated = run(memory,core,"assessment",selected_ids=["measures"],scratchboard_ids=[n["id"] for n in assessments],max_tokens=512)
+            generated = run(memory,core,"assessment",selected_ids=["measures"],scratchboard_ids=[n["id"] for n in assessments])
             result["document"] = generated
             content = generated["proposal"]["output"]["content"]
             check("real_document_contains_checked_quantities_and_current_reference",all(word in content for word in ("46","42","[measures@1]")),content=content)

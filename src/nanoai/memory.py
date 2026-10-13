@@ -1,6 +1,6 @@
-"""Versioned source/task memory on the maintained SJQL transaction journal.
+"""Versioned source/task memory on an explicitly selected durable journal.
 
-SJQL owns durable segments, locks, integrity and head publication. This module
+The journal owns atomic commits, integrity and head publication. This module
 owns nano'ai's domain events and reconstructible current-state projection.
 """
 from __future__ import annotations
@@ -71,12 +71,30 @@ def identifier(value):
 
 
 class Memory:
-    def __init__(self, root: str | Path):
+    def __init__(self, root: str | Path, *, backend="auto"):
         self.root = Path(root).resolve()
         self.root.mkdir(parents=True, exist_ok=True, mode=0o700)
-        self.journal, self.fs = sjql_modules()
-        self.segments = self.root / "transactions.sjql.d"
-        self.segments.mkdir(exist_ok=True, mode=0o700)
+        if backend not in {"auto", "sjql", "sqlite"}:
+            raise ValueError("Unknown journal backend")
+        from . import sqlite_journal
+        with sqlite_journal.locked(self.root / ".operation-lock"):
+            old = self.root / "transactions.sjql.d" / "HEAD"
+            legacy = old.exists() or old.is_symlink()
+            sql = (self.root / "transactions.sqlite.d" / "journal.sqlite3").exists()
+            if legacy and sql:
+                raise ValueError("Two journal owners exist; resolve their lineage explicitly")
+            if backend == "auto":
+                backend = "sjql" if legacy else "sqlite"
+            if (legacy and backend != "sjql") or (sql and backend != "sqlite"):
+                raise ValueError("Existing journal keeps its storage owner")
+            self.backend = backend
+            self.segments = self.root / f"transactions.{backend}.d"
+            if backend == "sqlite":
+                self.journal = self.fs = sqlite_journal
+                self.journal.initialize(self.segments)
+            else:
+                self.journal, self.fs = sjql_modules()
+                self.segments.mkdir(exist_ok=True, mode=0o700)
         self.recovery_issues = []
         self.reload()
 
@@ -89,7 +107,8 @@ class Memory:
                       "steps": {}, "step_observations": {}, "step_reviews": {}, "step_cache": {},
                       "scratchboard": {}, "scratchboard_revisions": {},
                       "experiences": {}, "experience_proposals": {}, "experience_assessments": {},
-                      "learners": {}, "active_learner": None}
+                      "learners": {}, "active_learner": None,
+                      "language_observations": {}, "perception_references": {}}
         for _, transaction in self.journal.tail(self.segments, None, at_head=self.head):
             if transaction["previous"] != self.sequence or transaction["sequence"] != self.sequence + 1:
                 raise ValueError("Memory transaction sequence mismatch")
@@ -147,6 +166,9 @@ class Memory:
         elif kind.startswith("experience.") or kind.startswith("learner."):
             from .experience import apply_event
             apply_event(self.state, e)
+        elif kind.startswith("catalogue."):
+            from .catalogue import apply_event
+            apply_event(self.state, e)
         else:
             raise ValueError("Unknown memory event")
 
@@ -159,7 +181,7 @@ class Memory:
     def _append(self, event):
         if self.catalogue is None:
             self.catalogue = str(uuid.uuid4())
-        # Validate projection before publication; recovery always replays SJQL.
+        # Validate the projection before publication; recovery replays commits.
         old = deepcopy(self.state)
         try:
             self._apply(event)
@@ -188,7 +210,7 @@ class Memory:
                 return
             self._append({"kind": "identity.created", "identity": identity})
 
-    def put_source(self, source_id, text, *, expected_revision=0, role="evidence", note=""):
+    def put_source(self, source_id, text, *, expected_revision=0, role="evidence", note="", derived_from=None):
         identifier(source_id)
         bounded_text(text, "source")
         if role not in {"evidence", "observation"}:
@@ -196,12 +218,19 @@ class Memory:
         if not isinstance(note, str) or len(note.encode()) > 4096:
             raise ValueError("Source note extent")
         with self.locked():
+            if derived_from is not None:
+                if (derived_from.get("selection", {}).get("kind") != "explicit-v1"
+                        or source_id in derived_from["sources"]):
+                    raise ValueError("Derived sources require fixed parents distinct from themselves")
+                self._validate_snapshot(derived_from)
             prior = self.state["sources"].get(source_id)
             if (prior["revision"] if prior else 0) != expected_revision:
                 raise ValueError("Stale source revision")
             record = {"id": source_id, "revision": expected_revision + 1, "text": text,
                       "digest": digest_bytes(text.encode()), "role": role, "note": note,
                       "supersedes": prior["digest"] if prior else None}
+            if derived_from is not None:
+                record["derived_from"] = deepcopy(derived_from)
             self._append({"kind": "source.recorded", "record": record})
             return deepcopy(record)
 
@@ -238,7 +267,7 @@ class Memory:
         if not isinstance(query, str) or type(count) is not int or not 1 <= count <= 64 or type(max_bytes) is not int or not 1 <= max_bytes <= 65536:
             raise ValueError("Evidence selection bounds")
         wanted = token_set(query)
-        ranked = sorted(self.state["sources"].values(), key=lambda r: (
+        ranked = sorted((r for r in self.state["sources"].values() if self.source_current(r)), key=lambda r: (
             -len(wanted & token_set(r["text"] + " " + r["id"])) / max(1, len(token_set(r["text"]))**0.5), r["id"]))
         chosen, total = [], 0
         for row in ranked:
@@ -248,6 +277,14 @@ class Memory:
             if len(chosen) == count:
                 break
         return chosen
+
+    def source_current(self, source):
+        try:
+            if source.get("derived_from") is not None:
+                self._validate_snapshot(source["derived_from"])
+            return True
+        except (ValueError, OSError):
+            return False
 
     @staticmethod
     def _selection_identity(sources):
@@ -294,6 +331,13 @@ class Memory:
             actual = self.state["sources"].get(name)
             if not actual or any(actual[k] != v for k,v in expected.items()):
                 raise StaleState("Proposal source is stale")
+            if actual.get("derived_from") is not None:
+                self._validate_snapshot(actual["derived_from"], _depth=_depth + 1, _board_checked=_board_checked)
+        for operation_id, expected in snapshot.get("artifacts", {}).items():
+            receipt = self.state["receipts"].get(operation_id)
+            if receipt is None or receipt["digest"] != expected:
+                raise StaleState("Derived artifact receipt differs")
+            self._verify_receipt(receipt)
         for step_id, expected in snapshot.get("observations", {}).items():
             from .steps import Steps
             observation = self.state["step_observations"].get(step_id)
@@ -326,6 +370,15 @@ class Memory:
                 step_id: self.state["step_observations"][step_id]["digest"] for step_id in step_ids})
             self._validate_snapshot(snapshot)
             return snapshot
+
+    def attach_artifacts(self, snapshot, operation_ids):
+        """Bind exact observed outputs to the source or work derived from them."""
+        snapshot = deepcopy(snapshot)
+        with self.locked():
+            snapshot.setdefault("artifacts", {}).update({
+                operation_id: self.state["receipts"][operation_id]["digest"] for operation_id in operation_ids})
+            self._validate_snapshot(snapshot)
+        return snapshot
 
     def completed(self, task_id):
         """Observe completed current task artifacts without loading a model.
@@ -518,7 +571,7 @@ class Memory:
         obligations = {task_id: {"completed": sorted(completed[task_id]),
             "remaining": [name for name in task["filenames"] if name not in completed[task_id]]}
             for task_id, task in self.state["tasks"].items()}
-        return {"head": self.head, "sequence": self.sequence, "identity": deepcopy(self.state["identity"]),
+        return {"head": self.head, "backend": self.backend, "sequence": self.sequence, "identity": deepcopy(self.state["identity"]),
                 "tasks": deepcopy(self.state["tasks"]), "source_epoch": self.state["source_epoch"],
                 "artifacts": artifacts, "obligations": obligations,
                 "rejected_proposals": len(self.state["rejections"]),

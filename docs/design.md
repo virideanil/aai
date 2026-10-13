@@ -1,12 +1,20 @@
 # Computation, memory and continuing agency
 
-Status: implementation contract, 13 October 2026. The [consolidated whole architecture](../../NANOAI-ARCHITECTURE.md) governs the design. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
+Status: implementation contract, 13 October 2026. The parent research package retains the consolidated architecture in `NANOAI-ARCHITECTURE.md`; this repository carries its implementation contract. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
 
 ## Purpose
 
 nano'ai should understand unfamiliar work, reason and create, act within entrusted scope, inspect consequences and learn from correction. It retains identity, history and commitments across parameter and runtime changes. The research ambition includes exceeding strong existing systems in useful capability and efficiency. Each claimed improvement needs a named comparator, matched inputs and costs.
 
 The current investigation studies how Qwen and Kimi accomplish their computation. The earlier crop-initialization experiment was an assistant-selected method; its results do not answer this architectural question. Original model artifacts remain unchanged. A resident pretrained baseline helps measure our mechanisms without making its architecture the final design.
+
+## Error, uncertainty and correction
+
+The system aims to lower error frequency and consequences while retaining the ability to notice and repair mistakes. This principle covers words, contextual meanings, perception, memory, decisions and learning. Numerical and pi examples illustrate it; they define no universal error formula.
+
+An empirical claim names its task population, tested version, denominator, horizon and uncertainty. Repeated decisions can share causes, so a constant factor cannot become a sequence-wide reliability claim without justified dependence assumptions. Exact carriers and typed operations enforce their stated invariants. Learned interpretation and action selection require independent outcome checks. Preserve the original failure, its consequence, the correction and a fresh transfer case when evaluating improvement.
+
+Current mechanisms already reject incompatible tokenizer records, stale evidence and invalid source-dependent actions. Those rejections and recoveries have direct tests. Useful learned calibration, broader error reduction and adaptation from new experience remain separately measured targets.
 
 ## What the source implementations teach
 
@@ -36,7 +44,7 @@ This computation learns what to retain and overwrite. Its latent mixture does no
 
 The first question is whether a bounded memory can select useful valid evidence, preserve unfinished work and recover after interruption while a capable language core retains its useful behavior. Compare an ordinary recent-context core, exact revision-aware retrieval, and a learned selector where training produces evidence of benefit. Measure the complete generated task, rather than only a retrieval score.
 
-The durable source memory uses the maintained SJQL transaction journal. A task records its goal, current revision, source versions and identity. Learned selection ranks eligible evidence; exact revision and access rules define eligibility. The model receives source text as data with explicit citations. Model proposals carry their dependency snapshot and cannot commit after that snapshot changes. A selection records its policy, parameters and ordered output identity. Validation re-runs that policy: an unrelated insertion that leaves its output unchanged remains compatible, while changed selected evidence or a newly selected source invalidates the pending proposal. Explicit source selection retains only its named dependencies. Historical epoch-based snapshots keep their original conservative validation law.
+The durable source memory uses a SQLite transaction journal for new states and preserves the original SJQL owner for existing states. A task records its goal, current revision, source versions and identity. Learned selection ranks eligible evidence; exact revision and access rules define eligibility. The model receives source text as data with explicit citations. Model proposals carry their dependency snapshot and cannot commit after that snapshot changes. A selection records its policy, parameters and ordered output identity. Validation re-runs that policy: an unrelated insertion that leaves its output unchanged remains compatible, while changed selected evidence or a newly selected source invalidates the pending proposal. Explicit source selection retains only its named dependencies. Historical epoch-based snapshots keep their original conservative validation law.
 
 An output becomes a durable local artifact through a create-only prepared operation, followed by byte readback. Recovery observes the actual file before retrying. A crash after publication and before receipt recording is reconciled without repeating the effect. Changed sources invalidate dependent proposals while retaining unrelated completed artifacts. A replacement operation records the prior operation in `supersedes`; previous bytes remain available. Recovery publishes already fixed journal content, and its receipt records `core_identity_at_proposal`, even if a newer core is now available. Source citations and factual correctness have separate checks in the artifact evaluation.
 
@@ -64,7 +72,7 @@ The laptop evaluation and existing original-BF16 target retain separate model id
 
 `agent.calculate` supplies current quantity references to the real BF16 generator, then compiles its selected operation into `steps.py`. The pure DAG records source reads, field selection and integer/dimensioned arithmetic. Operator execution, semantic task review and external effect authority have separate meanings. `documents.py` creates exact English/Turkish notes only from confirmed current calculations. The CLI exposes these operations, review, publication, recovery and model-free completed-task resumption.
 
-The native client starts a dedicated process group and closes it on timeout, cancellation, protocol error or worker exit, including descendants whose parent exits first. The worker uses a private Unix socket. Runtime profiles explicitly control mapped/streamed source access, BF16 admission and optional exact cold-file restoration. Every resource guard observes its configured process group; RSS, physical footprint and host swap remain separately reported.
+The native client starts a dedicated process group and closes it on timeout, cancellation, protocol error or worker exit, including descendants whose parent exits first. Cleanup preserves the primary failure and records each failed operating-system operation. An unavailable process inventory is recorded as unknown; a later cleanup attempt can confirm shutdown while retaining the earlier diagnostic. The worker uses a private Unix socket. Runtime profiles explicitly control mapped/streamed source access, BF16 admission and optional exact cold-file restoration. Every resource guard observes its configured process group; RSS, physical footprint and host swap remain separately reported.
 
 The core's future learning record includes complete context, candidate/model identity, original outputs, task family, versioned sources, independent verdicts and actual effects. Data splits hold out source/task families; repeated turns stay together. Teacher agreement is a prediction metric. General language, creation and conduct require diverse replay and representative evaluation beyond the present quantity tasks.
 
@@ -99,3 +107,9 @@ Historical experiences and current-source training have distinct eligibility. A 
 `export_hybrid_state` and `restore_hybrid_state` carry all 18 recurrent matrices and convolution buffers plus six attention key/value pairs, native position and a source/model/runtime compatibility contract. The supported checkpoint boundary is before a known next input. Arbitrary interruption during an unfinished token decision requires additional pending-output state and is outside this port's contract.
 
 `tools/evaluate_recurrent_credit.py` connects a checked failed experience to a corrected generated answer, isolates the earlier native recurrent write as the only gradient path, performs an actual BF16 update, publishes source-bound text and reproduces later logits in a fresh process. The source snapshot is revalidated before state reuse. This is a causal-credit integration check; the selected full-loss probe slightly worsened and the candidate was retained as an experiment.
+
+## Frozen language and perception ports
+
+The [master tokenizer](master-tokenizer.md) freezes a finite normalized byte law and compact active IDs for the future owned model. `master_data.py` checks causal batching and exact data restoration. Native model adapters keep their original complete tokenizer pipeline.
+
+The [language/perception catalogue](catalogue.md) adds observations to the existing journal. Source versions, tokenizer identities, native witnesses, byte barcodes and SEE sample/mask references remain attributable. The harmonizer includes eligible observations with explicit view bounds. Restart and source-correction checks exercise the real port. The writing consumer automatically records its actual generated artifacts in the language catalogue. Learned semantic use and parameter transfer remain separately evaluated capabilities.

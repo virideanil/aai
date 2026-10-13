@@ -91,7 +91,7 @@ def main():
                          "scope": "Exact typed rendering of the reviewed model-chosen calculation", "render_model_calls": 0}
             else:
                 draft = run(memory, core, sid, selected_ids=[sid, "archive"],
-                            observation_ids=[calculated["step_id"]], max_tokens=256)
+                            observation_ids=[calculated["step_id"]])
         except (ValueError, KeyError) as error:
             if core.child.poll() is not None:
                 raise

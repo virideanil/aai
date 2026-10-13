@@ -29,7 +29,8 @@ class Harmonizer:
         self.implementation = {"harmonizer": file_digest(__file__),
                                "operators": file_digest(__import__("nanoai.steps", fromlist=["__file__"]).__file__),
                                "scratchboard": file_digest(__import__("nanoai.scratchboard", fromlist=["__file__"]).__file__),
-                               "judgments": file_digest(__import__("nanoai.judgments", fromlist=["__file__"]).__file__)}
+                               "judgments": file_digest(__import__("nanoai.judgments", fromlist=["__file__"]).__file__),
+                               "catalogue": file_digest(__import__("nanoai.catalogue", fromlist=["__file__"]).__file__)}
 
     def view(self, snapshot):
         """Derive a packet; the task journal remains the sole durable owner."""
@@ -78,9 +79,13 @@ class Harmonizer:
                     "authority":"Internal state or bounded local expansion; publication requires the task's separate grant"})
             lexical = None if self.vocabulary is None else {"identity": self.vocabulary.identity,
                 "piece_count": len(self.vocabulary.pieces), "meaning": "Literal byte pieces with separately namespaced native meanings"}
+            from .catalogue import LanguageCatalogue
+            catalogue = LanguageCatalogue(memory).context_entries(snapshot)
+            entries.extend(catalogue["entries"])
             packet = {"schema": "nanoai.system-zero.dictionary.v2", "snapshot": deepcopy(snapshot),
                 "implementation": self.implementation, "lexical_dictionary": lexical,
                 "entries": entries, "quantity_catalogue": quantities,
+                "catalogue_extent": {key: catalogue[key] for key in ("eligible_entries", "remaining_entries")},
                 "learned_semantic_synthesis": "untrained", "authority": "Existing task grant only"}
             packet["identity"] = digest_bytes(canonical(packet))
             return packet

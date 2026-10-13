@@ -10,3 +10,8 @@ __pycache__/
 *.npz
 *.sjql
 node_modules/
+build/
+*.egg-info/
+*.so
+*.dylib
+*.pyd

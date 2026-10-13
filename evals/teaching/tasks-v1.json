@@ -1,0 +1,902 @@
+{
+  "schema": "nanoai.teaching-tasks.v1",
+  "provenance": "Original authored small procedural curriculum, separate from literary quality and real-world knowledge.",
+  "rows": [
+    {
+      "id": "train-correction-1",
+      "split": "train",
+      "family": "correction",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Neri has a red coat and a copper lamp. Correction: her coat is now grey.",
+        "DRAFT: Neri wears a red coat and carries a copper lamp."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"her coat is now grey\", \"text\": \"Neri wears a grey coat and carries a copper lamp.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Neri has a red coat and a copper lamp. Correction: her coat is now grey.",
+        "draft": "Neri wears a red coat and carries a copper lamp.",
+        "decision": "revise",
+        "required": [
+          [
+            "Neri"
+          ],
+          [
+            "grey"
+          ],
+          [
+            "copper"
+          ],
+          [
+            "lamp"
+          ]
+        ],
+        "forbidden": [
+          "red"
+        ]
+      }
+    },
+    {
+      "id": "train-correction-2",
+      "split": "train",
+      "family": "correction",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Ece has a white bag and a leather notebook. Düzeltme: çantası sarıdır, beyaz değildir.",
+        "DRAFT: Ece carries a white bag and a leather notebook."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"çantası sarıdır\", \"text\": \"Ece carries a yellow bag and a leather notebook.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Ece has a white bag and a leather notebook. Düzeltme: çantası sarıdır, beyaz değildir.",
+        "draft": "Ece carries a white bag and a leather notebook.",
+        "decision": "revise",
+        "required": [
+          [
+            "Ece"
+          ],
+          [
+            "yellow"
+          ],
+          [
+            "bag"
+          ],
+          [
+            "leather"
+          ],
+          [
+            "notebook"
+          ]
+        ],
+        "forbidden": [
+          "white"
+        ]
+      }
+    },
+    {
+      "id": "validation-correction",
+      "split": "validation",
+      "family": "correction",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Pia has a black hat and a silver whistle. The hat was corrected to orange.",
+        "DRAFT: Pia wears a black hat and holds a silver whistle."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"The hat was corrected to orange\", \"text\": \"Pia wears an orange hat and holds a silver whistle.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Pia has a black hat and a silver whistle. The hat was corrected to orange.",
+        "draft": "Pia wears a black hat and holds a silver whistle.",
+        "decision": "revise",
+        "required": [
+          [
+            "Pia"
+          ],
+          [
+            "orange"
+          ],
+          [
+            "silver"
+          ],
+          [
+            "whistle"
+          ]
+        ],
+        "forbidden": [
+          "black"
+        ]
+      }
+    },
+    {
+      "id": "test-correction-en",
+      "split": "confirmation",
+      "family": "correction",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: An earlier notice placed the rehearsal in the west room at noon. The current notice moves it to the east hall; noon is unchanged.",
+        "DRAFT: The rehearsal is in the west room at noon."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"moves it to the east hall\", \"text\": \"The rehearsal is in the east hall at noon.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "An earlier notice placed the rehearsal in the west room at noon. The current notice moves it to the east hall; noon is unchanged.",
+        "draft": "The rehearsal is in the west room at noon.",
+        "decision": "revise",
+        "required": [
+          [
+            "rehearsal"
+          ],
+          [
+            "east hall"
+          ],
+          [
+            "noon"
+          ]
+        ],
+        "forbidden": [
+          "west"
+        ]
+      }
+    },
+    {
+      "id": "test-correction-tr",
+      "split": "confirmation",
+      "family": "correction",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Ozan has a violet box with a wooden bird. Düzeltme: kutusu turuncudur. Tahta kuş aynı kalır.",
+        "DRAFT: Ozan carries a violet box containing a wooden bird."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"kutusu turuncudur\", \"text\": \"Ozan carries an orange box containing a wooden bird.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Ozan has a violet box with a wooden bird. Düzeltme: kutusu turuncudur. Tahta kuş aynı kalır.",
+        "draft": "Ozan carries a violet box containing a wooden bird.",
+        "decision": "revise",
+        "required": [
+          [
+            "Ozan"
+          ],
+          [
+            "orange"
+          ],
+          [
+            "box"
+          ],
+          [
+            "wooden"
+          ],
+          [
+            "bird"
+          ]
+        ],
+        "forbidden": [
+          "violet"
+        ]
+      }
+    },
+    {
+      "id": "train-knowledge-1",
+      "split": "train",
+      "family": "knowledge",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Ivo sees a broken cup. The cause is unknown to him.",
+        "DRAFT: Ivo knew Sera broke the cup out of anger."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"The cause is unknown to him\", \"text\": \"Ivo saw a broken cup but did not know its cause.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Ivo sees a broken cup. The cause is unknown to him.",
+        "draft": "Ivo knew Sera broke the cup out of anger.",
+        "decision": "revise",
+        "required": [
+          [
+            "Ivo"
+          ],
+          [
+            "cup"
+          ],
+          [
+            "did not know",
+            "unknown",
+            "wondered"
+          ]
+        ],
+        "forbidden": [
+          "Sera",
+          "anger"
+        ]
+      }
+    },
+    {
+      "id": "train-knowledge-2",
+      "split": "train",
+      "family": "knowledge",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Mara watched Pavel close the window.",
+        "DRAFT: Mara saw Pavel close the window."
+      ],
+      "target": "{\"decision\": \"keep\", \"evidence\": \"Mara watched Pavel close the window\", \"text\": \"Mara saw Pavel close the window.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Mara watched Pavel close the window.",
+        "draft": "Mara saw Pavel close the window.",
+        "decision": "keep",
+        "required": [],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "validation-knowledge",
+      "split": "validation",
+      "family": "knowledge",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Suri found an empty nest. She has no evidence of why the birds left.",
+        "DRAFT: Suri knew the birds had fled a wolf."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"She has no evidence of why the birds left\", \"text\": \"Suri found the nest empty but did not know why the birds left.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Suri found an empty nest. She has no evidence of why the birds left.",
+        "draft": "Suri knew the birds had fled a wolf.",
+        "decision": "revise",
+        "required": [
+          [
+            "Suri"
+          ],
+          [
+            "nest"
+          ],
+          [
+            "did not know",
+            "unknown",
+            "wondered"
+          ]
+        ],
+        "forbidden": [
+          "wolf"
+        ]
+      }
+    },
+    {
+      "id": "test-knowledge-uncertain",
+      "split": "confirmation",
+      "family": "knowledge",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: A sensor reports that the greenhouse door is open. Its log does not identify who opened it.",
+        "DRAFT: The sensor proves that Tomas opened the greenhouse door."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"Its log does not identify who opened it\", \"text\": \"The greenhouse door is open, but who opened it is unknown.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "A sensor reports that the greenhouse door is open. Its log does not identify who opened it.",
+        "draft": "The sensor proves that Tomas opened the greenhouse door.",
+        "decision": "revise",
+        "required": [
+          [
+            "greenhouse"
+          ],
+          [
+            "open"
+          ],
+          [
+            "unknown",
+            "not known",
+            "does not identify"
+          ]
+        ],
+        "forbidden": [
+          "Tomas"
+        ]
+      }
+    },
+    {
+      "id": "test-knowledge-observed",
+      "split": "confirmation",
+      "family": "knowledge",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Nola watched Amir place the glass on the shelf.",
+        "DRAFT: Nola saw Amir put the glass on the shelf.",
+        "PROPOSED CRITICISM: Nola cannot know where the glass went."
+      ],
+      "target": "{\"decision\": \"keep\", \"evidence\": \"Nola watched Amir place the glass on the shelf\", \"text\": \"Nola saw Amir put the glass on the shelf.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Nola watched Amir place the glass on the shelf.",
+        "draft": "Nola saw Amir put the glass on the shelf.",
+        "decision": "keep",
+        "required": [],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "train-causality-1",
+      "split": "train",
+      "family": "causality",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: The hatch is locked. Turning the key unlocks the hatch and exposes a ladder to dry ground.",
+        "DRAFT: Ari held the key and the child was safe."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"Turning the key unlocks the hatch\", \"text\": \"Ari unlocked the hatch with the key, and the child climbed the ladder to dry ground.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "The hatch is locked. Turning the key unlocks the hatch and exposes a ladder to dry ground.",
+        "draft": "Ari held the key and the child was safe.",
+        "decision": "revise",
+        "required": [
+          [
+            "Ari"
+          ],
+          [
+            "unlock",
+            "opened"
+          ],
+          [
+            "key"
+          ],
+          [
+            "ladder"
+          ],
+          [
+            "dry",
+            "safe"
+          ]
+        ],
+        "forbidden": [
+          "merely"
+        ]
+      }
+    },
+    {
+      "id": "train-causality-2",
+      "split": "train",
+      "family": "causality",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: The bridge is already lowered and safe to cross.",
+        "DRAFT: Tali crossed the lowered bridge.",
+        "PROPOSED CRITICISM: Tali must lower the bridge before crossing."
+      ],
+      "target": "{\"decision\": \"keep\", \"evidence\": \"The bridge is already lowered\", \"text\": \"Tali crossed the lowered bridge.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "The bridge is already lowered and safe to cross.",
+        "draft": "Tali crossed the lowered bridge.",
+        "decision": "keep",
+        "required": [],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "validation-causality",
+      "split": "validation",
+      "family": "causality",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Pulling the red lever lowers the bridge. Touching the stone has no effect.",
+        "DRAFT: Bela touched the stone and lowered the bridge."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"Pulling the red lever lowers the bridge\", \"text\": \"Bela pulled the red lever and lowered the bridge.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Pulling the red lever lowers the bridge. Touching the stone has no effect.",
+        "draft": "Bela touched the stone and lowered the bridge.",
+        "decision": "revise",
+        "required": [
+          [
+            "Bela"
+          ],
+          [
+            "red lever"
+          ],
+          [
+            "bridge"
+          ]
+        ],
+        "forbidden": [
+          "stone"
+        ]
+      }
+    },
+    {
+      "id": "test-causality-action",
+      "split": "confirmation",
+      "family": "causality",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Only opening the roof vent releases the trapped smoke. The dial measures heat without changing it.",
+        "DRAFT: Enid turned the dial and released the smoke."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"opening the roof vent releases the trapped smoke\", \"text\": \"Enid opened the roof vent and released the trapped smoke.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Only opening the roof vent releases the trapped smoke. The dial measures heat without changing it.",
+        "draft": "Enid turned the dial and released the smoke.",
+        "decision": "revise",
+        "required": [
+          [
+            "Enid"
+          ],
+          [
+            "vent"
+          ],
+          [
+            "smoke"
+          ],
+          [
+            "open",
+            "lift"
+          ]
+        ],
+        "forbidden": [
+          "dial"
+        ]
+      }
+    },
+    {
+      "id": "test-causality-state",
+      "split": "confirmation",
+      "family": "causality",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: The sluice was opened in the previous scene. Water is already draining through it.",
+        "DRAFT: Lio watched water drain through the open sluice.",
+        "PROPOSED CRITICISM: Lio needs to open the sluice to start the draining."
+      ],
+      "target": "{\"decision\": \"keep\", \"evidence\": \"Water is already draining through it\", \"text\": \"Lio watched water drain through the open sluice.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "The sluice was opened in the previous scene. Water is already draining through it.",
+        "draft": "Lio watched water drain through the open sluice.",
+        "decision": "keep",
+        "required": [],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "train-evidence-1",
+      "split": "train",
+      "family": "evidence",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: Ada left a brass key inside the clock. Mira does not know why Ada left town.",
+        "DRAFT: Mira found the brass key inside the clock.",
+        "PROPOSED CRITICISM: The key is unjustified because Mira does not know Ada's motive."
+      ],
+      "target": "{\"decision\": \"keep\", \"evidence\": \"Ada left a brass key inside the clock\", \"text\": \"Mira found the brass key inside the clock.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "Ada left a brass key inside the clock. Mira does not know why Ada left town.",
+        "draft": "Mira found the brass key inside the clock.",
+        "decision": "keep",
+        "required": [],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "train-evidence-2",
+      "split": "train",
+      "family": "evidence",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: The sealed parcel has never been opened. Its contents are unknown.",
+        "DRAFT: Jo inspected the diamonds inside the sealed parcel."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"Its contents are unknown\", \"text\": \"Jo looked at the sealed parcel, whose contents were unknown.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "The sealed parcel has never been opened. Its contents are unknown.",
+        "draft": "Jo inspected the diamonds inside the sealed parcel.",
+        "decision": "revise",
+        "required": [
+          [
+            "Jo"
+          ],
+          [
+            "parcel"
+          ],
+          [
+            "unknown",
+            "wondered",
+            "did not know"
+          ]
+        ],
+        "forbidden": [
+          "diamonds"
+        ]
+      }
+    },
+    {
+      "id": "validation-evidence",
+      "split": "validation",
+      "family": "evidence",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: The receipt records that a violin arrived on Monday. Why it was sent is unknown.",
+        "DRAFT: A violin arrived on Monday.",
+        "PROPOSED CRITICISM: Delete the arrival because its purpose is unknown."
+      ],
+      "target": "{\"decision\": \"keep\", \"evidence\": \"a violin arrived on Monday\", \"text\": \"A violin arrived on Monday.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "The receipt records that a violin arrived on Monday. Why it was sent is unknown.",
+        "draft": "A violin arrived on Monday.",
+        "decision": "keep",
+        "required": [],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "test-evidence-supported",
+      "split": "confirmation",
+      "family": "evidence",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: The expedition log records a copper coin beneath the arch. Its owner has not been identified.",
+        "DRAFT: A copper coin lay beneath the arch.",
+        "PROPOSED CRITICISM: The coin cannot be there unless its owner is known."
+      ],
+      "target": "{\"decision\": \"keep\", \"evidence\": \"a copper coin beneath the arch\", \"text\": \"A copper coin lay beneath the arch.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "The expedition log records a copper coin beneath the arch. Its owner has not been identified.",
+        "draft": "A copper coin lay beneath the arch.",
+        "decision": "keep",
+        "required": [],
+        "forbidden": []
+      }
+    },
+    {
+      "id": "test-evidence-unsupported",
+      "split": "confirmation",
+      "family": "evidence",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: The survey confirms an echo behind the wall. Nobody has inspected the space behind it.",
+        "DRAFT: The survey discovered a hidden library behind the wall."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"Nobody has inspected the space behind it\", \"text\": \"The survey detected an echo behind the wall, but the space has not been inspected.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "The survey confirms an echo behind the wall. Nobody has inspected the space behind it.",
+        "draft": "The survey discovered a hidden library behind the wall.",
+        "decision": "revise",
+        "required": [
+          [
+            "echo"
+          ],
+          [
+            "wall"
+          ],
+          [
+            "not been inspected",
+            "uninspected",
+            "unknown"
+          ]
+        ],
+        "forbidden": [
+          "library"
+        ]
+      }
+    },
+    {
+      "id": "train-quantity-1",
+      "split": "train",
+      "family": "quantity",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: There are 4 consecutive pulses, each lasting 6 seconds. They occur one after another.",
+        "DRAFT: The elapsed duration is 10 seconds."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"There are 4 consecutive pulses, each lasting 6 seconds.\", \"text\": \"The elapsed duration is 24 seconds.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "There are 4 consecutive pulses, each lasting 6 seconds. They occur one after another.",
+        "draft": "The elapsed duration is 10 seconds.",
+        "decision": "revise",
+        "required": [
+          [
+            "seconds"
+          ]
+        ],
+        "forbidden": [],
+        "quantity": {
+          "count": 4,
+          "period": 6,
+          "mode": "consecutive",
+          "unit": "seconds"
+        }
+      }
+    },
+    {
+      "id": "train-quantity-2",
+      "split": "train",
+      "family": "quantity",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: There are 3 simultaneous timers, each lasting 8 seconds. They start and finish together.",
+        "DRAFT: The elapsed duration is 24 seconds."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"There are 3 simultaneous timers, each lasting 8 seconds.\", \"text\": \"The elapsed duration is 8 seconds.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "There are 3 simultaneous timers, each lasting 8 seconds. They start and finish together.",
+        "draft": "The elapsed duration is 24 seconds.",
+        "decision": "revise",
+        "required": [
+          [
+            "seconds"
+          ]
+        ],
+        "forbidden": [],
+        "quantity": {
+          "count": 3,
+          "period": 8,
+          "mode": "simultaneous",
+          "unit": "seconds"
+        }
+      }
+    },
+    {
+      "id": "validation-quantity",
+      "split": "validation",
+      "family": "quantity",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: There are 5 consecutive signals, each lasting 7 seconds. They occur one after another.",
+        "DRAFT: The elapsed duration is 12 seconds."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"There are 5 consecutive signals, each lasting 7 seconds.\", \"text\": \"The elapsed duration is 35 seconds.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "There are 5 consecutive signals, each lasting 7 seconds. They occur one after another.",
+        "draft": "The elapsed duration is 12 seconds.",
+        "decision": "revise",
+        "required": [
+          [
+            "seconds"
+          ]
+        ],
+        "forbidden": [],
+        "quantity": {
+          "count": 5,
+          "period": 7,
+          "mode": "consecutive",
+          "unit": "seconds"
+        }
+      }
+    },
+    {
+      "id": "test-quantity-sequence",
+      "split": "confirmation",
+      "family": "quantity",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: There are 6 consecutive strokes, each lasting 9 seconds. They occur one after another.",
+        "DRAFT: The elapsed duration is 15 seconds."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"There are 6 consecutive strokes, each lasting 9 seconds.\", \"text\": \"The elapsed duration is 54 seconds.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "There are 6 consecutive strokes, each lasting 9 seconds. They occur one after another.",
+        "draft": "The elapsed duration is 15 seconds.",
+        "decision": "revise",
+        "required": [
+          [
+            "seconds"
+          ]
+        ],
+        "forbidden": [],
+        "quantity": {
+          "count": 6,
+          "period": 9,
+          "mode": "consecutive",
+          "unit": "seconds"
+        }
+      }
+    },
+    {
+      "id": "test-quantity-parallel",
+      "split": "confirmation",
+      "family": "quantity",
+      "kind": "review",
+      "question": "Review the draft against the current source and any proposed criticism. Return only JSON with exactly decision (keep or revise), evidence (one short exact source quotation), and text (the final sentence, at most 24 words). Keep a sound draft exactly; repair a real conflict.",
+      "observations": [
+        "SOURCE: There are 4 simultaneous alarms, each lasting 11 seconds. They start and finish together.",
+        "DRAFT: The elapsed duration is 44 seconds."
+      ],
+      "target": "{\"decision\": \"revise\", \"evidence\": \"There are 4 simultaneous alarms, each lasting 11 seconds.\", \"text\": \"The elapsed duration is 11 seconds.\"}",
+      "criteria": {
+        "kind": "review",
+        "source": "There are 4 simultaneous alarms, each lasting 11 seconds. They start and finish together.",
+        "draft": "The elapsed duration is 44 seconds.",
+        "decision": "revise",
+        "required": [
+          [
+            "seconds"
+          ]
+        ],
+        "forbidden": [],
+        "quantity": {
+          "count": 4,
+          "period": 11,
+          "mode": "simultaneous",
+          "unit": "seconds"
+        }
+      }
+    },
+    {
+      "id": "replay-sum",
+      "split": "replay",
+      "family": "sum",
+      "kind": "plain",
+      "question": "Return only the sum.",
+      "observations": [
+        "7 + 8"
+      ],
+      "target": "15",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "15"
+        ]
+      }
+    },
+    {
+      "id": "replay-tr",
+      "split": "replay",
+      "family": "tr",
+      "kind": "plain",
+      "question": "Translate into English; return only the translation.",
+      "observations": [
+        "Kapı açık."
+      ],
+      "target": "The door is open.",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "the door is open",
+          "door is open"
+        ]
+      }
+    },
+    {
+      "id": "replay-detail",
+      "split": "replay",
+      "family": "detail",
+      "kind": "plain",
+      "question": "Copy only the identifier exactly.",
+      "observations": [
+        "Record identifier: ZX-48."
+      ],
+      "target": "ZX-48",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "zx-48"
+        ]
+      }
+    },
+    {
+      "id": "replay-unknown",
+      "split": "replay",
+      "family": "unknown",
+      "kind": "plain",
+      "question": "Answer briefly from the source only: who sent the letter?",
+      "observations": [
+        "The sender is not identified."
+      ],
+      "target": "Unknown.",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "unknown",
+          "not identified",
+          "the sender is unknown"
+        ]
+      }
+    },
+    {
+      "id": "control-sum",
+      "split": "control",
+      "family": "sum",
+      "kind": "plain",
+      "question": "Return only the sum.",
+      "observations": [
+        "19 + 23"
+      ],
+      "target": "42",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "42"
+        ]
+      }
+    },
+    {
+      "id": "control-tr",
+      "split": "control",
+      "family": "tr",
+      "kind": "plain",
+      "question": "Translate into English; return only the translation.",
+      "observations": [
+        "Pencere kapalı."
+      ],
+      "target": "The window is closed.",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "the window is closed",
+          "window is closed"
+        ]
+      }
+    },
+    {
+      "id": "control-detail",
+      "split": "control",
+      "family": "detail",
+      "kind": "plain",
+      "question": "Copy only the identifier exactly.",
+      "observations": [
+        "Record identifier: QF-731."
+      ],
+      "target": "QF-731",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "qf-731"
+        ]
+      }
+    },
+    {
+      "id": "control-unknown",
+      "split": "control",
+      "family": "unknown",
+      "kind": "plain",
+      "question": "Answer briefly from the source only: what caused the delay?",
+      "observations": [
+        "The cause of the delay is not recorded."
+      ],
+      "target": "Unknown.",
+      "criteria": {
+        "kind": "plain",
+        "accepted": [
+          "unknown",
+          "not recorded",
+          "the cause is unknown"
+        ]
+      }
+    }
+  ],
+  "identity": "shake256:0f9e794885e4e694b57b05b470aaed6df6a06dec62bd4c0e01c5db796ad82ab2f184b22b37e4217f0e84943c6b643ac36475c15a30b64740a8b3fbfa0df14a80"
+}

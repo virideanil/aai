@@ -21,7 +21,8 @@ def main():
     parser.add_argument("--preflight", required=True, type=Path)
     args = parser.parse_args()
     preflight = json.loads(args.preflight.read_text())
-    if preflight.get("model") != "Qwen3.5-2B-BF16" or preflight.get("effort") != "none" or not preflight.get("parent_source"):
+    if (preflight.get("model") != "Qwen3.5-2B-BF16" or preflight.get("thinking") is not True
+            or preflight.get("reasoning_token_limit", 0) is not None or not preflight.get("parent_source")):
         raise ValueError("A sourced native launch preflight is required")
     corpus = json.loads(args.corpus.read_text())
     args.out.mkdir(parents=True, exist_ok=True)
@@ -31,6 +32,8 @@ def main():
     result = {"corpus":file_digest(args.corpus), "rows":[], "status":"running"}
     try:
         with JsonlCore(json.loads(args.config.read_text()), stderr_path=args.out/"worker.log") as core:
+            if core.load.get("sampling", {}).get("temperature", 0) != 0:
+                raise ValueError("This historical choice-propensity control requires an explicit greedy profile")
             result.update(core_identity=core.identity, load=core.load)
             for episode in corpus["episodes"]:
                 if episode["split"] != "test": continue
@@ -45,7 +48,7 @@ def main():
                 ids = [c["id"] for c in episode["candidates"]]
                 schema = {"type":"object", "properties":{"selected_id":{"type":"string","enum":ids}}, "required":["selected_id"],"additionalProperties":False}
                 row = {"id":episode["id"], "mode":episode["mode"], "messages":messages}
-                generated = core.generate(messages,max_tokens=48,schema=schema)
+                generated = core.generate(messages,schema=schema,trace=True)
                 row["generated"] = generated
                 try:
                     output = json.loads(generated["output"])

@@ -1,6 +1,14 @@
 # Measured implementation state
 
-Observed 13 October 2026 on an Apple M5 Mac with 16 GiB RAM. This report covers a research implementation and authored diagnostic tasks. It distinguishes exact storage, numerical references, generated behavior and proposed learning. Original model payloads remain unchanged. The independently stopped 27B lane was not restarted.
+Observed 13–14 October 2026 on an Apple M5 Mac with 16 GiB RAM. This report covers a research implementation and authored diagnostic tasks. It distinguishes exact storage, numerical references, generated behavior and proposed learning. Original model payloads remain unchanged. The independently stopped 27B lane was not restarted.
+
+The tokenizer-finalization checkpoint passed 130 tests with every selected native
+dependency and zero skips. The subsequent SQLite, writing, teaching and thinking
+integration passed 177 tests; the explicit-backend revision passes 178. Its
+isolated installed consumer reproduced the documented examples, fresh catalogue
+views and actual ten-tensor BF16 inventory without a checkout import or SJQL path.
+The measurements below retain both successful mechanisms and failed learning
+and generation outcomes.
 
 ## Original BF16 language instrument
 
@@ -124,7 +132,7 @@ Fresh child processes actually exited after saving the recurrent state and after
 
 The whole-design review retains one capable generative core, learned working state and an exact work graph. It compares causal memory training, checkpoint replay, scoped semantic aliases, retention and full cost. Claude's independent critique and the lead's qualifications are preserved. The current selector remains a diagnostic control. The vocabulary owner's v2 active mass is normalized, but an independent finite-string witness still disproved its claimed likelihood; that separate owner repair is recorded without altering its source.
 
-Local receipts: `../../audit/developmental-loop-20261013/learning/results.json`, `native-comparison.json`, `recovery/results.json`, and `../../audit/whole-design-20261013/integration-tests.json`, `review.json`, `vocab-review/results.json`. The [governing architecture](../../NANOAI-ARCHITECTURE.md) and [frozen experiment contract](../evals/developmental_contract.md) distinguish current consumers from further learned integration.
+Local receipts: `../../audit/developmental-loop-20261013/learning/results.json`, `native-comparison.json`, `recovery/results.json`, and `../../audit/whole-design-20261013/integration-tests.json`, `review.json`, `vocab-review/results.json`. The parent project's `NANOAI-ARCHITECTURE.md`, this repository's [design](design.md) and the [frozen experiment contract](../evals/developmental_contract.md) distinguish current consumers from further learned integration.
 
 ## Completed generative update and fresh reload
 
@@ -163,3 +171,219 @@ All nine original oracle-selected parameter sets were reproduced bit for bit. Th
 The complete control took 155.19 seconds with all processes reaped and no guard firing. This completes a bounded choices-to-observed-experience-to-parameter-update-to-new-action loop, with a negative quality result. Better language understanding, retention and useful autonomous learning remain unestablished. The prospective admission rule now compares against the unchanged BF16 actor and lexical control and reserves new families, wording and distractors. The original 75% rule and its failed candidates remain recorded unchanged as history.
 
 Receipts: `../../audit/whole-design-20261013/outcome-control/{protocol,summary,results,resources}.json`; exact training inputs, source snapshots, parameter candidates and artifact journals accompany them. Broad semantic development remains the next empirical question in the governing architecture.
+
+## Bidirectional meaning experiment and its stopping boundary
+
+The finite semantic data now contains 58 authored records with English,
+mathematical forms, referents, alternatives and executable consequences.
+Independent evaluation checks complete finite meanings, including linked
+observations where a single answer cannot separate interpretations. The data
+checker and renderer establish the declared fragment's consistency.
+
+The full-source BF16 meaning run saved a candidate selected at epoch three, then
+stopped at the host-swap-growth guard after 852.446 seconds. The unchanged-model
+arm completed four of eight confirmation requests. None produced a supported
+form with certified equivalent meaning. The two-example retrieval arm and learned
+candidate arm completed zero of eight requests each; their scores remain pending.
+No candidate was admitted. The saved outputs include the failure cases and their
+scope, and the research note shows them without treating missing cases as zero
+accuracy. Further model learning was deferred by the user's tokenizer-first
+instruction. Local evidence: `audit/capability-learning-20261013/meaning-learning-v3`
+in the parent project.
+
+## Frozen byte tokenizer and source qualification
+
+The [versioned artifact](../data/master-tokenizer-v1/manifest.json) contains
+24,664 active byte pieces and occupies 426,628 bytes. Its cold inventory derives
+from 22 pinned source payloads, including Qwen3.8 and Kimi K3, with 19 distinct
+byte-piece sets. Native controls and normalization retain source-specific roles.
+All 22 native pipelines executed eight diagnostics each. The source declarations
+and captured attribution are retained with the data.
+
+The finite emitted law has byte fallbacks, a normalized positive piece
+distribution and an explicit terminal probability. Six lexical recipes used 94
+training and 10 validation lines. The initial narrow candidate's multilingual
+fallback failure led to a declared protected-scalar prior, with fresh confirmation
+kept separate. Final validation measured 1.995597 nats/byte; the 16-row fresh
+confirmation measured 4.445170. These authored panels qualify this lexical version
+within their stated scope.
+
+Python and C++ matched IDs, byte spans, recovered bytes and log probabilities on
+all 127 full-artifact probes. An independent exhaustive small-alphabet oracle,
+16,000 conditional samples, strict C++ warnings, ASan/UBSan and API lifetime and
+rejection checks also passed. On 1,976 warm native encodes, median/p95/p99 were
+0.074/0.230/0.347 ms, including record-byte hashing and excluding serialization,
+decode and startup. Fresh-process median was 8.44 ms. Sampled native RSS was
+8.62 MB and physical footprint 5.98 MB. A fixed BF16 indexing/loss consumer
+produced `[5, 56, 24667]` logits with identical parameter bytes before and after;
+it performed zero neural updates. Full contracts and cost scopes are in the
+[tokenizer guide](master-tokenizer.md).
+
+Local receipts: `audit/tokenizer-finalization-20261013/{frozen-v1,frozen-v2,native-sources-v1,qualification-v2}`,
+the independent-law and native API logs, and `master-build-helper-parity.json`
+in the parent project. The actual documented build helper also compiled the
+strict C++20 consumer and reproduced the 127 saved probes.
+
+## Durable language catalogue and SEE consumer
+
+The [catalogue](catalogue.md) records literal observations in the existing work
+journal, with raw-byte SHAKE256 barcodes, immutable observation IDs, source
+revisions, tokenizer identities, spans and native witnesses. Current piece counts
+exclude revised evidence; historical summaries retain its reason and lineage.
+Repeated identical observations are idempotent. Context entries expose eligible
+language and perception records to the same dictionary used by the actor.
+
+The actual Monet *Water Lilies* consumer checked an 1800 by 1732 native source
+plane and two masks, recorded 31 distinct caption pieces and 581 native witnesses,
+then recovered the catalogue in a fresh CLI process. Correcting the caption
+invalidated both its language and perception references; a new text observation
+succeeded. A synthetic 16-bit RGBA fixture separately checked exact samples,
+hidden color under zero alpha and an independently computed TupleHash mask ID.
+All operations performed zero neural parameter updates. The later writing consumer
+automatically records its generated artifacts in the catalogue; useful learned
+semantic use remains separately evaluated. The parent SEE catalogue contains ten retained
+works and is linked from the rewritten research note.
+
+The full suite passed 130 tests with zero skips in 8.867 seconds using Python
+3.14, the selected native harmony library, independent BF5P encoder, native master
+tokenizer, SEE executable and independent TupleHash implementation. A clean
+installed-package consumer ran the README, catalogue and causal-data examples;
+fresh CLI processes exposed one current and two retained observations after a
+source correction. A later local preview served the note, scalar laboratory and
+SEE catalogue over loopback HTTP. Controller/source checks and file serving
+establish their stated behavior; browser layout, actual interaction and user
+acceptance have separate evidence.
+
+Local receipts: `audit/tokenizer-finalization-20261013/catalogue-consumer-v1/result.json`
+and `git-preparation/{full-tests.log,documented-consumer.json,live-run.json}` in
+the parent project. No new model process or learning run was started during this
+finalization.
+
+## Observed writing and applicable teaching
+
+The continuing writing episode produced local planning, draft, criticism,
+revision and continuation artifacts, then recovered its completed work. A stricter
+reassessment against the original requested word ranges found five length
+failures that the earlier permissive checks had obscured. Source reading also
+found a repeated key retrieval and a gate action whose described consequence did
+not establish the neighbour's rescue. The original outputs and original checks
+remain alongside that reassessment.
+
+Nine attributed lessons now carry a principle, scope, reason, worked example,
+contrast and next check. Feedback quotes actual published work and its current
+source. Checked correction targets can enter training only from declared train
+or replay examples; stale work and confirmation labels are rejected. A practice
+loop assesses each actual attempt, supplies its observed failures to the next
+attempt and preserves a successful artifact without regenerating it.
+
+The first guided writing run completed in 161.83 seconds with zero parameter
+updates. Its criticism check passed; the revised opening exceeded the requested
+length, and the continuation exceeded length and ended before natural
+completion. Supplying teaching principles therefore did not establish successful
+writing or learned improvement. The later thinking-enabled practice and actual
+parameter-learning comparison depend on the execution qualification described
+below.
+
+The authored teaching panel has 10 training, five validation, 10 confirmation,
+four replay and four control cases. Nineteen training/validation/replay records
+include attributed rationales. Eight independently authored confirmation cases
+have a separately committed file identity. The evaluator requires that identity,
+rejects reused development inputs and reports the independent cohort separately.
+Their contents remain withheld while the implementation and learner selection
+are being frozen.
+
+Receipts: `../../audit/applicable-teaching-20261013/strict-baseline.json`,
+`story-01/result.json`, `independent-review-loader.log` and the versioned data in
+`evals/teaching`. Mechanical rubric checks and literary judgment have separate
+scope.
+
+## SQLite tensor inventory and cancellation integrity
+
+New work journals and tensor catalogues use SQLite. The full original model's
+335 GGUF tensor headers and an exported adapter's 10 headers match the pinned
+upstream GGUF reader on names, types, shapes and byte extents. The native core
+loaded the original model through an immutable catalogue reference while an
+unrelated learning event was appended to the same database.
+
+A reproduced metadata flaw allowed a consistent SQL rewrite to reinterpret
+unchanged tensor bytes. Resolution now compares the catalogue with the actual
+native header. A loaded native session also retains the original verified
+inventory identity. Direct-store and native-session checks reject the rewritten
+metadata while permitting unrelated event appends. Tensor values remain in the
+original GGUF or safetensors files; the [storage contract](storage.md) explains
+the transaction and interchange boundaries.
+
+Cancellation of an experimental mapped generation exposed a missing cleanup
+receipt after an operating-system permission error. Seven real-process and
+failure-injection tests now pass: cancellation retains its primary exception,
+cleanup attempts continue, diagnostic receipts are written, and unavailable
+process observations remain unknown until a successful retry. This verifies the
+repaired failure handling; it does not retrospectively supply the missing
+resource receipt for that mapped run.
+
+Receipts: `../../audit/sqlite-tensor-20261013/upstream-reader-comparison.json`,
+`inventory-binding-before.log`, `inventory-binding-after.log`,
+`native-inventory-binding.log`, and
+`../../audit/thinking-default-20261013/cleanup-{before,after}.log`.
+
+## Actual native adapter execution
+
+On 14 October, a fresh export preserved all ten BF16 adapter tensors bit for
+bit and registered candidate-to-native lineage in SQLite. The unchanged full
+backbone and adapted backbone received the same two literal token sequences.
+Both adapted vectors differed in all 2,048 components; their L2 differences
+were 26.5191 and 25.4052. Within-session repeats and a fresh adapted native
+session reproduced the complete vectors exactly.
+
+All three sessions completed in 27.40 seconds together. Peak sampled process-group
+RSS was 546,455,552 bytes and physical footprint 529,288,096 bytes, with zero
+observed swap growth. Every process group stopped and its child was reaped.
+The source identity reads warm the file cache. These two inputs establish native
+adapter execution and recovery, without a quality or cross-runtime numerical
+equivalence claim.
+
+The frozen teaching comparison uses separate native collection, guarded
+full-source training and matched native evaluation. Its 19 training, validation
+and replay examples passed the actual reasoning-enabled tokenizer/encode path.
+The eight independently supplied cases are frozen outside training and selection.
+The later collection produced no complete answer before its performance-driven
+stop. The execution decision below governs the next comparison.
+
+Receipts: `../../audit/applicable-teaching-20261013/native-adapter-sql-probe/conversion.json`,
+`native-adapter-port/{result,resources-summary}.json` and
+`learning-02/{protocol,tokenizer-qualified}.json`.
+
+## Response-cost correction and native backend qualification
+
+The streamed CPU teaching collection was stopped after 1,317.14 seconds and
+2,275 decoded tokens without a final answer. Its last reported average was
+1.76 tokens per second. Logs record 3.76 GB of application weight reads per
+decode pass; this is not a measurement of physical SSD traffic. No answer quality
+or parameter update resulted. The original model bytes are unchanged and every
+owned process stopped.
+
+The native wrapper had forced CPU execution. An explicit mapped Metal profile
+now reaches the existing device-selecting native path while preserving original
+BF16 parameters, BF16 caches and the same resource guards. Two attempts stopped
+at the 512 MiB host swap-growth guard during startup, after 9.51 and 9.67 seconds.
+They recorded 0.924 and 1.007 GB of positive host swap growth. That system-wide
+counter establishes the guard event, without attributing all growth to this
+process. Both children were reaped, with no remaining group members or cleanup
+errors. Neither attempt returned a feature vector.
+
+The Metal option remains experimental; numerical comparison and task quality
+were unperformed because startup did not pass resource admission. The observed
+CPU stream is a low-residency control with inadequate response cost for the
+retained objective. The fast trained nano'ai core, high task accuracy and stated
+nanosecond response remain unestablished. New learning and writing comparisons
+require a qualified execution path, then a complete representative task with
+measured correctness and cost.
+
+The final source suite passed 178 tests with zero skips in 25.846 seconds.
+This qualifies the tested runtime contracts, storage, exact representations and
+recovery paths. It supplies no missing model-quality or GPU-output evidence.
+
+Receipts: `../../audit/performance-correction-20261014/stopped-collection.json`,
+`execution-decision.json`, `full-tests.json`, `metal-features*.json` and the native
+logs. The interrupted learning protocol's 18 implementation files are preserved
+in `../../audit/applicable-teaching-20261013/learning-02/source-snapshot`.

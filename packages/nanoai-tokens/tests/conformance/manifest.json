@@ -1,0 +1,187 @@
+{
+  "schema": "nanoai.nmt-conformance.v1",
+  "provenance": "Independent authored NMT1 byte fixtures; no imported model data.",
+  "contract": "accept describes parser admission; violation identifies the required invariant, not a language-specific exception string.",
+  "cases": [
+    {
+      "id": "valid-byte-law",
+      "file": "valid-byte-law.nmt",
+      "bytes": 4048,
+      "accept": true,
+      "violation": null,
+      "description": "complete byte alphabet with positive normalized probabilities",
+      "file_identity": "shake256:c37ddb78d4e84e57d5efbf8722f7248bfc3bf0225eaffee96076a328e48a7bc58a201f93b774cf53a9da0f05d7e478a99ce836fa3bd6dcafa04ecca6b6dcdc66"
+    },
+    {
+      "id": "stop-zero",
+      "file": "stop-zero.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "terminal probability in the open unit interval",
+      "description": "terminal probability in the open unit interval",
+      "file_identity": "shake256:c5be353ad7e4640e958b8af206aecf4c49165f6aaf0a2066eafa4318a8bcdda3d57235cfbc7eff133e39a870435b833fbea3f915a5f89b54e5315f351e516f90"
+    },
+    {
+      "id": "stop-one",
+      "file": "stop-one.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "terminal probability in the open unit interval",
+      "description": "terminal probability in the open unit interval",
+      "file_identity": "shake256:7d9e7f5221a3dca2e388ff4d88d2f79d723a98b6a96d946902325aba6117ed19f97a1f8a4752219b7bf932e7e2997ebd8ee993d78179f9e9ed6b02a59bba6705"
+    },
+    {
+      "id": "stop-nan",
+      "file": "stop-nan.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "finite terminal probability",
+      "description": "finite terminal probability",
+      "file_identity": "shake256:b6537dc76f8a764fc8d625ef0003cc6af0170992ced5eab684cde7ae8912e4046020e767b2c37719b0ec8e02e881cd4dc7f5f8181189b0772393a3b03cd15e25"
+    },
+    {
+      "id": "count-low",
+      "file": "count-low.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "active row lower bound",
+      "description": "active row lower bound",
+      "file_identity": "shake256:e5fa7a6c1ebbec9b26e34969ae9d38a0558d658cf61eaf67ce56e16f5e98638f929bafa9a26f975a0127a72a89ec2a1731ed53dec83c94047a50f76f083f9e88"
+    },
+    {
+      "id": "count-high",
+      "file": "count-high.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "active row upper bound",
+      "description": "active row upper bound",
+      "file_identity": "shake256:fb785617134ffc6ba73a0417e585a82bc4e6a5c15b5fa2ec864a2eef8cbce6739961feed8058bf46f575c46310e585e6ef76c7409eeece8460d8445354db4dbc"
+    },
+    {
+      "id": "magic",
+      "file": "magic.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "format magic",
+      "description": "format magic",
+      "file_identity": "shake256:93599dea1f785583200e4c80767b80827d5c07220a921cd8b15ff5be0002432c2681efc92995af68cffe7a0b0226cbdae3b7c2e9b6d31a80da392bc069da6923"
+    },
+    {
+      "id": "trailing",
+      "file": "trailing.nmt",
+      "bytes": 4049,
+      "accept": false,
+      "violation": "exact record extent",
+      "description": "exact record extent",
+      "file_identity": "shake256:0b4c7c72c17e7fa168f0d2d9cc718cbff6fdcf718f6e7476f7b2bc544af38ed938c3a756b3704ec6b41614c5558e0b90dd96dc27bb398a30e53a88671bf726e6"
+    },
+    {
+      "id": "probability-zero",
+      "file": "probability-zero.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "positive emission probability",
+      "description": "positive emission probability",
+      "file_identity": "shake256:5dcedd6d7c7b6b0ac77c9e577a6c1bf1c54ca7d55f566d0395305ff1402b29ee650fbf0491cd13ba15a86ff91e6bd65ace49717f2a92fa3114a935608819373f"
+    },
+    {
+      "id": "probability-nan",
+      "file": "probability-nan.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "finite emission probability",
+      "description": "finite emission probability",
+      "file_identity": "shake256:2202e312eb0b6266a807f48886ea15dd6a3fe3edd30acad670949f17986e45a98568f85852740a94ed957dfe776ce4b026a2919654fac79a94ae44e135445c62"
+    },
+    {
+      "id": "probability-sum",
+      "file": "probability-sum.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "normalized emission mass",
+      "description": "normalized emission mass",
+      "file_identity": "shake256:527f468a4a571a455ef200d51e92b49f97fc614397760f3e040d951b180785c583695697c0fb96b23c5e0d18267dae4f6c364bbd6df0e53aabbc737c0fd6cdd7"
+    },
+    {
+      "id": "id-duplicate",
+      "file": "id-duplicate.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "strict common ID ordering",
+      "description": "strict common ID ordering",
+      "file_identity": "shake256:f7a7c04acf44630ab51988bc5df98170f55f8970f3a15e8bf84295a3bb138aead3a45edfa1e794dafd94eae1a9d7442babe9b89ec82c74672a5e2b6cef96d745"
+    },
+    {
+      "id": "id-range",
+      "file": "id-range.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "common ID upper bound",
+      "description": "common ID upper bound",
+      "file_identity": "shake256:b4575f696781761c47fe5224855206e20cc4807fdcccd517a85c385d59e3c8bbbe834a2eff0e8e33eb13b9ffa27d01487a393bf948264cf29dbf763550e19027"
+    },
+    {
+      "id": "piece-empty",
+      "file": "piece-empty.nmt",
+      "bytes": 4047,
+      "accept": false,
+      "violation": "nonempty literal piece",
+      "description": "nonempty literal piece",
+      "file_identity": "shake256:696256a3b9aa120b463e9bf5978da06209489e66c5beed95b305ee309234d0e9c436c9f9e3c3cacfdc09b36fe123b3bf7bb26b55573c72edb8ae0ba167a41cbe"
+    },
+    {
+      "id": "piece-long",
+      "file": "piece-long.nmt",
+      "bytes": 4176,
+      "accept": false,
+      "violation": "literal piece upper bound",
+      "description": "literal piece upper bound",
+      "file_identity": "shake256:1c46ce815ef267decc07442f84e00ec01b4fa70c837bc9c42f8a452fd1034c4ee8ddb782b76b0327168ffaab931067e071226667cd528a9d1fd795961b3c6bd6"
+    },
+    {
+      "id": "piece-order",
+      "file": "piece-order.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "strict byte ordering",
+      "description": "strict byte ordering",
+      "file_identity": "shake256:40940ea55f017cc0676195c21799f08ebf83ecb4ae1eb209cb5c57f77f13ff12fba893641a8728b150ede5af19a480be9cfa638b07c4b12546cda0f27b06df56"
+    },
+    {
+      "id": "fallback-missing",
+      "file": "fallback-missing.nmt",
+      "bytes": 4049,
+      "accept": false,
+      "violation": "complete single-byte fallback",
+      "description": "complete single-byte fallback",
+      "file_identity": "shake256:d7da0046ca6433d811ce16e7c30b5d4b682b27974d6a497e67b8ed30c32227ea838af449461d7eb4f63c57146cab5022740cdbaa707734808351b1f59578501d"
+    },
+    {
+      "id": "truncated-record",
+      "file": "truncated-record.nmt",
+      "bytes": 4047,
+      "accept": false,
+      "violation": "complete final piece",
+      "description": "complete final piece",
+      "file_identity": "shake256:aaa9440ea0ca7f2ce1ed1076d9199cf90c8c8b95405cfc6270c37a9baf587ea1724091048ec50ef72e0339696f0e1b78ce943ae01f57217b4812c1e63eecf498"
+    },
+    {
+      "id": "corrupt-footer",
+      "file": "corrupt-footer.nmt",
+      "bytes": 4048,
+      "accept": false,
+      "violation": "payload digest",
+      "description": "payload digest",
+      "file_identity": "shake256:3d071a389d4ae2313b18998e994c2ead6706f3073749a1a9920e28d887827a45c9fca5204d5521bc898a1e7cf675785a641d56f34b0fa41a4bab749ff67295fa"
+    },
+    {
+      "id": "container-short",
+      "file": "container-short.nmt",
+      "bytes": 4,
+      "accept": false,
+      "violation": "minimum container extent",
+      "description": "minimum container extent",
+      "file_identity": "shake256:4010ae1b531fa1d1ce353d21fa03a33ed2bc1d1363859928777fdc278d461f26598420825149e9f1f288fb7f4d034e875a547752510d9e9e485eecc27015e1cc"
+    }
+  ]
+}

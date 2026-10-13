@@ -1,0 +1,628 @@
+{
+  "schema": "nanoai.frozen-master.v1",
+  "artifact": "master.nmt",
+  "tokenizer_identity": "shake256:76f5daf61f98ceb6a0f4d4474a337b874b920bcb8205f4a393a3d2c6f1bbf442b902e1757c6711a7b73b66fe075362d0ff73133dca3359e90342c073b0a22c8f",
+  "file_identity": "shake256:c88aadbe486987f506296d720bd05627f6fcb44bb59e461d9309c38ba3c3efe418eae67d58162d5dc1dacf53e69322b7b986772f3241955bd7400777d6755465",
+  "vocabulary_identity": "shake256:e07031bb016fe4629c4eb97f2ec388925f7bb5bfc6c4e928a84ab57d617d6edc115bd4a303ce0cffd48c94121dfe54b66d93f48ccc405de73e301fe8a206216a",
+  "inventory_identity": "shake256:5e8a039a5d7242843e6ee1934ee49d9b098c4d15e97d48305ae26dee9c9224fe03662de03004f5489d5cd7e650f4c5a10ca26e9da7c41584f36f643b88af6f96",
+  "active_rows": 24664,
+  "model_contract": {
+    "schema": "nanoai.master-model-input.v1",
+    "tokenizer_identity": "shake256:76f5daf61f98ceb6a0f4d4474a337b874b920bcb8205f4a393a3d2c6f1bbf442b902e1757c6711a7b73b66fe075362d0ff73133dca3359e90342c073b0a22c8f",
+    "vocabulary_identity": "shake256:e07031bb016fe4629c4eb97f2ec388925f7bb5bfc6c4e928a84ab57d617d6edc115bd4a303ce0cffd48c94121dfe54b66d93f48ccc405de73e301fe8a206216a",
+    "literal_rows": 24664,
+    "model_rows": 24667,
+    "bos_id": 24664,
+    "eos_id": 24665,
+    "pad_id": 24666,
+    "label_ignore": -100,
+    "byte_controls": "BOS/EOS/PAD are model controls with no literal byte surface"
+  },
+  "sources": [
+    {
+      "name": "gpt2",
+      "payload_identity": "shake256:1df7591ba3957ba71e86ea0f10262e7bf26c60f823ac27f5535f84fc9d2b49b94e9992af328fc5154bbd261807131a64a68a5fe45f85160b06285e5e81a0d999",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "openai-community/gpt2",
+        "revision": "607a30d783dfa663caf39e06633721c8d4cfcd7e",
+        "url": "https://huggingface.co/openai-community/gpt2/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/openai-community/gpt2/resolve/607a30d783dfa663caf39e06633721c8d4cfcd7e/tokenizer.json",
+        "license_declaration": "mit",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "cl100k_base",
+      "payload_identity": "shake256:636302fea8e63dbc2e80b8e2db8516ffe0dd5ffedc0a8b8a52fd42d1c6fdbcd12806e2890e8bfbe8e51cff860329a148a0736ff63189b8894c7919b461ad5e33",
+      "kind": "tiktoken",
+      "provenance": {
+        "url": "https://openaipublic.blob.core.windows.net/encodings/cl100k_base.tiktoken",
+        "license_declaration": "see shared tiktoken source-license evidence",
+        "qualification": "content snapshot pinned by SHAKE256; upstream blob has no Git revision",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "o200k_base",
+      "payload_identity": "shake256:991492bf4be288e1c1c8e75c8c5ffcdebc946580e860686d0d290c1de31d6084af0f9f0ba7db3102ee683973a22bf8aec66e8613e83300c97171d2b8cf0dd66d",
+      "kind": "tiktoken",
+      "provenance": {
+        "url": "https://openaipublic.blob.core.windows.net/encodings/o200k_base.tiktoken",
+        "license_declaration": "see shared tiktoken source-license evidence",
+        "qualification": "content snapshot pinned by SHAKE256; upstream blob has no Git revision",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "deepseek-v3",
+      "payload_identity": "shake256:faad6c622b0fce695bfebed557d197697b0efd0a3904ec9cbb0cd9badb82ad6755b4ece8f552b32d839efc1573b847e35da16ff51d0c3da783bd20a4d8ba84f9",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "deepseek-ai/DeepSeek-V3",
+        "revision": "e815299b0bcbac849fa540c768ef21845365c9eb",
+        "url": "https://huggingface.co/deepseek-ai/DeepSeek-V3/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/deepseek-ai/DeepSeek-V3/resolve/e815299b0bcbac849fa540c768ef21845365c9eb/tokenizer.json",
+        "license_declaration": null,
+        "license_files": [
+          {
+            "filename": "LICENSE-CODE",
+            "url": "https://huggingface.co/deepseek-ai/DeepSeek-V3/resolve/e815299b0bcbac849fa540c768ef21845365c9eb/LICENSE-CODE",
+            "digest": "shake256:9a246d388d185b41a5bcfd1a5ebdf5acd40582820d16651db207274d57da148abd8d9bb983c718a4486bc4e42e302bb4149ab139d31ae84e06d46c02123f8dcd",
+            "bytes": 1064
+          },
+          {
+            "filename": "LICENSE-MODEL",
+            "url": "https://huggingface.co/deepseek-ai/DeepSeek-V3/resolve/e815299b0bcbac849fa540c768ef21845365c9eb/LICENSE-MODEL",
+            "digest": "shake256:2bd77c4429777c7350aea58470043e8df73ce4daf60ff2dbf990a6a7ad98d9407416612908c83587a2286a8325a3488de132d0b7b2483c478f57a22528620075",
+            "bytes": 13759
+          }
+        ],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "bloom",
+      "payload_identity": "shake256:db731b415747feb58bf6dd8e8bd8dc41b9a937ad3aa2678dff2ebf8470abbddbd9351bc75b6d5f42208b71abdf9a6bfe2316d7aae7e1a9e40c08e98e9c91da06",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "bigscience/bloom",
+        "revision": "7f10a99ce7c08f03c7719a586cb2cbda1433ac05",
+        "url": "https://huggingface.co/bigscience/bloom/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/bigscience/bloom/resolve/7f10a99ce7c08f03c7719a586cb2cbda1433ac05/tokenizer.json",
+        "license_declaration": "bigscience-bloom-rail-1.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "falcon",
+      "payload_identity": "shake256:731242bb2b6c0d65ecdd274edb07dec91d0a524b99b43b42c25db74cc02f1e829f5512027829e71579c6045e569135b54d6a3bfb94f5eb73f54b8d93de943de7",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "tiiuae/falcon-7b",
+        "revision": "ec89142b67d748a1865ea4451372db8313ada0d8",
+        "url": "https://huggingface.co/tiiuae/falcon-7b/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/tiiuae/falcon-7b/resolve/ec89142b67d748a1865ea4451372db8313ada0d8/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "olmo-2",
+      "payload_identity": "shake256:a1fb0e67b4681a9b09bd993b8be5ff449cbaa6974a3d91b4ce1f4cb3e8f7c9bbc9e2e8612863511ed59a03a9da7a50cf523833242cfef11ff49790ce09c6ea0c",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "allenai/OLMo-2-1124-7B",
+        "revision": "7df9a82518afdecae4e8c026b27adccc8c1f0032",
+        "url": "https://huggingface.co/allenai/OLMo-2-1124-7B/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/allenai/OLMo-2-1124-7B/resolve/7df9a82518afdecae4e8c026b27adccc8c1f0032/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "smollm3",
+      "payload_identity": "shake256:c59c0d8583deeae9e233801e455b6acfff22b638948527705c1070b26b7b759dc90b2a603a9f6b56bdfbfeaf037d352c6238ead415d96d91ad127004ee73d835",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "HuggingFaceTB/SmolLM3-3B",
+        "revision": "a07cc9a04f16550a088caea529712d1d335b0ac1",
+        "url": "https://huggingface.co/HuggingFaceTB/SmolLM3-3B/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/HuggingFaceTB/SmolLM3-3B/resolve/a07cc9a04f16550a088caea529712d1d335b0ac1/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "granite-3.3",
+      "payload_identity": "shake256:15d3307b35f28102600f6ae1c5e337547d30e4bc31492ae4324a7592687dd56a046c8b5bdf0b5c265f44ddfd8c718f86c4f227f1893c3c706b6d11b9c29e7bcf",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "ibm-granite/granite-3.3-8b-instruct",
+        "revision": "51dd4bc2ade4059a6bd87649d68aa11e4fb2529b",
+        "url": "https://huggingface.co/ibm-granite/granite-3.3-8b-instruct/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/ibm-granite/granite-3.3-8b-instruct/resolve/51dd4bc2ade4059a6bd87649d68aa11e4fb2529b/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "mt5",
+      "payload_identity": "shake256:2ed5ca943cd6d1a887a4ce9db78c66cc7893c76206a4881b0edc7d0868408b92c462e1071dae2893deb440a78a4ed1470760f08a83ae8bae9ce835e02aac4a18",
+      "kind": "sentencepiece",
+      "provenance": {
+        "repository": "google/mt5-base",
+        "revision": "2eb15465c5dd7f72a8f7984306ad05ebc3dd1e1f",
+        "url": "https://huggingface.co/google/mt5-base/resolve/main/spiece.model",
+        "immutable_url": "https://huggingface.co/google/mt5-base/resolve/2eb15465c5dd7f72a8f7984306ad05ebc3dd1e1f/spiece.model",
+        "license_declaration": "apache-2.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "xlm-roberta",
+      "payload_identity": "shake256:bab3284c09a69e585220e330c4d47798da8f5dddc01bf3c7fbce1e701798729cefd5b3121344e32810b9ff82eb59718308ae1fe24246b99c95ab4c387b92610e",
+      "kind": "sentencepiece",
+      "provenance": {
+        "repository": "FacebookAI/xlm-roberta-base",
+        "revision": "e73636d4f797dec63c3081bb6ed5c7b0bb3f2089",
+        "url": "https://huggingface.co/FacebookAI/xlm-roberta-base/resolve/main/sentencepiece.bpe.model",
+        "immutable_url": "https://huggingface.co/FacebookAI/xlm-roberta-base/resolve/e73636d4f797dec63c3081bb6ed5c7b0bb3f2089/sentencepiece.bpe.model",
+        "license_declaration": "mit",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "nllb-200",
+      "payload_identity": "shake256:399fd202d61b2764c0f6aa1613d17341a94585c39b875091bb8df478cdafb2d7a0070df404e1232d5ac09f9308290523a334f674f92887bb5d0012613c5f9f23",
+      "kind": "sentencepiece",
+      "provenance": {
+        "repository": "facebook/nllb-200-distilled-600M",
+        "revision": "f8d333a098d19b4fd9a8b18f94170487ad3f821d",
+        "url": "https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/main/sentencepiece.bpe.model",
+        "immutable_url": "https://huggingface.co/facebook/nllb-200-distilled-600M/resolve/f8d333a098d19b4fd9a8b18f94170487ad3f821d/sentencepiece.bpe.model",
+        "license_declaration": "cc-by-nc-4.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "bert-turkish",
+      "payload_identity": "shake256:d566090cd8c2d384911ff4e88abdd2afb7bf8aa245475616e780e815308cd3c9e205fc1207febaa342005fd7f2c48605044de2be010ad1a196e8c406ca33971d",
+      "kind": "wordpiece",
+      "provenance": {
+        "repository": "dbmdz/bert-base-turkish-cased",
+        "revision": "b6e1de16c983e0f2c70664591ea3f22810072608",
+        "url": "https://huggingface.co/dbmdz/bert-base-turkish-cased/resolve/main/vocab.txt",
+        "immutable_url": "https://huggingface.co/dbmdz/bert-base-turkish-cased/resolve/b6e1de16c983e0f2c70664591ea3f22810072608/vocab.txt",
+        "license_declaration": "mit",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "mistral-nemo",
+      "payload_identity": "shake256:1ea5566ccc60843ffc7fbe397be2658e970c2bd19ead10b2afc1849ee546acf826a5311306593a28bcfc3dfd55ea2a2205d04e613f3ba1084e1a51bb522de2ea",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "mistralai/Mistral-Nemo-Base-2407",
+        "revision": "a4477a2f977929a969745b69bbd62e03043551a5",
+        "url": "https://huggingface.co/mistralai/Mistral-Nemo-Base-2407/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/mistralai/Mistral-Nemo-Base-2407/resolve/a4477a2f977929a969745b69bbd62e03043551a5/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "phi-4",
+      "payload_identity": "shake256:be1feee460fcbf96b2958607ff08cbd1c6d4310832a392db8b6d671ff8b4366c11932a65e14c5bbb0521636c765d2983eda5a4c53f4470158afa73f197885c1b",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "microsoft/phi-4",
+        "revision": "2db69c1c3e91a05d2c64a3185acfbaf36f744e25",
+        "url": "https://huggingface.co/microsoft/phi-4/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/microsoft/phi-4/resolve/2db69c1c3e91a05d2c64a3185acfbaf36f744e25/tokenizer.json",
+        "license_declaration": "mit",
+        "license_files": [
+          {
+            "filename": "LICENSE",
+            "url": "https://huggingface.co/microsoft/phi-4/resolve/2db69c1c3e91a05d2c64a3185acfbaf36f744e25/LICENSE",
+            "digest": "shake256:745549b7edeeaed509459ba7de94003593a7b5704a7e88671723742928599c262e065854fdb5d62d4dcf78db022832a258656fa8c9bfde8cae4ace494c9f4aa8",
+            "bytes": 1105
+          }
+        ],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "yi-1.5",
+      "payload_identity": "shake256:a8396b4bc3c723e539d85453322e10f23f1e624fc4c6941ed5a42e25edf600439caeaa1fa5d2d9e43596d3bd9a547ba45b27fd4cbdfd5fdb9916b88e57741e29",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "01-ai/Yi-1.5-9B",
+        "revision": "80d5471b1eae28beae33e06eadbd4b48e74d4ce1",
+        "url": "https://huggingface.co/01-ai/Yi-1.5-9B/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/01-ai/Yi-1.5-9B/resolve/80d5471b1eae28beae33e06eadbd4b48e74d4ce1/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "exaone-3.5",
+      "payload_identity": "shake256:cd0df433d925ca1adc9e2c66750836ea32cd83f8d81437ab0147da3e449e95dfd9b352f5d32e185d30279e3e9ba436c70382f19e8c2bd52030c9d2a34e47ee83",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct",
+        "revision": "553ea250b9a5317231459279d5847d6cf955b9aa",
+        "url": "https://huggingface.co/LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct/resolve/553ea250b9a5317231459279d5847d6cf955b9aa/tokenizer.json",
+        "license_declaration": "other",
+        "license_files": [
+          {
+            "filename": "LICENSE",
+            "url": "https://huggingface.co/LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct/resolve/553ea250b9a5317231459279d5847d6cf955b9aa/LICENSE",
+            "digest": "shake256:24449ee956af0eb75cffcda39ffe01b1d5d3273c54904e8f2ae0032893a58b8d3ecba61f93452b2d8e554d5bf5bbfab94d7d461a1a55cf1da15a7dbc46c4fe2e",
+            "bytes": 13779
+          }
+        ],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "nemotron-mini",
+      "payload_identity": "shake256:2130fe940cd8569c36a81087ce031ec9e73ddaf109ef0f8c204dd61a9a90ee976ff964efdf4d68dfd45c0251485f17b6e8b674a2eda09847c35999070771decf",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "nvidia/Nemotron-Mini-4B-Instruct",
+        "revision": "791833e92ebddb0bc2c1007f6d2b6764f886a2ae",
+        "url": "https://huggingface.co/nvidia/Nemotron-Mini-4B-Instruct/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/nvidia/Nemotron-Mini-4B-Instruct/resolve/791833e92ebddb0bc2c1007f6d2b6764f886a2ae/tokenizer.json",
+        "license_declaration": "other",
+        "license_files": [
+          {
+            "filename": "LICENSE",
+            "url": "https://huggingface.co/nvidia/Nemotron-Mini-4B-Instruct/resolve/791833e92ebddb0bc2c1007f6d2b6764f886a2ae/LICENSE",
+            "digest": "shake256:46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be",
+            "bytes": 0
+          }
+        ],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "kimi-k2",
+      "payload_identity": "shake256:bee2ad6456264c4085739fdef1ec76c86ff5e04a639dac41fc17d2153407f3cfd55f0dff3b55d44c01d860d3ac754c00f16ccdd62e84e06ffb8037b44a34a8ec",
+      "kind": "tiktoken",
+      "provenance": {
+        "repository": "moonshotai/Kimi-K2-Instruct",
+        "revision": "fd1984e2b7a3350dbf7305fe73a4ede25c14de50",
+        "url": "https://huggingface.co/moonshotai/Kimi-K2-Instruct/resolve/main/tiktoken.model",
+        "immutable_url": "https://huggingface.co/moonshotai/Kimi-K2-Instruct/resolve/fd1984e2b7a3350dbf7305fe73a4ede25c14de50/tiktoken.model",
+        "license_declaration": "other",
+        "license_files": [
+          {
+            "filename": "LICENSE",
+            "url": "https://huggingface.co/moonshotai/Kimi-K2-Instruct/resolve/fd1984e2b7a3350dbf7305fe73a4ede25c14de50/LICENSE",
+            "digest": "shake256:88ba4e0ab54f29cff421a8fdeeb7040f47b2051a852340f439857cbc439b2bf39f88eb55ff0717e5b1238c83fd3bcfb0c380d6e3fd01457c1a7743405a772e77",
+            "bytes": 1463
+          }
+        ],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "gpt-oss",
+      "payload_identity": "shake256:d51215c067b90f458b19758dde1d38a76ce0b406db0964045b2cd22805e1096b41f75fd5fd71acc06bbd9a6e4dbda47c341aa6cf645748b2a91592ed370b1fb5",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "openai/gpt-oss-20b",
+        "revision": "6cee5e81ee83917806bbde320786a8fb61efebee",
+        "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [
+          {
+            "filename": "LICENSE",
+            "url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/LICENSE",
+            "digest": "shake256:f9fa4c7936c5b10449eca8541d5ba4129d09e3825d14153339a1ce75b4c5597f9a01d166cb6bc73e7f79fe0f233c4ecc7045d1164b864700fd4d78325008bc3e",
+            "bytes": 11357
+          }
+        ],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "qwen3.8-27b",
+      "payload_identity": "shake256:98cebb72a1826ff0de5d9cccdbc44e54281a8df0e51f4fa1efb660d6c26bed81ffe676a218535709ea565a9ae51a0ec4a3138ad3d2d2139fb69f1e1e11979636",
+      "kind": "hf-tokenizer",
+      "provenance": {
+        "repository": "Qwen/Qwen3.8-27B",
+        "revision": "1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0",
+        "url": "https://huggingface.co/Qwen/Qwen3.8-27B/resolve/main/tokenizer.json",
+        "immutable_url": "https://huggingface.co/Qwen/Qwen3.8-27B/resolve/1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0/tokenizer.json",
+        "license_declaration": "apache-2.0",
+        "license_files": [
+          {
+            "filename": "LICENSE",
+            "url": "https://huggingface.co/Qwen/Qwen3.8-27B/resolve/1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0/LICENSE",
+            "digest": "shake256:e8c9a8a59f8fe45f6527b359d14f4b7d4b8f668556a63e1cd9865ccbcb1ffb8c470d32817dc26a25eeec8c28658e14ce69f350356b7bbd082d42a9309067563a",
+            "bytes": 11544
+          }
+        ],
+        "qualification": "exact current revision matched",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    },
+    {
+      "name": "kimi-k3",
+      "payload_identity": "shake256:bee2ad6456264c4085739fdef1ec76c86ff5e04a639dac41fc17d2153407f3cfd55f0dff3b55d44c01d860d3ac754c00f16ccdd62e84e06ffb8037b44a34a8ec",
+      "kind": "tiktoken",
+      "provenance": {
+        "repository": "moonshotai/Kimi-K3",
+        "revision": "f831ab66814297da540d832a5235f8e904f29d06",
+        "license_file": "sources/models/Kimi-K3/LICENSE",
+        "license_digest": "shake256:9a5adc5f6e995dd3ea0f6594cbb2370686db5b9342e130f67d080f832802fb2dac64af490b751ebb6c614f8d71c544d6c26071439bcc8961f5cca41993005df0",
+        "qualification": "original K3 local payload and existing revision record retained",
+        "evidence": "audit/tokenizer-finalization-20261013/source-inspection.json"
+      }
+    }
+  ],
+  "selection": {
+    "schema": "nanoai.master-selection-result.v1",
+    "candidate": "rows-4096-family-0",
+    "identity": "shake256:76f5daf61f98ceb6a0f4d4474a337b874b920bcb8205f4a393a3d2c6f1bbf442b902e1757c6711a7b73b66fe075362d0ff73133dca3359e90342c073b0a22c8f",
+    "active_rows": 24664,
+    "inventory_identity": "shake256:5e8a039a5d7242843e6ee1934ee49d9b098c4d15e97d48305ae26dee9c9224fe03662de03004f5489d5cd7e650f4c5a10ca26e9da7c41584f36f643b88af6f96",
+    "vocabulary_identity": "shake256:e07031bb016fe4629c4eb97f2ec388925f7bb5bfc6c4e928a84ab57d617d6edc115bd4a303ce0cffd48c94121dfe54b66d93f48ccc405de73e301fe8a206216a",
+    "minimum_validation_nats_per_byte": 1.9955973843648545,
+    "validation_nats_per_byte": 1.9955973843648545,
+    "families": 19,
+    "sources": 22,
+    "candidate_file": "rows-4096-family-0.nmt",
+    "policy_identity": "shake256:207fefae2d959793a1582429686ee41f4e29a8b1eaf61d2c0be237aa9e891a069cd18382cca52fb887aa2e810788b7a233516f024eecaec2c14e05a6192138e9"
+  },
+  "policy": {
+    "schema": "nanoai.master-selection.v1",
+    "corpus_identity": "shake256:6ce1796b699cc6118b6b525c716925ab54f589dfe708c789c5f39162c5d12ee67e503c21365de6d911f8457fd1db1000c139a7302f20211dc6f3eddaeb25471e",
+    "confirmation_identity": "shake256:b69b2e0296d91db085115e3a5008c42c372607fac7a73172a405493233bf5273eac540f281318a7c2530aebc1172ea14067f23b005b4d91350fd42d36d3c1815",
+    "seed": 0,
+    "train_ids": [
+      0,
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      17,
+      18,
+      19,
+      20,
+      21,
+      22,
+      25,
+      26,
+      27,
+      28,
+      29,
+      31,
+      32,
+      33,
+      34,
+      35,
+      36,
+      38,
+      39,
+      40,
+      41,
+      42,
+      43,
+      45,
+      46,
+      47,
+      48,
+      49,
+      50,
+      51,
+      52,
+      53,
+      54,
+      55,
+      56,
+      57,
+      58,
+      59,
+      60,
+      61,
+      62,
+      64,
+      65,
+      66,
+      67,
+      68,
+      69,
+      70,
+      71,
+      72,
+      73,
+      74,
+      75,
+      76,
+      77,
+      78,
+      79,
+      80,
+      81,
+      82,
+      84,
+      85,
+      86,
+      87,
+      88,
+      89,
+      91,
+      92,
+      93,
+      94,
+      95,
+      96,
+      97,
+      98,
+      99,
+      100,
+      101,
+      102,
+      103
+    ],
+    "validation_ids": [
+      8,
+      16,
+      23,
+      24,
+      30,
+      37,
+      44,
+      63,
+      83,
+      90
+    ],
+    "budgets": [
+      1024,
+      2048,
+      4096
+    ],
+    "family_prior_strengths": [
+      0.0,
+      0.25
+    ],
+    "byte_pseudocount": 0.05,
+    "piece_pseudocount": 0.001,
+    "epochs": 8,
+    "minimum_multi_byte_count": 2,
+    "max_piece_bytes": 128,
+    "protect_source_scalars": true,
+    "source_scalar_reserve": 0.02,
+    "selection": "Smallest active vocabulary within 1 percent of minimum validation nats/byte; then lower nats/byte, then lower family prior.",
+    "scope": "Lexical calibration on an authored corpus; confirmation diagnostics do not establish semantic or general language quality."
+  },
+  "qualification": {
+    "schema": "nanoai.master-qualification.v1",
+    "artifact_identity": "shake256:76f5daf61f98ceb6a0f4d4474a337b874b920bcb8205f4a393a3d2c6f1bbf442b902e1757c6711a7b73b66fe075362d0ff73133dca3359e90342c073b0a22c8f",
+    "artifact_file_identity": "shake256:c88aadbe486987f506296d720bd05627f6fcb44bb59e461d9309c38ba3c3efe418eae67d58162d5dc1dacf53e69322b7b986772f3241955bd7400777d6755465",
+    "artifact_bytes": 426628,
+    "native_executable_identity": "shake256:31a4aacf62e59480f2f2b5cf0e91f0cb8930ef0d9b98eacf92c54e2d4dac8d93ca1a8eb65880539beef206c8c229c8c46229ec7eda93d8792451754f3d754636",
+    "runtime": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "compiler": "Apple clang version 21.0.0 (clang-2100.3.34.2)",
+    "checks": {
+      "python_native_rows": 127,
+      "byte_id_span_failures": 0,
+      "maximum_logp_difference": 0.0
+    },
+    "warm_native": {
+      "rows": 1976,
+      "bytes": 568366,
+      "median_ms": 0.073854,
+      "p95_ms": 0.229583,
+      "p99_ms": 0.347375,
+      "bytes_per_second": 3138793.098306651,
+      "whole_batch_wall_seconds": 0.3018939159810543,
+      "scope": "Encoding, including token record byte digest; excludes serialization, decode and process startup"
+    },
+    "startup_one_byte": {
+      "runs": 12,
+      "median_ms": 8.441624988336116,
+      "p95_ms": 11.097375070676208,
+      "scope": "Process startup, artifact read/hash, dictionary build, one encode/decode, JSON, shutdown and monitor overhead"
+    },
+    "python": {
+      "load_seconds": 0.025015708059072495,
+      "panel_encode_seconds": 0.14080658624880016,
+      "after_load": {
+        "rss_bytes": 41631744,
+        "physical_footprint_bytes": 30704168
+      }
+    },
+    "native_sampled_peak": {
+      "rss_bytes": 8617984,
+      "physical_footprint_bytes": 5980568
+    },
+    "data_consumer": {
+      "contract": {
+        "schema": "nanoai.master-model-input.v1",
+        "tokenizer_identity": "shake256:76f5daf61f98ceb6a0f4d4474a337b874b920bcb8205f4a393a3d2c6f1bbf442b902e1757c6711a7b73b66fe075362d0ff73133dca3359e90342c073b0a22c8f",
+        "vocabulary_identity": "shake256:e07031bb016fe4629c4eb97f2ec388925f7bb5bfc6c4e928a84ab57d617d6edc115bd4a303ce0cffd48c94121dfe54b66d93f48ccc405de73e301fe8a206216a",
+        "literal_rows": 24664,
+        "model_rows": 24667,
+        "bos_id": 24664,
+        "eos_id": 24665,
+        "pad_id": 24666,
+        "label_ignore": -100,
+        "byte_controls": "BOS/EOS/PAD are model controls with no literal byte surface"
+      },
+      "batch_identity": "shake256:8fedf308eb09854497dec650681cdcf78880bc211f8662e4a95d28c261b81d291fee0f5c95c2112c3c7306cb9023f18b29d1a8794a0712811f211b84114aadcb",
+      "batch_shape": [
+        5,
+        56
+      ],
+      "output_shape": [
+        5,
+        56,
+        24667
+      ],
+      "embedding_dtype": "torch.bfloat16",
+      "output_dtype": "torch.bfloat16",
+      "torch": "2.14.0",
+      "fixed_fixture_loss": 63.899009704589844,
+      "weight_identity_before": "shake256:3db9be08c1e6d14dd5f161a1404049cefd42e9eb4578ca92e1298bd447532511399609b55dc534ca3f9db56c32b2a95b63ac302b4ca1077550ca44e0c9f73e45",
+      "weight_identity_after": "shake256:3db9be08c1e6d14dd5f161a1404049cefd42e9eb4578ca92e1298bd447532511399609b55dc534ca3f9db56c32b2a95b63ac302b4ca1077550ca44e0c9f73e45",
+      "neural_parameter_updates": 0,
+      "embedding_bytes_at_width_64": 3157376,
+      "scope": "Fixed BF16 index/output/loss consumer only; no trained language or generation claim"
+    },
+    "swap_before": 6478951874,
+    "swap_after": 6478951874
+  },
+  "source_qualification_identity": "shake256:fb8fca7ee07990cadd6eb83e8b7ed15d32f6294229e3c6ade8b013715d9c8dae0d763b058e42025fafea609cb555ddc37c561fb0f14703de49842bedfdc8059f",
+  "implementation": {
+    "src/nanoai/master_tokenizer.py": "shake256:d03e800ae9b430905662e4181db7ae2b6b6d2a0d5ac25fceafe9a9076c98da1149518e7319f70b03a3762c28a59b7586912f529b832b21ba5e293dd271d4fd15",
+    "src/nanoai/master_data.py": "shake256:f6e1700184bdbeb05c788dea9446819803cecb258c422b698b830ca3d08c40b909df2ddd50ebd7b746429ecfb14274a63aac9ab73222a1583e1900baaee28c80",
+    "native/master_tokenizer.cpp": "shake256:afc475d4ed52a61103c544185e87c860ccff4658fe5049d72ffc9bbd8a7dde5b2a5ae436eaeaaae0dd5239c6d835bcb38ed925496b27f7ab806c3c932601c9d7"
+  },
+  "scope": "Frozen tokenizer and data boundary; model learning follows its own qualified admission and has not started for this version."
+}

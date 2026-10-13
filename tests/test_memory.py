@@ -104,8 +104,11 @@ class MemoryConsumerTests(unittest.TestCase):
         self.memory.initialize(DEFAULT_IDENTITY)
         with self.assertRaisesRegex(ValueError, "migration"):
             self.memory.initialize({**DEFAULT_IDENTITY, "name": "Different"})
-        segment = self.memory.segments / self.memory.head
-        data = bytearray(segment.read_bytes());data[-1] ^= 1;segment.write_bytes(data)
+        import sqlite3
+        from contextlib import closing
+        with closing(sqlite3.connect(self.memory.segments / "journal.sqlite3")) as connection:
+            connection.execute("UPDATE transactions SET payload=? WHERE digest=?", (b'{}', self.memory.head))
+            connection.commit()
         with self.assertRaisesRegex(ValueError, "digest"):
             Memory(self.root)
 

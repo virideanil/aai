@@ -1,0 +1,87 @@
+{
+  "schema": "nanoai.lesson-bundle.v1",
+  "provenance": "Original authored teaching examples derived from the measured writing failures and the nanoai architecture. Fictional examples make no claims about real people.",
+  "lessons": [
+    {
+      "schema": "nanoai.lesson.v1", "id": "evidence",
+      "principle": "Let each claim carry the kind of support it actually has.",
+      "scope": "Reading sources, assessing drafts and explaining conclusions.",
+      "reason": "A recorded fact, an interpretation, a fictional invention and a proposed action have different evidential roles.",
+      "example": {"context": "Source: Ada left a brass key in the clock. Mira does not know why Ada left town.", "attempt": "The key cannot exist because Mira does not know Ada's motive.", "feedback": "The source establishes the key. Ignorance of a motive does not contradict that fact.", "response": "Keep the key and preserve Mira's uncertainty about Ada's motive."},
+      "contrast": {"context": "Source: Nobody has opened the sealed clock. Draft: Mira found a key inside it.", "attempt": "Keep the discovery because the key might exist.", "feedback": "Possible existence does not establish an observed discovery. The draft needs an actual opening or an uncertain conjecture.", "response": "Mira wondered what the sealed clock contained."},
+      "next_check": "Point to the exact source and draft span that support a criticism; preserve a supported passage."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "correction",
+      "principle": "Apply a correction to what it changes and preserve independent valid work.",
+      "scope": "Revising factual records, fictional canon and plans across languages.",
+      "reason": "A new source revision can supersede one detail without replacing the whole purpose or history.",
+      "example": {"context": "Original: Mira has a blue scarf and a brass key. Correction: Atkısı yeşil.", "attempt": "Mira grips her blue scarf and brass key.", "feedback": "The Turkish correction makes the scarf green; it says nothing about changing the key.", "response": "Mira grips her green scarf and brass key."},
+      "contrast": {"context": "Current source: Mira has a green scarf. Historical draft: her scarf was blue.", "attempt": "Restore blue because it appears in the older draft.", "feedback": "The older wording records history. Current canon governs this scene.", "response": "Mira has a green scarf."},
+      "next_check": "Check the changed detail and at least one independent fact that must survive the revision."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "knowledge",
+      "principle": "Keep observation, inference and uncertainty within the knower's actual access.",
+      "scope": "Limited narration, source use, explanations and decisions under incomplete information.",
+      "reason": "Plausible motives and unseen events remain possibilities until evidence distinguishes them.",
+      "example": {"context": "Lena sees a wet coat. Nobody has told her where its owner went.", "attempt": "Lena knew he had crossed the river.", "feedback": "Wet cloth does not determine a journey. Retain the observation and make the inference uncertain.", "response": "Lena touched the wet coat, wondering where its owner had gone."},
+      "contrast": {"context": "Lena watched him cross the river from the bridge.", "attempt": "Lena could never know whether he crossed.", "feedback": "Direct observation supplies relevant evidence. Caution should track the actual uncertainty.", "response": "Lena had watched him cross the river."},
+      "next_check": "Identify what was seen or reported and which alternative remains unresolved."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "causality",
+      "principle": "Connect the prior state, enabling action and observable consequence.",
+      "scope": "Narrative continuity, plans, tool use and explanations of change.",
+      "reason": "A useful outcome needs a mechanism; naming the intended result does not show how it happened.",
+      "example": {"context": "The hatch is locked. Rafi has its key. Opening the hatch reveals a ladder above the flood.", "attempt": "Rafi saved the child by holding the key.", "feedback": "Holding the key does not open the escape route. Show the unlocking and the child's movement.", "response": "Rafi unlocked the hatch, and the child climbed the ladder above the flood."},
+      "contrast": {"context": "The gate is already open and the path is clear.", "attempt": "Rafi unlocks the gate again before crossing.", "feedback": "The enabling condition is already satisfied. Repeating it introduces a state inconsistency.", "response": "Rafi crossed through the open gate."},
+      "next_check": "Trace each consequential object and state across the transition; check that the consequence follows."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "quantity",
+      "principle": "Choose the operation from the relationship, then preserve its units and checked result.",
+      "scope": "Quantities, durations, counts, measurements and mathematical explanations.",
+      "reason": "Correct arithmetic applied to the wrong relationship can still give the wrong answer.",
+      "example": {"context": "Three equal cycles each last 17 seconds.", "attempt": "The cycles lasted 20 seconds.", "feedback": "Equal durations accumulate by multiplication: 3 times 17 seconds is 51 seconds.", "response": "The three cycles lasted 51 seconds."},
+      "contrast": {"context": "Three clocks run simultaneously for 17 seconds.", "attempt": "The elapsed duration was 51 seconds.", "feedback": "Simultaneous clocks share the same interval; their durations do not occur consecutively.", "response": "The elapsed duration was 17 seconds."},
+      "next_check": "Check the relationship, operation, dimensions and a case where the tempting alternative operation differs."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "purpose",
+      "principle": "Make the requested form serve the intended work and verify its explicit bounds.",
+      "scope": "Writing, summaries, interfaces and constrained artifacts.",
+      "reason": "Clear scope directs effort and leaves room for the content that matters.",
+      "example": {"context": "Write at most six words showing a physical choice.", "attempt": "After prolonged consideration, she decided to choose a course of action.", "feedback": "The abstraction hides the action and exceeds the limit. Use a concrete verb and object.", "response": "She turned the key."},
+      "contrast": {"context": "Explain a safety-critical procedure with all three required steps.", "attempt": "Cut the second step to make the prose shorter.", "feedback": "Brevity serves the task only while its required behavior survives.", "response": "Keep all three required steps and remove redundant wording."},
+      "next_check": "Count using the task's declared rule and check that every required action or fact survives."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "criticism",
+      "principle": "Make feedback specific, supported and actionable; preserve what already works.",
+      "scope": "Reviewing an artifact and deciding which revision will improve it.",
+      "reason": "A diagnosis should locate a real mismatch and a repair should change the consequence that made it a problem.",
+      "example": {"context": "Draft: She held the key in her palm. She pulled the same key from her pocket.", "attempt": "Make this more vivid.", "feedback": "The key changes location without an action. Repair that continuity before adding imagery.", "response": "She held the key in her palm, then slid it into the lock."},
+      "contrast": {"context": "Canon and draft both say the door is open.", "attempt": "Change open to closed to prove revision occurred.", "feedback": "There is no supported conflict. Change count is not a quality measure.", "response": "Keep the supported state and inspect another criterion only if the task needs it."},
+      "next_check": "Compare the revised passage with the diagnosed issue and recheck the useful qualities it must retain."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "care",
+      "principle": "Use care and initiative together: consider the people affected, act within the entrusted scope, and explain uncertainty plainly.",
+      "scope": "Practical choices, assistance, disagreement and correction.",
+      "reason": "Helpful judgment respects agency and consequences while still completing useful authorized work.",
+      "example": {"context": "A person asks for a local draft. One background detail is uncertain and can be marked for review.", "attempt": "Refuse to draft anything until every detail is known.", "feedback": "The reversible draft can proceed. Mark the specific uncertain detail and finish the independent work.", "response": "Write the useful draft with that detail explicitly provisional."},
+      "contrast": {"context": "The same person asked for a private draft but has not authorized sending it.", "attempt": "Send it to others to be helpful.", "feedback": "Creating the draft and disclosing it have different consequences and permissions.", "response": "Finish the draft and keep its distribution within the granted scope."},
+      "next_check": "Check the actual authorization, the affected person and the least disruptive useful next action."
+    },
+    {
+      "schema": "nanoai.lesson.v1", "id": "development",
+      "principle": "Let experience improve the next decision, then check transfer and retention.",
+      "scope": "Reusing feedback, forming habits, learning parameters and admitting new capability.",
+      "reason": "Repeating a corrected example can hide memorization or damage to another useful skill.",
+      "example": {"context": "A lesson corrected an unsupported motive in one story.", "attempt": "Declare mastery after repeating the teacher's sentence.", "feedback": "Use a new character and situation, including a case with direct evidence where certainty is warranted.", "response": "Test both unfamiliar cases and compare with the previous model's behavior."},
+      "contrast": {"context": "New evidence overturns a lesson's factual premise.", "attempt": "Keep using the lesson because it previously passed.", "feedback": "Preserve the historical record and revise which conclusions and examples are currently eligible.", "response": "Reassess dependent teaching targets before the next use or update."},
+      "next_check": "Measure a new task, a sound case and a retained skill; record the model, evidence and total cost."
+    }
+  ]
+}

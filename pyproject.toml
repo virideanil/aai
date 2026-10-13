@@ -7,10 +7,12 @@ name = "nanoai-research"
 version = "0.1.0"
 description = "Source-grounded experiments in learned computation, memory and recoverable agency"
 requires-python = ">=3.14"
-dependencies = []
+dependencies = ["nanoai-tokens==0.1.0"]
 
 [project.optional-dependencies]
 syszero = ["tokenizers==0.23.2", "tiktoken==0.12.0"]
+tokenizer-sources = ["tokenizers==0.23.2", "tiktoken==0.12.0", "sentencepiece==0.2.2", "protobuf==7.36.2"]
+perception = ["Pillow==12.3.0"]
 learning = ["numpy==2.5.3", "torch==2.14.0"]
 generative = ["torch==2.14.0", "transformers==5.19.0", "safetensors==0.8.0", "tokenizers==0.23.2"]
 

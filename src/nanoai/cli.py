@@ -25,6 +25,29 @@ def main():
     task.add_argument("--filename", default="result.md")
     sub.add_parser("status")
     sub.add_parser("recover")
+    write = sub.add_parser("write-phase", help="Generate and journal one editable writing phase")
+    write.add_argument("phase_id")
+    write.add_argument("instruction", type=Path)
+    write.add_argument("--workflow", default="book")
+    write.add_argument("--kind", choices=("plan", "draft", "critique", "revision", "continuation", "control"), default="draft")
+    write.add_argument("--source", action="append", required=True)
+    write.add_argument("--lesson", action="append", default=[], help="A current lesson source installed in this journal")
+    write.add_argument("--core-config", type=Path, required=True)
+    write.add_argument("--max-tokens", type=int, default=None,
+                       help="Optional total generation limit; default uses natural completion with thinking enabled")
+    write.add_argument("--filename", default="text.md")
+    assemble = sub.add_parser("assemble")
+    assemble.add_argument("workflow")
+    assemble.add_argument("title")
+    assemble.add_argument("--source", action="append", required=True)
+    lesson = sub.add_parser("lesson-install", help="Install one versioned teaching lesson")
+    lesson.add_argument("file", type=Path)
+    lesson.add_argument("--expected-revision", type=int, default=0)
+    feedback = sub.add_parser("teaching-feedback", help="Bind proposed feedback to exact observed work and evidence")
+    feedback.add_argument("experience_id")
+    feedback.add_argument("file", type=Path)
+    pair = sub.add_parser("teaching-pair", help="Export a current checked training target and its exact prompt")
+    pair.add_argument("experience_id")
     resume = sub.add_parser("resume")
     resume.add_argument("task_id")
     sub.add_parser("steps")
@@ -100,6 +123,25 @@ def main():
     dictionary.add_argument("--source", action="append", required=True)
     dictionary.add_argument("--vocabulary", type=Path)
     dictionary.add_argument("--board", action="append", default=[])
+    catalogue = sub.add_parser("catalogue")
+    catalogue.add_argument("task_id")
+    catalogue.add_argument("--history", action="store_true")
+    catalogue.add_argument("--limit", type=int, default=500)
+    catalogue.add_argument("--inventory", type=Path)
+    observe = sub.add_parser("catalogue-observe")
+    observe.add_argument("task_id")
+    observe.add_argument("source_id")
+    observe.add_argument("--request-id", required=True)
+    observe.add_argument("--tokenizer", type=Path, required=True)
+    observe.add_argument("--tokenizer-identity", required=True)
+    perceive = sub.add_parser("catalogue-perceive")
+    perceive.add_argument("task_id")
+    perceive.add_argument("source_id")
+    perceive.add_argument("--request-id", required=True)
+    perceive.add_argument("--bundle", type=Path, required=True)
+    perceive.add_argument("--see-executable", type=Path, required=True)
+    perceive.add_argument("--source-image", type=Path)
+    perceive.add_argument("--region", action="append", type=int, required=True)
     judgment = sub.add_parser("judge")
     judgment.add_argument("task_id")
     judgment.add_argument("question")
@@ -149,6 +191,26 @@ def main():
         output = memory.status()
     elif args.command == "recover":
         output = {"reconciled": memory.recover(), "status": memory.status()}
+    elif args.command == "write-phase":
+        from .writing import Writing
+        memory.recover()
+        config = json.loads(args.core_config.read_text())
+        with JsonlCore(config, stderr_path=args.state / "writing-worker.log") as core:
+            output = Writing(memory).run(args.phase_id, args.instruction.read_text(), args.source, core,
+                workflow=args.workflow, kind=args.kind, max_tokens=args.max_tokens, filename=args.filename,
+                lesson_ids=args.lesson)
+    elif args.command == "assemble":
+        from .writing import Writing
+        output = Writing(memory).assemble(args.workflow, args.source, args.title)
+    elif args.command == "lesson-install":
+        from .teaching import Teaching
+        output = Teaching(memory).install(json.loads(args.file.read_text()), expected_revision=args.expected_revision)
+    elif args.command == "teaching-feedback":
+        from .teaching import Teaching
+        output = Teaching(memory).feedback(args.experience_id, **json.loads(args.file.read_text()))
+    elif args.command == "teaching-pair":
+        from .teaching import Teaching
+        output = Teaching(memory).training_pair(args.experience_id)
     elif args.command == "resume":
         memory.recover()
         output = memory.completed(args.task_id)
@@ -198,6 +260,19 @@ def main():
         output = {"proposal": proposal, "receipt": receipt,
                   "artifact_path": str(memory.root / receipt["path"]) if receipt else None,
                   "model_calls": 0}
+    elif args.command == "catalogue-perceive":
+        from .perception import attach_perception
+        output = attach_perception(memory, args.request_id, args.task_id, args.source_id,
+            bundle=args.bundle, executable=args.see_executable, region_ids=args.region, source_image=args.source_image)
+    elif args.command in {"catalogue", "catalogue-observe"}:
+        from .catalogue import LanguageCatalogue
+        from .master_tokenizer import MasterTokenizer
+        catalogue = LanguageCatalogue(memory)
+        if args.command == "catalogue-observe":
+            tokenizer = MasterTokenizer.load(args.tokenizer, expected_identity=args.tokenizer_identity)
+            output = catalogue.observe(args.request_id, args.task_id, args.source_id, tokenizer)
+        else:
+            output = catalogue.view(args.task_id, include_history=args.history, limit=args.limit, inventory=args.inventory)
     elif args.command == "dictionary":
         from .harmonizer import Harmonizer
         from .syszero import CommonVocabulary

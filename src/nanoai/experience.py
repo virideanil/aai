@@ -1,4 +1,4 @@
-"""Attributed choices, observed artifacts and candidate versions in one journal.
+"""Attributed choices, generated work and candidate versions in one journal.
 
 The exact menu rubric assesses an authored task. It is kept outside inference
 inputs and distinguishes an observed chosen effect from replayable alternatives.
@@ -146,26 +146,85 @@ class Experience:
         self.memory._validate_snapshot(row["snapshot"])
         return row
 
+    def record_generation(self, snapshot, *, question, observations, messages,
+                          generation, representation_identity, source_id, metadata=None):
+        """Bind a free generated answer to its actual input and decoding trace."""
+        bounded_text(question, "experience question", 2048)
+        bounded_text(representation_identity, "representation identity", 256)
+        if not isinstance(observations, list) or not 1 <= len(observations) <= 16:
+            raise ValueError("Generation observation extent")
+        for text in observations:
+            bounded_text(text, "observation", 8192)
+        if not isinstance(messages, list) or not 1 <= len(messages) <= 16:
+            raise ValueError("Generation message extent")
+        for message in messages:
+            if set(message) != {"role", "content"} or message["role"] not in {"system", "user", "assistant"}:
+                raise ValueError("Generation message contract")
+            bounded_text(message["content"], "generation input", 16384)
+        input_text = "\n".join(message["content"] for message in messages)
+        if question not in input_text or any(text not in input_text for text in observations):
+            raise ValueError("Recorded question or observation is absent from the generation input")
+        from .sampling import observed_policy
+        if "policy" in generation:
+            observed_policy(generation["policy"])
+        if (set(generation) != {"text", "token_ids", "finish_reason", "policy"}
+                or generation["finish_reason"] not in {"stop", "length"}
+                or not isinstance(generation["token_ids"], list)
+                or not 1 <= len(generation["token_ids"]) <= 262144
+                or any(type(t) is not int or not 0 <= t < 1 << 24 for t in generation["token_ids"])):
+            raise ValueError("Observed generation trace contract")
+        if generation["text"] != "":
+            bounded_text(generation["text"], "generated content", 8192)
+        with self.memory.locked():
+            self.memory._validate_snapshot(snapshot)
+            if source_id not in snapshot["sources"]:
+                raise ValueError("Generation source is outside its current snapshot")
+            source = self.memory.state["sources"][source_id]
+            if json.loads(source["text"]) != {"observations": observations}:
+                raise ValueError("Generation observations differ from their exact source")
+            if self.memory.state["tasks"][snapshot["task_id"]]["goal"] != question:
+                raise ValueError("Generation question differs from the current task")
+            body = {"schema": "nanoai.generated-experience.v1", "snapshot": snapshot,
+                    "question": question, "observations": observations, "messages": messages,
+                    "generation": generation, "representation_identity": representation_identity,
+                    "source_id": source_id, "metadata": metadata or {}, "implementation": self.implementation}
+            if len(canonical(body)) > 2 * 1024**2:
+                raise ValueError("Generated experience extent")
+            row = {"id": digest_bytes(canonical(body)), **body}
+            self.memory._append({"kind": "experience.recorded", "experience": row})
+            return deepcopy(row)
+
     @staticmethod
     def content(row, candidate_id=None):
-        candidate_id = candidate_id or row["behavior"]["selected_id"]
-        candidate = next(c for c in row["candidates"] if c["id"] == candidate_id)
+        if row["schema"] == "nanoai.generated-experience.v1":
+            if candidate_id is not None:
+                raise ValueError("A generated experience has one observed answer")
+            content = row["generation"]["text"]
+        else:
+            candidate_id = candidate_id or row["behavior"]["selected_id"]
+            content = next(c for c in row["candidates"] if c["id"] == candidate_id)["content"]
         source_id = row["source_id"]
         revision = row["snapshot"]["sources"][source_id]["revision"]
-        return candidate["content"]+f" [{source_id}@{revision}]\n"
+        return content+f" [{source_id}@{revision}]\n"
 
-    def execute(self, experience_id, *, crash_after_publish=False):
+    def execute(self, experience_id, *, filename=None, crash_after_publish=False):
         """Publish through the existing artifact owner and its once-only receipt."""
         with self.memory.locked():
             row = deepcopy(self._current(experience_id))
             proposal_id = self.memory.state["experience_proposals"].get(experience_id)
-            filename = self.memory.state["tasks"][row["snapshot"]["task_id"]]["filenames"][0]
+            granted = self.memory.state["tasks"][row["snapshot"]["task_id"]]["filenames"]
+            filename = granted[0] if filename is None else filename
+            if filename not in granted:
+                raise ValueError("Experience filename lacks a task grant")
+            if (proposal_id is not None
+                    and self.memory.state["proposals"][proposal_id]["output"]["filename"] != filename):
+                raise ValueError("An observed experience keeps its original artifact filename")
         if proposal_id is None:
             source_id = row["source_id"]
             citation = f"{source_id}@{row['snapshot']['sources'][source_id]['revision']}"
             proposal = self.memory.record_proposal(row["snapshot"], {"filename": filename,
                 "content": self.content(row), "citations": [citation]},
-                metrics={"experience_id": experience_id, "action": row["behavior"]["selected_id"]})
+                metrics={"experience_id": experience_id, "action": row.get("behavior", {}).get("selected_id", "generate")})
             with self.memory.locked():
                 self._current(experience_id)
                 if experience_id not in self.memory.state["experience_proposals"]:
@@ -211,6 +270,57 @@ class Experience:
             self.memory._append({"kind": "experience.assessed", "assessment": assessment})
             return deepcopy(assessment)
 
+    def assess_generation(self, experience_id, *, rubric, evaluator_identity, evaluate):
+        """Assess observed bytes with a separately versioned, task-owned evaluator.
+
+        A checked corrective target supplies declared supervision. It remains
+        distinct from the generated action and its actual observed outcome.
+        """
+        bounded_text(evaluator_identity, "evaluator identity", 256)
+        if not isinstance(rubric, dict) or set(rubric) != {"scope", "criteria", "training_target"}:
+            raise ValueError("Generated rubric contract")
+        bounded_text(rubric["scope"], "rubric scope", 2048)
+        if len(canonical(rubric)) > 16384:
+            raise ValueError("Generated rubric extent")
+
+        def checks(text):
+            result = evaluate(text, deepcopy(rubric["criteria"]))
+            if (not isinstance(result, dict) or not 1 <= len(result) <= 32
+                    or any(not isinstance(k, str) or not k or type(v) is not bool for k, v in result.items())
+                    or "complete_generation" in result):
+                raise ValueError("The evaluator must return named Boolean task checks")
+            return result
+
+        target = rubric["training_target"]
+        if target is not None:
+            bounded_text(target, "corrective training target", 8192)
+            if not all(checks(target).values()):
+                raise ValueError("Corrective target fails its own task rubric")
+        with self.memory.locked():
+            row = self._current(experience_id)
+            if row["schema"] != "nanoai.generated-experience.v1":
+                raise ValueError("Generation assessment requires a generated experience")
+            receipt = self._receipt(experience_id)
+            actual = self.memory._artifact_path(receipt["path"]).read_text()
+            if actual != self.content(row):
+                raise ValueError("Observed generated work differs from the proposal")
+            observed = actual[:len(row["generation"]["text"])]
+            results = checks(observed)
+            results["complete_generation"] = row["generation"]["finish_reason"] == "stop"
+            success = all(results.values())
+            assessment = {"experience_id": experience_id, "evaluator_identity": evaluator_identity,
+                "scope": rubric["scope"], "observed_outcome": "yes" if success else "no",
+                "reason": "Observed generated artifact checked against the separately frozen task rubric",
+                "checks": results, "receipt": receipt, "observed_content_digest": digest_bytes(actual.encode()),
+                "corrective_supervision": deepcopy(rubric), "implementation": self.implementation}
+            prior = self.memory.state["experience_assessments"].get(experience_id)
+            if prior is not None:
+                if prior != assessment:
+                    raise ValueError("An assessment is immutable; revise the task or evaluator as a new experience")
+                return deepcopy(prior)
+            self.memory._append({"kind": "experience.assessed", "assessment": assessment})
+            return deepcopy(assessment)
+
     def export(self, experience_id):
         with self.memory.locked():
             row = deepcopy(self.memory.state["experiences"][experience_id])
@@ -226,14 +336,19 @@ class Experience:
                 status, reason = "invalidated", str(error)
             return {**row, "assessment": assessment, "eligibility": {"status": status, "reason": reason}}
 
-    def register_candidate(self, data, *, feature_basis, parent=None, training=None):
+    def register_candidate(self, data, *, feature_basis, parent=None, training=None, tensor_format=None):
         if not isinstance(data, bytes) or not 1 <= len(data) <= 32 << 20:
             raise ValueError("Candidate checkpoint extent")
+        if tensor_format not in (None, "safetensors"):
+            raise ValueError("Candidate tensor format")
         identity = digest_bytes(data)
-        relative = "learners/"+identity.split(":")[1]+".pt"
+        relative = "learners/"+identity.split(":")[1]+(".safetensors" if tensor_format else ".pt")
         with self.memory.locked():
             if identity in self.memory.state["learners"]:
                 row = self.memory.state["learners"][identity]
+                if (row["feature_basis"] != feature_basis or row["parent"] != parent
+                        or row["training"] != (training or {})):
+                    raise ValueError("Registered candidate provenance differs")
                 if file_digest(self.memory._artifact_path(row["path"])) != identity:
                     raise ValueError("Registered candidate bytes changed")
                 return deepcopy(row)
@@ -252,6 +367,17 @@ class Experience:
                     raise ValueError("Published candidate bytes differ")
                 row = {"id": identity, "path": relative, "parent": parent,
                        "feature_basis": feature_basis, "training": training or {}, "implementation": self.implementation}
+                if tensor_format:
+                    from .tensor_store import TensorStore
+                    store = TensorStore(self.memory.root / "tensors.sqlite3", create=True)
+                    parent_version = (self.memory.state["learners"][parent].get("tensor_version", {}).get("version")
+                                      if parent is not None else None)
+                    if parent is not None and parent_version is None:
+                        raise ValueError("Register the parent's typed tensor version first")
+                    row["tensor_version"] = store.register(path, expected=identity, basis=feature_basis,
+                        recipe=(training or {}).get("recipe", "candidate-registration-v1"),
+                        source="journal:learner.registered:" + identity, parent=parent_version)
+                    row["tensor_version"]["database"] = "tensors.sqlite3"
                 self.memory._append({"kind": "learner.registered", "learner": row})
                 return deepcopy(row)
             finally:

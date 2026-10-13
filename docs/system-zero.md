@@ -1,6 +1,6 @@
 # System Zero and Quantum tokening
 
-The [consolidated architecture](../../NANOAI-ARCHITECTURE.md) governs development order and the distinction between the current generative instrument, bounded feature learner and destination byte/patch core. This document supplies their representation, probability and learning interfaces.
+The [implementation design](design.md) governs the current generative instrument, bounded feature learner and destination byte/patch core; the parent research package retains the complete architecture. This document supplies their representation, probability and learning interfaces.
 
 System Zero provides a common, source-bound representation of exact bytes, evidence, operations and reusable work. A single jointly trained core learns how to interpret that information, form patches, retain working state, allocate capacity and propose the next action. These learned functions share an objective and a model identity. System One is the core's acting computation; System Two is additional deliberation and task assessment when those can improve the outcome.
 
@@ -167,3 +167,9 @@ The current implementation has native BF16 generation, typed source/calculation 
 6. Broaden conditional capacity, personal education, perception and creation through their own representative consumers, while preserving the same source, state, identity and learning contracts.
 
 The order supplies executable feedback between stages. A stage can yield a negative result that changes the design. It cannot stand in for the remaining whole-system requirements.
+
+## Frozen tokenizer and observed catalogue
+
+The first frozen [master tokenizer](master-tokenizer.md) now separates the 909,421-piece cold source inventory from 24,664 active byte pieces. Python and C++ use the same finite emission/stop law, common IDs, active slots and exact byte spans. The manifest retains calibration, fresh confirmation, native parity and the untrained model-input fixture. Native pretrained inputs keep their own tokenizers.
+
+The [catalogue](catalogue.md) derives literal occurrence and source-bound perception views from the shared journal. It records explicit observations, retains history, excludes stale current evidence and exposes checked SEE coordinates. Exact byte identity, interpretation and parameter learning have distinct evidence. Error reduction and correction apply to the complete task; lexical likelihood measures its specified tokenizer law.

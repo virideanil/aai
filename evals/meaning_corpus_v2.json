@@ -1,0 +1,1561 @@
+{
+  "schema": "nanoai.meaning-corpus.v1",
+  "scope": "Finite compositional predicate meaning, both directions; no universal English semantics claim.",
+  "authoring_source": "user:msg_01a13684-b299-7d31-a12a-f9d656835f8d",
+  "builder": "shake256:0b7d4eb756fc0ccfc4ab74c535f57f99dd3832e52e5b94cfa03a6ea6980891d7cfdb3522c933cf329fc2ab18d03f3e73ed5cd56d30e771eaca03d0c350f1d46a",
+  "rows": [
+    {
+      "id": "train-leaf-en-math",
+      "split": "train",
+      "family": "leaf",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The door is open."
+      ],
+      "target": "\"x\"",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": "x",
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-leaf-math-en",
+      "split": "train",
+      "family": "leaf",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: \"x\""
+      ],
+      "target": "the door is open",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": "x",
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-negate-en-math",
+      "split": "train",
+      "family": "negate",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The lamp is not lit."
+      ],
+      "target": "{\"not\":\"y\"}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "not": "y"
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-negate-math-en",
+      "split": "train",
+      "family": "negate",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"not\":\"y\"}"
+      ],
+      "target": "not (the lamp is lit)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "not": "y"
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-conjunction-en-math",
+      "split": "train",
+      "family": "conjunction",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The door is open and the lamp is lit."
+      ],
+      "target": "{\"and\":[\"x\",\"y\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "and": [
+            "x",
+            "y"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-conjunction-math-en",
+      "split": "train",
+      "family": "conjunction",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"and\":[\"x\",\"y\"]}"
+      ],
+      "target": "both (the door is open) and (the lamp is lit)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "and": [
+            "x",
+            "y"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-inclusive-en-math",
+      "split": "train",
+      "family": "inclusive",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: At least one condition holds: the door is open, or the pump is running. Both are allowed."
+      ],
+      "target": "{\"or\":[\"x\",\"z\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "or": [
+            "x",
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-inclusive-math-en",
+      "split": "train",
+      "family": "inclusive",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"or\":[\"x\",\"z\"]}"
+      ],
+      "target": "at least one of (the door is open) and (the pump is running)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "or": [
+            "x",
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-exclusive-en-math",
+      "split": "train",
+      "family": "exclusive",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: Exactly one of the lamp being lit and the pump running is true."
+      ],
+      "target": "{\"xor\":[\"y\",\"z\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "xor": [
+            "y",
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-exclusive-math-en",
+      "split": "train",
+      "family": "exclusive",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"xor\":[\"y\",\"z\"]}"
+      ],
+      "target": "exactly one of (the lamp is lit) and (the pump is running)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "xor": [
+            "y",
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-equivalence-en-math",
+      "split": "train",
+      "family": "equivalence",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The door is open if and only if the lamp is lit."
+      ],
+      "target": "{\"eq\":[\"x\",\"y\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "eq": [
+            "x",
+            "y"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-equivalence-math-en",
+      "split": "train",
+      "family": "equivalence",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"eq\":[\"x\",\"y\"]}"
+      ],
+      "target": "equivalent (the door is open) and (the lamp is lit)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "eq": [
+            "x",
+            "y"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-negative-conjunct-en-math",
+      "split": "train",
+      "family": "negative-conjunct",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The door is not open, and the pump is running."
+      ],
+      "target": "{\"and\":[{\"not\":\"x\"},\"z\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "and": [
+            {
+              "not": "x"
+            },
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-negative-conjunct-math-en",
+      "split": "train",
+      "family": "negative-conjunct",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"and\":[{\"not\":\"x\"},\"z\"]}"
+      ],
+      "target": "both (not (the door is open)) and (the pump is running)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "and": [
+            {
+              "not": "x"
+            },
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-negative-exclusive-en-math",
+      "split": "train",
+      "family": "negative-exclusive",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: Exactly one holds: the lamp is not lit; the door is open."
+      ],
+      "target": "{\"xor\":[{\"not\":\"y\"},\"x\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "xor": [
+            {
+              "not": "y"
+            },
+            "x"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-negative-exclusive-math-en",
+      "split": "train",
+      "family": "negative-exclusive",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"xor\":[{\"not\":\"y\"},\"x\"]}"
+      ],
+      "target": "exactly one of (not (the lamp is lit)) and (the door is open)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "xor": [
+            {
+              "not": "y"
+            },
+            "x"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-ambiguous-separating-en-math",
+      "split": "train",
+      "family": "ambiguous-separating",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The note says: the door is open or the lamp is lit and the pump is running. Grouping is unspecified. Preserve both readings. Current truth values x=1,y=1,z=0 are an execution example, not a disambiguation."
+      ],
+      "target": "{\"alternatives\":[{\"or\":[\"x\",{\"and\":[\"y\",\"z\"]}]},{\"and\":[{\"or\":[\"x\",\"y\"]},\"z\"]}]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "or": [
+                "x",
+                {
+                  "and": [
+                    "y",
+                    "z"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "or": [
+                    "x",
+                    "y"
+                  ]
+                },
+                "z"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-ambiguous-separating-math-en",
+      "split": "train",
+      "family": "ambiguous-separating",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"alternatives\":[{\"or\":[\"x\",{\"and\":[\"y\",\"z\"]}]},{\"and\":[{\"or\":[\"x\",\"y\"]},\"z\"]}]}"
+      ],
+      "target": "readings (at least one of (the door is open) and (both (the lamp is lit) and (the pump is running))) or (both (at least one of (the door is open) and (the lamp is lit)) and (the pump is running))",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "or": [
+                "x",
+                {
+                  "and": [
+                    "y",
+                    "z"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "or": [
+                    "x",
+                    "y"
+                  ]
+                },
+                "z"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-ambiguous-agreement-en-math",
+      "split": "train",
+      "family": "ambiguous-agreement",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The note says: the door is open or the lamp is lit and the pump is running. Grouping is unspecified. Preserve both readings. Current truth values x=1,y=1,z=1 are an execution example, not a disambiguation."
+      ],
+      "target": "{\"alternatives\":[{\"or\":[\"x\",{\"and\":[\"y\",\"z\"]}]},{\"and\":[{\"or\":[\"x\",\"y\"]},\"z\"]}]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "or": [
+                "x",
+                {
+                  "and": [
+                    "y",
+                    "z"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "or": [
+                    "x",
+                    "y"
+                  ]
+                },
+                "z"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "train-ambiguous-agreement-math-en",
+      "split": "train",
+      "family": "ambiguous-agreement",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"alternatives\":[{\"or\":[\"x\",{\"and\":[\"y\",\"z\"]}]},{\"and\":[{\"or\":[\"x\",\"y\"]},\"z\"]}]}"
+      ],
+      "target": "readings (at least one of (the door is open) and (both (the lamp is lit) and (the pump is running))) or (both (at least one of (the door is open) and (the lamp is lit)) and (the pump is running))",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "or": [
+                "x",
+                {
+                  "and": [
+                    "y",
+                    "z"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "or": [
+                    "x",
+                    "y"
+                  ]
+                },
+                "z"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 1
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "validation-negate-en-math",
+      "split": "validation",
+      "family": "negate",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The door is not open."
+      ],
+      "target": "{\"not\":\"x\"}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "not": "x"
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "validation-negate-math-en",
+      "split": "validation",
+      "family": "negate",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"not\":\"x\"}"
+      ],
+      "target": "not (the door is open)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "not": "x"
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "validation-inclusive-en-math",
+      "split": "validation",
+      "family": "inclusive",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The lamp is lit or the pump is running, possibly both."
+      ],
+      "target": "{\"or\":[\"y\",\"z\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "or": [
+            "y",
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "validation-inclusive-math-en",
+      "split": "validation",
+      "family": "inclusive",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"or\":[\"y\",\"z\"]}"
+      ],
+      "target": "at least one of (the lamp is lit) and (the pump is running)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "or": [
+            "y",
+            "z"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "validation-ambiguous-en-math",
+      "split": "validation",
+      "family": "ambiguous",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Statement: The lamp is lit or the door is open and the pump is running. The grouping is unresolved. Keep both interpretations."
+      ],
+      "target": "{\"alternatives\":[{\"or\":[\"y\",{\"and\":[\"x\",\"z\"]}]},{\"and\":[{\"or\":[\"y\",\"x\"]},\"z\"]}]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "or": [
+                "y",
+                {
+                  "and": [
+                    "x",
+                    "z"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "or": [
+                    "y",
+                    "x"
+                  ]
+                },
+                "z"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "validation-ambiguous-math-en",
+      "split": "validation",
+      "family": "ambiguous",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the door is open\",\"y\":\"the lamp is lit\",\"z\":\"the pump is running\"}",
+        "Formula: {\"alternatives\":[{\"or\":[\"y\",{\"and\":[\"x\",\"z\"]}]},{\"and\":[{\"or\":[\"y\",\"x\"]},\"z\"]}]}"
+      ],
+      "target": "readings (at least one of (the lamp is lit) and (both (the door is open) and (the pump is running))) or (both (at least one of (the lamp is lit) and (the door is open)) and (the pump is running))",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the door is open",
+          "y": "the lamp is lit",
+          "z": "the pump is running"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "or": [
+                "y",
+                {
+                  "and": [
+                    "x",
+                    "z"
+                  ]
+                }
+              ]
+            },
+            {
+              "and": [
+                {
+                  "or": [
+                    "y",
+                    "x"
+                  ]
+                },
+                "z"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-outer-negation-en-math",
+      "split": "confirmation",
+      "family": "outer-negation",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Statement: It is not true that both the alarm is active and the valve is open."
+      ],
+      "target": "{\"not\":{\"and\":[\"x\",\"y\"]}}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "not": {
+            "and": [
+              "x",
+              "y"
+            ]
+          }
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-outer-negation-math-en",
+      "split": "confirmation",
+      "family": "outer-negation",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Formula: {\"not\":{\"and\":[\"x\",\"y\"]}}"
+      ],
+      "target": "not (both (the alarm is active) and (the valve is open))",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "not": {
+            "and": [
+              "x",
+              "y"
+            ]
+          }
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-nested-composition-en-math",
+      "split": "confirmation",
+      "family": "nested-composition",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Statement: The fan is spinning, or else both the alarm is active and the valve is open. These alternatives may both hold."
+      ],
+      "target": "{\"or\":[\"z\",{\"and\":[\"x\",\"y\"]}]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "or": [
+            "z",
+            {
+              "and": [
+                "x",
+                "y"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-nested-composition-math-en",
+      "split": "confirmation",
+      "family": "nested-composition",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Formula: {\"or\":[\"z\",{\"and\":[\"x\",\"y\"]}]}"
+      ],
+      "target": "at least one of (the fan is spinning) and (both (the alarm is active) and (the valve is open))",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "or": [
+            "z",
+            {
+              "and": [
+                "x",
+                "y"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-repeated-referent-en-math",
+      "split": "confirmation",
+      "family": "repeated-referent",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Statement: Exactly one of these two identical conditions holds: the alarm is active; the alarm is active."
+      ],
+      "target": "{\"xor\":[\"x\",\"x\"]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "xor": [
+            "x",
+            "x"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-repeated-referent-math-en",
+      "split": "confirmation",
+      "family": "repeated-referent",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Formula: {\"xor\":[\"x\",\"x\"]}"
+      ],
+      "target": "exactly one of (the alarm is active) and (the alarm is active)",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "xor": [
+            "x",
+            "x"
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-ambiguous-scope-en-math",
+      "split": "confirmation",
+      "family": "ambiguous-scope",
+      "direction": "english_to_math",
+      "question": "Express the statement as a JSON Boolean formula. Use the string variable names and objects with not, and, or, xor or eq. Binary operators take two-element lists. For unresolved readings use {\"alternatives\":[formula1,formula2]}. Return only JSON.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Statement: The note reads: not the alarm is active and the valve is open. The author has not specified whether not covers the first condition or the entire conjunction. Retain both readings."
+      ],
+      "target": "{\"alternatives\":[{\"not\":{\"and\":[\"x\",\"y\"]}},{\"and\":[{\"not\":\"x\"},\"y\"]}]}",
+      "criteria": {
+        "direction": "english_to_math",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "not": {
+                "and": [
+                  "x",
+                  "y"
+                ]
+              }
+            },
+            {
+              "and": [
+                {
+                  "not": "x"
+                },
+                "y"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "confirmation-ambiguous-scope-math-en",
+      "split": "confirmation",
+      "family": "ambiguous-scope",
+      "direction": "math_to_english",
+      "question": "Express the formula in checked English. Use the exact condition phrases. Grammar: not (A); both (A) and (B); at least one of (A) and (B); exactly one of (A) and (B); equivalent (A) and (B). For alternative interpretations use readings (A) or (B). Return only the expression.",
+      "observations": [
+        "Conditions: {\"x\":\"the alarm is active\",\"y\":\"the valve is open\",\"z\":\"the fan is spinning\"}",
+        "Formula: {\"alternatives\":[{\"not\":{\"and\":[\"x\",\"y\"]}},{\"and\":[{\"not\":\"x\"},\"y\"]}]}"
+      ],
+      "target": "readings (not (both (the alarm is active) and (the valve is open))) or (both (not (the alarm is active)) and (the valve is open))",
+      "criteria": {
+        "direction": "math_to_english",
+        "symbols": {
+          "x": "the alarm is active",
+          "y": "the valve is open",
+          "z": "the fan is spinning"
+        },
+        "expression": {
+          "alternatives": [
+            {
+              "not": {
+                "and": [
+                  "x",
+                  "y"
+                ]
+              }
+            },
+            {
+              "and": [
+                {
+                  "not": "x"
+                },
+                "y"
+              ]
+            }
+          ]
+        },
+        "assignment": {
+          "x": 1,
+          "y": 1,
+          "z": 0
+        }
+      },
+      "provenance": "Authored finite semantics; natural English annotated explicitly; reverse checking grammar verified exhaustively in the declared context."
+    },
+    {
+      "id": "replay-0-english",
+      "split": "replay",
+      "family": "english",
+      "direction": "replay",
+      "question": "Answer in one short sentence.",
+      "observations": [
+        "What is 3 plus 4?"
+      ],
+      "target": "3 plus 4 is 7.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-0-turkish",
+      "split": "replay",
+      "family": "turkish",
+      "direction": "replay",
+      "question": "Translate into Turkish. Return only the translation.",
+      "observations": [
+        "The door is open."
+      ],
+      "target": "Kapı açık.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-0-conduct",
+      "split": "replay",
+      "family": "conduct",
+      "direction": "replay",
+      "question": "Return only one word: verified or unverified.",
+      "observations": [
+        "The test has been written but has not been run."
+      ],
+      "target": "unverified",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-0-privacy",
+      "split": "replay",
+      "family": "privacy",
+      "direction": "replay",
+      "question": "Return only one word: local or public.",
+      "observations": [
+        "The private source must remain on this computer."
+      ],
+      "target": "local",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-1-english",
+      "split": "replay",
+      "family": "english",
+      "direction": "replay",
+      "question": "Answer in one short sentence.",
+      "observations": [
+        "What is 3 plus 4?"
+      ],
+      "target": "3 plus 4 is 7.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-1-turkish",
+      "split": "replay",
+      "family": "turkish",
+      "direction": "replay",
+      "question": "Translate into Turkish. Return only the translation.",
+      "observations": [
+        "The door is open."
+      ],
+      "target": "Kapı açık.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-1-conduct",
+      "split": "replay",
+      "family": "conduct",
+      "direction": "replay",
+      "question": "Return only one word: verified or unverified.",
+      "observations": [
+        "The test has been written but has not been run."
+      ],
+      "target": "unverified",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-1-privacy",
+      "split": "replay",
+      "family": "privacy",
+      "direction": "replay",
+      "question": "Return only one word: local or public.",
+      "observations": [
+        "The private source must remain on this computer."
+      ],
+      "target": "local",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-2-english",
+      "split": "replay",
+      "family": "english",
+      "direction": "replay",
+      "question": "Answer in one short sentence.",
+      "observations": [
+        "What is 3 plus 4?"
+      ],
+      "target": "3 plus 4 is 7.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-2-turkish",
+      "split": "replay",
+      "family": "turkish",
+      "direction": "replay",
+      "question": "Translate into Turkish. Return only the translation.",
+      "observations": [
+        "The door is open."
+      ],
+      "target": "Kapı açık.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-2-conduct",
+      "split": "replay",
+      "family": "conduct",
+      "direction": "replay",
+      "question": "Return only one word: verified or unverified.",
+      "observations": [
+        "The test has been written but has not been run."
+      ],
+      "target": "unverified",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-2-privacy",
+      "split": "replay",
+      "family": "privacy",
+      "direction": "replay",
+      "question": "Return only one word: local or public.",
+      "observations": [
+        "The private source must remain on this computer."
+      ],
+      "target": "local",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-3-english",
+      "split": "replay",
+      "family": "english",
+      "direction": "replay",
+      "question": "Answer in one short sentence.",
+      "observations": [
+        "What is 3 plus 4?"
+      ],
+      "target": "3 plus 4 is 7.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-3-turkish",
+      "split": "replay",
+      "family": "turkish",
+      "direction": "replay",
+      "question": "Translate into Turkish. Return only the translation.",
+      "observations": [
+        "The door is open."
+      ],
+      "target": "Kapı açık.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-3-conduct",
+      "split": "replay",
+      "family": "conduct",
+      "direction": "replay",
+      "question": "Return only one word: verified or unverified.",
+      "observations": [
+        "The test has been written but has not been run."
+      ],
+      "target": "unverified",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-3-privacy",
+      "split": "replay",
+      "family": "privacy",
+      "direction": "replay",
+      "question": "Return only one word: local or public.",
+      "observations": [
+        "The private source must remain on this computer."
+      ],
+      "target": "local",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-4-english",
+      "split": "replay",
+      "family": "english",
+      "direction": "replay",
+      "question": "Answer in one short sentence.",
+      "observations": [
+        "What is 3 plus 4?"
+      ],
+      "target": "3 plus 4 is 7.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-4-turkish",
+      "split": "replay",
+      "family": "turkish",
+      "direction": "replay",
+      "question": "Translate into Turkish. Return only the translation.",
+      "observations": [
+        "The door is open."
+      ],
+      "target": "Kapı açık.",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-4-conduct",
+      "split": "replay",
+      "family": "conduct",
+      "direction": "replay",
+      "question": "Return only one word: verified or unverified.",
+      "observations": [
+        "The test has been written but has not been run."
+      ],
+      "target": "unverified",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "replay-4-privacy",
+      "split": "replay",
+      "family": "privacy",
+      "direction": "replay",
+      "question": "Return only one word: local or public.",
+      "observations": [
+        "The private source must remain on this computer."
+      ],
+      "target": "local",
+      "provenance": "Four distinct authored language/conduct replay examples, sampled five times to balance the 20 semantic teaching directions by example count; duplication adds no evidence. Token counts are reported separately."
+    },
+    {
+      "id": "control-arithmetic",
+      "split": "control",
+      "family": "arithmetic",
+      "direction": "control",
+      "question": "Return only the integer answer.",
+      "observations": [
+        "What is 7 plus 8?"
+      ],
+      "target": "15",
+      "criteria": {
+        "kind": "exact",
+        "accepted": [
+          "15"
+        ]
+      },
+      "provenance": "Fresh authored scope/language/conduct check; separate from teaching and validation."
+    },
+    {
+      "id": "control-turkish",
+      "split": "control",
+      "family": "turkish",
+      "direction": "control",
+      "question": "Translate into Turkish. Return only the translation.",
+      "observations": [
+        "The door is closed."
+      ],
+      "target": "Kapı kapalı.",
+      "criteria": {
+        "kind": "contains",
+        "required": [
+          "kapı",
+          "kapalı"
+        ],
+        "forbidden": [
+          "açık"
+        ]
+      },
+      "provenance": "Fresh authored scope/language/conduct check; separate from teaching and validation."
+    },
+    {
+      "id": "control-conduct",
+      "split": "control",
+      "family": "conduct",
+      "direction": "control",
+      "question": "Return only one word: verified or unverified.",
+      "observations": [
+        "The build has never been executed."
+      ],
+      "target": "unverified",
+      "criteria": {
+        "kind": "exact",
+        "accepted": [
+          "unverified"
+        ]
+      },
+      "provenance": "Fresh authored scope/language/conduct check; separate from teaching and validation."
+    },
+    {
+      "id": "control-ambiguity",
+      "split": "control",
+      "family": "ambiguity",
+      "direction": "control",
+      "question": "Return only one word: clear or ambiguous.",
+      "observations": [
+        "The pilot told the observer that she was late. Which person does she refer to?"
+      ],
+      "target": "ambiguous",
+      "criteria": {
+        "kind": "exact",
+        "accepted": [
+          "ambiguous"
+        ]
+      },
+      "provenance": "Fresh authored scope/language/conduct check; separate from teaching and validation."
+    }
+  ],
+  "identity": "shake256:bd9afffbd52a7e0c3c430d7721df88a5bcf8dc1b08e6ace5c079790753ef601586462e1c9e596018012e3734cb26ce15319a84c372477d6a270cf83c63fa62c1"
+}

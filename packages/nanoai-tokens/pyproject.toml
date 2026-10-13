@@ -1,0 +1,20 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nanoai-tokens"
+version = "0.1.0"
+description = "Native exact-byte tokenization with versioned spans and controllable segmentation"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.scripts]
+nanoai-tokens = "nanoai_tokens.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.setuptools.package-data]
+nanoai_tokens = ["native/*.cpp", "data/master-tokenizer-v1/*", "data/master-tokenizer-v1/source-licenses/*/*"]

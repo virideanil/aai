@@ -8,8 +8,9 @@ from nanoai.precision import inspect_bf16
 
 
 def fixture(kind):
-    return (b"GGUF" + struct.pack("<IQQ", 3, 1, 0) + struct.pack("<Q", 6) + b"weight"
+    header = (b"GGUF" + struct.pack("<IQQ", 3, 1, 0) + struct.pack("<Q", 6) + b"weight"
         + struct.pack("<IQQIQ", 2, 2, 2, kind, 0))
+    return header + bytes((-len(header)) % 32) + bytes(16 if kind == 0 else 8)
 
 
 class PrecisionPolicyTests(unittest.TestCase):

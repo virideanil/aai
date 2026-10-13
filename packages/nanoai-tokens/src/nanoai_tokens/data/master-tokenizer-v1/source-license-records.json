@@ -1,0 +1,76 @@
+{
+  "schema": "nanoai.source-license-records.v1",
+  "files": [
+    {
+      "path": "source-licenses/tiktoken/LICENSE",
+      "source_url": "https://github.com/openai/tiktoken/blob/4e71bbe0c078468e00fefbf94b39849389f346e5/LICENSE",
+      "bytes": 1078,
+      "identity": "shake256:9e0857d68d85ae165c2cfe9bd38b48dbd4d2842935c5cb187d3a84dc3e614f31f10db1cdb2136f65f76c32f832b28cd6a9fc8b8ccba60395846fee19f90554cd",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/deepseek-v3/LICENSE-CODE",
+      "source_url": "https://huggingface.co/deepseek-ai/DeepSeek-V3/resolve/e815299b0bcbac849fa540c768ef21845365c9eb/LICENSE-CODE",
+      "bytes": 1064,
+      "identity": "shake256:9a246d388d185b41a5bcfd1a5ebdf5acd40582820d16651db207274d57da148abd8d9bb983c718a4486bc4e42e302bb4149ab139d31ae84e06d46c02123f8dcd",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/deepseek-v3/LICENSE-MODEL",
+      "source_url": "https://huggingface.co/deepseek-ai/DeepSeek-V3/resolve/e815299b0bcbac849fa540c768ef21845365c9eb/LICENSE-MODEL",
+      "bytes": 13759,
+      "identity": "shake256:2bd77c4429777c7350aea58470043e8df73ce4daf60ff2dbf990a6a7ad98d9407416612908c83587a2286a8325a3488de132d0b7b2483c478f57a22528620075",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/phi-4/LICENSE",
+      "source_url": "https://huggingface.co/microsoft/phi-4/resolve/2db69c1c3e91a05d2c64a3185acfbaf36f744e25/LICENSE",
+      "bytes": 1105,
+      "identity": "shake256:745549b7edeeaed509459ba7de94003593a7b5704a7e88671723742928599c262e065854fdb5d62d4dcf78db022832a258656fa8c9bfde8cae4ace494c9f4aa8",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/exaone-3.5/LICENSE",
+      "source_url": "https://huggingface.co/LGAI-EXAONE/EXAONE-3.5-7.8B-Instruct/resolve/553ea250b9a5317231459279d5847d6cf955b9aa/LICENSE",
+      "bytes": 13779,
+      "identity": "shake256:24449ee956af0eb75cffcda39ffe01b1d5d3273c54904e8f2ae0032893a58b8d3ecba61f93452b2d8e554d5bf5bbfab94d7d461a1a55cf1da15a7dbc46c4fe2e",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/nemotron-mini/LICENSE",
+      "source_url": "https://huggingface.co/nvidia/Nemotron-Mini-4B-Instruct/resolve/791833e92ebddb0bc2c1007f6d2b6764f886a2ae/LICENSE",
+      "bytes": 0,
+      "identity": "shake256:46b9dd2b0ba88d13233b3feb743eeb243fcd52ea62b81b82b50c27646ed5762fd75dc4ddd8c0f200cb05019d67b592f6fc821c49479ab48640292eacb3b7c4be",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/kimi-k2/LICENSE",
+      "source_url": "https://huggingface.co/moonshotai/Kimi-K2-Instruct/resolve/fd1984e2b7a3350dbf7305fe73a4ede25c14de50/LICENSE",
+      "bytes": 1463,
+      "identity": "shake256:88ba4e0ab54f29cff421a8fdeeb7040f47b2051a852340f439857cbc439b2bf39f88eb55ff0717e5b1238c83fd3bcfb0c380d6e3fd01457c1a7743405a772e77",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/gpt-oss/LICENSE",
+      "source_url": "https://huggingface.co/openai/gpt-oss-20b/resolve/6cee5e81ee83917806bbde320786a8fb61efebee/LICENSE",
+      "bytes": 11357,
+      "identity": "shake256:f9fa4c7936c5b10449eca8541d5ba4129d09e3825d14153339a1ce75b4c5597f9a01d166cb6bc73e7f79fe0f233c4ecc7045d1164b864700fd4d78325008bc3e",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/qwen3.8-27b/LICENSE",
+      "source_url": "https://huggingface.co/Qwen/Qwen3.8-27B/resolve/1d4bf0f2ff6012fd82039f2fa52739d0dd7c60c0/LICENSE",
+      "bytes": 11544,
+      "identity": "shake256:e8c9a8a59f8fe45f6527b359d14f4b7d4b8f668556a63e1cd9865ccbcb1ffb8c470d32817dc26a25eeec8c28658e14ce69f350356b7bbd082d42a9309067563a",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    },
+    {
+      "path": "source-licenses/kimi-k3/LICENSE",
+      "source_url": "https://huggingface.co/moonshotai/Kimi-K3/blob/f831ab66814297da540d832a5235f8e904f29d06/LICENSE",
+      "bytes": 3065,
+      "identity": "shake256:9a5adc5f6e995dd3ea0f6594cbb2370686db5b9342e130f67d080f832802fb2dac64af490b751ebb6c614f8d71c544d6c26071439bcc8961f5cca41993005df0",
+      "scope": "Exact captured upstream file bytes; an empty file is retained as empty."
+    }
+  ],
+  "scope": "Captured attribution and source declarations. Individual source terms remain separate; this record assigns no umbrella license to the derived tokenizer."
+}

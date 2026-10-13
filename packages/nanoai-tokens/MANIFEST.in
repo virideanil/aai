@@ -1,0 +1,2 @@
+recursive-include tests/conformance *.json *.nmt
+include tools/build_conformance.py
