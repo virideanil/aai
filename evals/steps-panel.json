@@ -1,0 +1,11 @@
+{
+  "schema": "nanoai.typed-work-panel.v1",
+  "scope": "Authored bilingual operation selection, exact calculation, source-bound artifact and recovery",
+  "cases": [
+    {"id":"rail", "source":{"length_cm":23,"count":2}, "goal":"Write rail.md in English, with the combined length of the equal rails in digits and cm. Cite the current rail source.", "operator":"integer.product", "paths":[["length_cm"],["count"]], "answer":46},
+    {"id":"shelf", "source":{"base_cm":14,"extension_cm":7}, "goal":"Write shelf.md in English, stating the total length in digits and cm after joining the base and extension end to end. Cite shelf.", "operator":"integer.sum", "paths":[["base_cm"],["extension_cm"]], "answer":21},
+    {"id":"craft", "source":{"length_cm":12,"count":3}, "goal":"Üç eş çubuğun toplam uzunluğunu rakamla ve cm birimiyle belirten kısa bir Türkçe notu craft.md dosyası için hazırla. craft kaynağına atıf yap.", "operator":"integer.product", "paths":[["length_cm"],["count"]], "answer":36},
+    {"id":"strip", "source":{"first_cm":11,"second_cm":17}, "goal":"Uç uca eklenen iki şeridin toplam uzunluğunu rakamla ve cm birimiyle belirten Türkçe notu strip.md için hazırla. strip kaynağına atıf yap.", "operator":"integer.sum", "paths":[["first_cm"],["second_cm"]], "answer":28}
+  ],
+  "correction":{"case":"rail","source":{"length_cm":19,"count":2},"answer":38,"obsolete_answer":46}
+}

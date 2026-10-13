@@ -1,0 +1,121 @@
+{
+  "schema": "nanoai.typed-quantity-panel.v1",
+  "scope": "Revised representation after observed length/count addition and citation failures; real model operation selection plus exact typed rendering. This changes the task interface and is not an isolated prompt comparison.",
+  "cases": [
+    {
+      "id": "rail",
+      "source": {
+        "length_cm": {
+          "value": 23,
+          "unit": "cm"
+        },
+        "count": {
+          "value": 2,
+          "unit": "count"
+        }
+      },
+      "goal": "Write rail.md in English, with the combined length of the equal rails in digits and cm. Cite the current rail source.",
+      "operator": "quantity.product",
+      "paths": [
+        [
+          "length_cm"
+        ],
+        [
+          "count"
+        ]
+      ],
+      "answer": 46,
+      "language": "en"
+    },
+    {
+      "id": "shelf",
+      "source": {
+        "base_cm": {
+          "value": 14,
+          "unit": "cm"
+        },
+        "extension_cm": {
+          "value": 7,
+          "unit": "cm"
+        }
+      },
+      "goal": "Write shelf.md in English, stating the total length in digits and cm after joining the base and extension end to end. Cite shelf.",
+      "operator": "quantity.sum",
+      "paths": [
+        [
+          "base_cm"
+        ],
+        [
+          "extension_cm"
+        ]
+      ],
+      "answer": 21,
+      "language": "en"
+    },
+    {
+      "id": "craft",
+      "source": {
+        "length_cm": {
+          "value": 12,
+          "unit": "cm"
+        },
+        "count": {
+          "value": 3,
+          "unit": "count"
+        }
+      },
+      "goal": "Üç eş çubuğun toplam uzunluğunu rakamla ve cm birimiyle belirten kısa bir Türkçe notu craft.md dosyası için hazırla. craft kaynağına atıf yap.",
+      "operator": "quantity.product",
+      "paths": [
+        [
+          "length_cm"
+        ],
+        [
+          "count"
+        ]
+      ],
+      "answer": 36,
+      "language": "tr"
+    },
+    {
+      "id": "strip",
+      "source": {
+        "first_cm": {
+          "value": 11,
+          "unit": "cm"
+        },
+        "second_cm": {
+          "value": 17,
+          "unit": "cm"
+        }
+      },
+      "goal": "Uç uca eklenen iki şeridin toplam uzunluğunu rakamla ve cm birimiyle belirten Türkçe notu strip.md için hazırla. strip kaynağına atıf yap.",
+      "operator": "quantity.sum",
+      "paths": [
+        [
+          "first_cm"
+        ],
+        [
+          "second_cm"
+        ]
+      ],
+      "answer": 28,
+      "language": "tr"
+    }
+  ],
+  "correction": {
+    "case": "rail",
+    "source": {
+      "length_cm": {
+        "value": 19,
+        "unit": "cm"
+      },
+      "count": {
+        "value": 2,
+        "unit": "count"
+      }
+    },
+    "answer": 38,
+    "obsolete_answer": 46
+  }
+}

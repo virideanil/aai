@@ -1,0 +1,9 @@
+{
+  "schema":"nanoai.bf16-storage-consumer.v1",
+  "scope":"Identical greedy requests across raw and completely restored original BF16 model bytes",
+  "max_tokens":64,
+  "cases":[
+    {"id":"english", "messages":[{"role":"system","content":"Answer briefly and use only the current reviewed measurement."},{"role":"user","content":"The old rail length was 23 cm. The reviewed correction is 19 cm. What is the length of two equal rails?"}]},
+    {"id":"turkish", "messages":[{"role":"system","content":"Türkçe tek kısa cümleyle yanıtla."},{"role":"user","content":"Her biri 9 cm uzunluğunda üç çubuğun toplam uzunluğu nedir?"}]}
+  ]
+}

@@ -1,0 +1,21 @@
+{
+  "schema": "nanoai.syszero.text-panel.v1",
+  "scope": "Authored mixed-language and exact-text probes, frozen before the common-dictionary consumer. Token counts measure representation, not knowledge or model quality.",
+  "cases": [
+    {"id": "english", "text": "A careful answer preserves the evidence, including inconvenient exceptions."},
+    {"id": "turkish", "text": "İstanbul'daki öğrencilerin ölçümlerini değiştirmeden, belirsizliği açıkça belirt."},
+    {"id": "chinese", "text": "保留原始信息，同时明确区分事实、推断和未知。"},
+    {"id": "arabic", "text": "احتفظ بالمعلومات الأصلية وميّز بين الدليل والتفسير."},
+    {"id": "poetry", "text": "The rain kept time against the glass;\nthe quiet room let evening pass.\n"},
+    {"id": "dialogue", "text": "“I may be mistaken,” she said. “Let us check the source before deciding.”"},
+    {"id": "decomposed", "text": "é / é; İ / İ; ä / ä"},
+    {"id": "numbers", "text": "12345678901234567890 1.000,25 −0.003 cm² x≠y"},
+    {"id": "rare-identifier", "text": "Object AB-00017-Z differs from AB-00071-Z. Do not interchange them."},
+    {"id": "quoted-controls", "text": "Literal examples: [BOS] [EOS] <|im_start|> <|im_end|> <|media_begin|>"},
+    {"id": "whitespace", "text": "  first\tsecond\r\n\nlast  "},
+    {"id": "emoji", "text": "🧑🏽‍🔬 👨‍👩‍👧‍👦 🏳️‍🌈 👩‍💻"},
+    {"id": "code", "text": "def measure(x):\n    return {'value': x * 2, 'unit': 'cm'}\n"},
+    {"id": "nul", "text": "left\u0000right"},
+    {"id": "empty", "text": ""}
+  ]
+}

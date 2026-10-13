@@ -1,0 +1,12 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+.venv/
+.deps/
+.local/
+*.gguf
+*.safetensors
+*.pt
+*.npz
+*.sjql
+node_modules/

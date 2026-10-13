@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nanoai-research"
+version = "0.1.0"
+description = "Source-grounded experiments in learned computation, memory and recoverable agency"
+requires-python = ">=3.14"
+dependencies = []
+
+[project.optional-dependencies]
+syszero = ["tokenizers==0.23.2", "tiktoken==0.12.0"]
+
+[project.scripts]
+nanoai = "nanoai.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]

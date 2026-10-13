@@ -1,0 +1,17 @@
+{
+  "schema": "nanoai.memory-panel.v1",
+  "scope": "Authored held-out episode values, frozen before generation; development diagnostics, not a frontier comparison",
+  "artifact_facts": {
+    "initial": {"must_contain": [{"value":23,"unit":"cm"},{"value":46,"unit":"cm"}], "must_not_contain": [{"value":11,"unit":"m"}]},
+    "corrected": {"must_contain": [{"value":19,"unit":"cm"},{"value":38,"unit":"cm"}], "must_not_contain": [{"value":23,"unit":"cm"},{"value":46,"unit":"cm"},{"value":11,"unit":"m"}]},
+    "turkish": {"must_contain": [{"value":12,"unit":"cm"},{"value":36,"unit":"cm"}], "must_not_contain": [{"value":11,"unit":"m"}]}
+  },
+  "cases": [
+    {"id":"pair_17","family":"derived_plan","old":17,"current":23,"factor":2,"question":"A display needs two equal rails. Give the current total rail length in cm.","answer":46},
+    {"id":"pair_29","family":"derived_plan","old":29,"current":13,"factor":2,"question":"Each frame uses two matching bars. How many cm must be prepared for one frame now?","answer":26},
+    {"id":"triple_8","family":"derived_plan","old":8,"current":11,"factor":3,"question":"The model uses three equal strips. State the current combined length in cm.","answer":33},
+    {"id":"turkish_14","family":"turkish_revision","old":14,"current":19,"factor":2,"question":"Maket için aynı uzunlukta iki çubuk gerekiyor. Güncel ölçüye göre toplam kaç cm hazırlanmalı?","answer":38},
+    {"id":"turkish_7","family":"turkish_revision","old":7,"current":12,"factor":3,"question":"Üç eş parçanın güncel toplam uzunluğu kaç cm olmalı?","answer":36},
+    {"id":"perturbed_31","family":"derived_plan","old":31,"current":9,"factor":4,"question":"Four pieces use the revised individual length. Report the current overall cm requirement.","answer":36}
+  ]
+}
