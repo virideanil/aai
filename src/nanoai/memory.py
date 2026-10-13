@@ -50,7 +50,12 @@ def token_set(text: str) -> set[str]:
 
 
 def document_references(text: str) -> set[str]:
-    return set(re.findall(r"\[([A-Za-z0-9][A-Za-z0-9_.-]*@[0-9]+)\]", text))
+    """Collect every reference candidate in the bounded document grammar.
+
+    Bracketed name@value forms are reserved for source references. Collect
+    malformed revisions too, so the proposal boundary can reject them.
+    """
+    return set(re.findall(r"\[([A-Za-z0-9][A-Za-z0-9_.-]*\s*@[^\]]+)\]", text))
 
 
 def bounded_text(value, label, limit=32768):
@@ -81,7 +86,8 @@ class Memory:
         self.catalogue = None
         self.state = {"identity": None, "sources": {}, "source_history": {}, "tasks": {},
                       "proposals": {}, "rejections": [], "operations": {}, "receipts": {}, "source_epoch": 0,
-                      "steps": {}, "step_observations": {}, "step_reviews": {}, "step_cache": {}}
+                      "steps": {}, "step_observations": {}, "step_reviews": {}, "step_cache": {},
+                      "scratchboard": {}, "scratchboard_revisions": {}}
         for _, transaction in self.journal.tail(self.segments, None, at_head=self.head):
             if transaction["previous"] != self.sequence or transaction["sequence"] != self.sequence + 1:
                 raise ValueError("Memory transaction sequence mismatch")
@@ -122,6 +128,20 @@ class Memory:
             self.state["step_cache"][observation["cache_key"]] = observation["step_id"]
         elif kind == "step.reviewed":
             self.state["step_reviews"][e["review"]["step_id"]] = e["review"]
+        elif kind == "scratchboard.recorded":
+            node = e["node"]
+            if node["id"] in self.state["scratchboard"]:
+                raise ValueError("Scratchboard nodes are immutable")
+            self.state["scratchboard"][node["id"]] = node
+        elif kind == "scratchboard.revised":
+            revision, node = e["revision"], e["node"]
+            if (revision["previous"] not in self.state["scratchboard"]
+                    or revision["previous"] in self.state["scratchboard_revisions"]
+                    or node["id"] in self.state["scratchboard"]
+                    or revision["replacement"] != node["id"]):
+                raise ValueError("Scratchboard revision lineage differs")
+            self.state["scratchboard"][node["id"]] = node
+            self.state["scratchboard_revisions"][revision["previous"]] = revision
         else:
             raise ValueError("Unknown memory event")
 
@@ -249,7 +269,7 @@ class Memory:
         except KeyError:
             return False
 
-    def _validate_snapshot(self, snapshot, *, include_selection=True, _depth=0):
+    def _validate_snapshot(self, snapshot, *, include_selection=True, _depth=0, _board_checked=None):
         if _depth > 16:
             raise StaleState("Observation dependency depth exceeds the contract")
         task = self.state["tasks"].get(snapshot["task_id"])
@@ -264,17 +284,28 @@ class Memory:
             if not actual or any(actual[k] != v for k,v in expected.items()):
                 raise StaleState("Proposal source is stale")
         for step_id, expected in snapshot.get("observations", {}).items():
+            from .steps import Steps
             observation = self.state["step_observations"].get(step_id)
             step = self.state["steps"].get(step_id)
             review = self.state["step_reviews"].get(step_id)
-            if (not observation or not step or observation["digest"] != expected
+            if (not observation or not step or step["implementation"] != Steps(self).implementation
+                    or observation["digest"] != expected
                     or digest_bytes(canonical(observation["result"])) != expected
                     or review and review["decision"] in {"rejected", "cancelled"}):
                 raise StaleState("Proposal calculation observation is stale")
             parent = step["snapshot"]
             if parent["task_id"] != snapshot["task_id"] or parent["task_revision"] != snapshot["task_revision"]:
                 raise StaleState("Observation belongs to a different task revision")
-            self._validate_snapshot(parent, _depth=_depth + 1)
+            self._validate_snapshot(parent, _depth=_depth + 1, _board_checked=_board_checked)
+        if snapshot.get("scratchboard"):
+            from .scratchboard import Scratchboard
+            board = Scratchboard(self)
+            checked = set() if _board_checked is None else _board_checked
+            for node_id, expected in snapshot["scratchboard"].items():
+                node = board._validate(node_id, _depth=_depth + 1, _checked=checked)
+                if node["digest"] != expected:
+                    raise StaleState("Scratchboard dependency identity differs")
+                board._compatible(node, snapshot)
 
     def attach_observations(self, snapshot, step_ids):
         """Bind observed pure operations to a document or a later operation."""
@@ -456,7 +487,7 @@ class Memory:
             try:
                 self._validate_snapshot(proposal["snapshot"], include_selection=False)
                 current = True
-            except ValueError:
+            except (ValueError, OSError):
                 current = False
             try:
                 self._verify_receipt(receipt)

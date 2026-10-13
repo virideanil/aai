@@ -27,7 +27,9 @@ class Harmonizer:
         self.memory = memory
         self.vocabulary = vocabulary
         self.implementation = {"harmonizer": file_digest(__file__),
-                               "operators": file_digest(__import__("nanoai.steps", fromlist=["__file__"]).__file__)}
+                               "operators": file_digest(__import__("nanoai.steps", fromlist=["__file__"]).__file__),
+                               "scratchboard": file_digest(__import__("nanoai.scratchboard", fromlist=["__file__"]).__file__),
+                               "judgments": file_digest(__import__("nanoai.judgments", fromlist=["__file__"]).__file__)}
 
     def view(self, snapshot):
         """Derive a packet; the task journal remains the sole durable owner."""
@@ -52,11 +54,31 @@ class Harmonizer:
                     "result": deepcopy(observation["result"]),
                     "review": deepcopy(memory.state["step_reviews"].get(step_id)),
                     "meaning": "Exact execution; recorded task review remains a separate judgment"})
+            from .scratchboard import Scratchboard
+            board = Scratchboard(memory)
+            for node_id in snapshot.get("scratchboard", {}):
+                entries.append(board._entry(node_id))
             for rule in rule_catalogue():
                 entries.append({"kind": "executable_rule", **rule, "implementation": self.implementation["operators"]})
+            entries.append({"kind": "judgment_rule", "id": "result.equals",
+                "contract": "Compare an observed bounded integer with an explicit expected value and matching dimensions. Keep prediction, predicate result and task relevance separate.",
+                "carrier": "Optional base-three packed bytes and BF16 one-hot tensor with channels no, maybe, yes",
+                "implementation": self.implementation["judgments"],
+                "authority": "A recorded judgment grants no external action permission or parameter update"})
+            for operation, invariant in (
+                ("branch", "Preserve an independent candidate with the same current representation"),
+                ("revise", "Record a replacement and invalidate dependents of the old version; assess meaning separately"),
+                ("refine", "Check exact text-byte equivalence before adopting a new composition"),
+                ("reshape_tensor", "Keep tensor bytes, element order, dtype and model basis"),
+                ("bind", "Bind an unresolved address in a new sparse candidate range"),
+                ("import", "Reuse an explicit current origin with its dependencies and a separate relevance judgment"),
+                ("materialize", "Expand resolved compatible content within the declared byte budget")):
+                entries.append({"kind":"graph_rule", "id":"scratchboard."+operation, "contract":invariant,
+                    "implementation":self.implementation["scratchboard"],
+                    "authority":"Internal state or bounded local expansion; publication requires the task's separate grant"})
             lexical = None if self.vocabulary is None else {"identity": self.vocabulary.identity,
                 "piece_count": len(self.vocabulary.pieces), "meaning": "Literal byte pieces with separately namespaced native meanings"}
-            packet = {"schema": "nanoai.system-zero.dictionary.v1", "snapshot": deepcopy(snapshot),
+            packet = {"schema": "nanoai.system-zero.dictionary.v2", "snapshot": deepcopy(snapshot),
                 "implementation": self.implementation, "lexical_dictionary": lexical,
                 "entries": entries, "quantity_catalogue": quantities,
                 "learned_semantic_synthesis": "untrained", "authority": "Existing task grant only"}

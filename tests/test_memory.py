@@ -7,7 +7,7 @@ import tempfile
 import unittest
 
 from nanoai.agent import DEFAULT_IDENTITY, context
-from nanoai.memory import Memory
+from nanoai.memory import Memory, document_references
 
 
 class MemoryConsumerTests(unittest.TestCase):
@@ -43,6 +43,17 @@ class MemoryConsumerTests(unittest.TestCase):
         snap = proposal["snapshot"]
         with self.assertRaisesRegex(ValueError, "Citations"):
             self.memory.record_proposal(snap, {"filename": "panel.md", "content": "Unsupported [other@1]", "citations": ["other@1"]})
+
+    def test_malformed_reference_candidates_cannot_hide_behind_a_valid_citation(self):
+        snap = context(self.memory, "panel", "test-core-v1", selected_ids=["spec"])["snapshot"]
+        for bad in ("[source_id@revision]", "[spec@1x]", "[spec @1]", "[spec@1 extra]"):
+            content = "Width 19 cm. [spec@1] " + bad
+            self.assertIn(bad[1:-1], document_references(content))
+            with self.assertRaisesRegex(ValueError, "source revisions|references"):
+                self.memory.record_proposal(snap, {"filename":"panel.md", "content":content,
+                    "citations":sorted(document_references(content))})
+            with self.assertRaisesRegex(ValueError, "references"):
+                self.memory.record_proposal(snap, {"filename":"panel.md", "content":content, "citations":["spec@1"]})
 
     def test_same_revision_writers_and_user_file_drift(self):
         other = Memory(self.root)

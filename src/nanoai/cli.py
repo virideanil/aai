@@ -28,6 +28,12 @@ def main():
     resume = sub.add_parser("resume")
     resume.add_argument("task_id")
     sub.add_parser("steps")
+    pure = sub.add_parser("step")
+    pure.add_argument("task_id")
+    pure.add_argument("operator")
+    pure.add_argument("arguments", type=Path)
+    pure.add_argument("--source", action="append", required=True)
+    pure.add_argument("--core-identity", default="symbolic-host-v1")
     review = sub.add_parser("review-step")
     review.add_argument("step_id")
     review.add_argument("decision", choices=("confirmed", "rejected", "cancelled"))
@@ -38,10 +44,79 @@ def main():
     note.add_argument("--language", choices=("en", "tr"), default="en")
     note.add_argument("--filename")
     note.add_argument("--commit", action="store_true")
+    board_add = sub.add_parser("board-add")
+    board_add.add_argument("task_id")
+    board_add.add_argument("spec", type=Path)
+    board_add.add_argument("--core-identity", default="symbolic-host-v1")
+    board_add.add_argument("--source", action="append", default=[])
+    reserve = sub.add_parser("board-reserve")
+    reserve.add_argument("task_id")
+    reserve.add_argument("count", type=int)
+    reserve.add_argument("--constraints", required=True)
+    reserve.add_argument("--core-identity", default="symbolic-host-v1")
+    reserve.add_argument("--source", action="append", default=[])
+    board_show = sub.add_parser("board-show")
+    board_show.add_argument("node_id")
+    board_show.add_argument("--slot", type=int)
+    board_bind = sub.add_parser("board-bind")
+    board_bind.add_argument("node_id")
+    board_bind.add_argument("index", type=int)
+    board_bind.add_argument("target_id")
+    board_branch = sub.add_parser("board-branch")
+    board_branch.add_argument("node_id")
+    board_branch.add_argument("--reason", required=True)
+    board_revise = sub.add_parser("board-revise")
+    board_revise.add_argument("node_id")
+    board_revise.add_argument("spec", type=Path)
+    board_revise.add_argument("--reason", required=True)
+    board_revise.add_argument("--refresh", action="store_true", help="Use the current task and explicitly selected sources")
+    board_revise.add_argument("--source", action="append")
+    board_refine = sub.add_parser("board-refine")
+    board_refine.add_argument("node_id")
+    board_refine.add_argument("parts", nargs="+")
+    board_refine.add_argument("--reason", required=True)
+    board_latest = sub.add_parser("board-latest")
+    board_latest.add_argument("node_id")
+    board_import = sub.add_parser("board-import")
+    board_import.add_argument("task_id")
+    board_import.add_argument("node_id")
+    board_import.add_argument("--relevance", required=True)
+    board_import.add_argument("--reason", required=True)
+    board_import.add_argument("--core-identity", default="symbolic-host-v1")
+    board_import.add_argument("--source", action="append", required=True)
+    board_reshape = sub.add_parser("board-reshape")
+    board_reshape.add_argument("node_id")
+    board_reshape.add_argument("shape", nargs="+", type=int)
+    board_reshape.add_argument("--reason", required=True)
+    board_note = sub.add_parser("board-note")
+    board_note.add_argument("step_id")
+    board_note.add_argument("--language", choices=("en", "tr"), default="en")
+    board_document = sub.add_parser("board-document")
+    board_document.add_argument("node_id")
+    board_document.add_argument("--filename")
+    board_document.add_argument("--commit", action="store_true")
     dictionary = sub.add_parser("dictionary")
     dictionary.add_argument("task_id")
     dictionary.add_argument("--source", action="append", required=True)
     dictionary.add_argument("--vocabulary", type=Path)
+    dictionary.add_argument("--board", action="append", default=[])
+    judgment = sub.add_parser("judge")
+    judgment.add_argument("task_id")
+    judgment.add_argument("question")
+    judgment.add_argument("--predicate", type=Path)
+    judgment.add_argument("--source", action="append", default=[])
+    judgment.add_argument("--core-config", type=Path)
+    judgment.add_argument("--core-identity", default="symbolic-host-v1")
+    judgment.add_argument("--verdict", choices=("yes", "maybe", "no"))
+    judgment.add_argument("--reason")
+    from .judgments import MAYBE_CAUSES
+    judgment.add_argument("--uncertainty", choices=MAYBE_CAUSES)
+    assessment = sub.add_parser("assess-judgment")
+    assessment.add_argument("node_id")
+    experience = sub.add_parser("experiences")
+    experience.add_argument("task_id")
+    carrier = sub.add_parser("carry-judgments")
+    carrier.add_argument("node_ids", nargs="+")
     calculation = sub.add_parser("calculate")
     calculation.add_argument("task_id")
     calculation.add_argument("--core-config", type=Path, required=True)
@@ -52,6 +127,7 @@ def main():
     worker.add_argument("--core-config", type=Path, required=True)
     worker.add_argument("--commit", action="store_true")
     worker.add_argument("--observation", action="append", default=[])
+    worker.add_argument("--board", action="append", default=[])
     worker.add_argument("--source", action="append")
     args = p.parse_args()
     memory = Memory(args.state)
@@ -72,6 +148,18 @@ def main():
     elif args.command == "steps":
         from .steps import Steps
         output = Steps(memory).status()
+    elif args.command == "step":
+        from .agent import context
+        from .steps import Steps, strict_json
+        steps = Steps(memory)
+        snapshot = context(memory, args.task_id, args.core_identity, selected_ids=args.source)["snapshot"]
+        proposed = steps.propose(snapshot, args.operator, strict_json(args.arguments.read_text()))
+        try:
+            observed = steps.execute(proposed["id"])
+        except ValueError as error:
+            steps.review(proposed["id"], "rejected", reviewer="pure-operator-contract-v1", reason=str(error))
+            raise
+        output = {"step": proposed, "observation": observed, "model_calls": 0}
     elif args.command == "review-step":
         from .steps import Steps
         output = Steps(memory).review(args.step_id, args.decision, reviewer=args.reviewer, reason=args.reason)
@@ -87,13 +175,87 @@ def main():
         from .syszero import CommonVocabulary
         from .agent import context
         vocabulary = CommonVocabulary.load(args.vocabulary) if args.vocabulary else None
-        snapshot = context(memory, args.task_id, "dictionary-inspection", selected_ids=args.source)["snapshot"]
+        basis = memory.state["scratchboard"][args.board[0]]["snapshot"]["core_identity"] if args.board else "dictionary-inspection"
+        snapshot = context(memory, args.task_id, basis, selected_ids=args.source, scratchboard_ids=args.board)["snapshot"]
         output = Harmonizer(memory, vocabulary=vocabulary).view(snapshot)
+    elif args.command in {"judge", "assess-judgment", "experiences", "carry-judgments"}:
+        from .agent import context
+        from .judgments import Judgments
+        from .steps import strict_json
+        judgments = Judgments(memory)
+        if args.command == "judge":
+            predicate = strict_json(args.predicate.read_text()) if args.predicate else None
+            if args.core_config:
+                if args.verdict is not None or args.reason is not None or args.uncertainty is not None:
+                    raise ValueError("A generated prediction supplies its own verdict and reason")
+                with JsonlCore(json.loads(args.core_config.read_text()), stderr_path=args.state/"worker.log") as core:
+                    output = judgments.generate(core, args.task_id, args.question, predicate=predicate, selected_ids=args.source)
+            else:
+                if args.verdict is None or args.reason is None:
+                    raise ValueError("A recorded prediction requires --verdict and --reason")
+                snapshot = context(memory, args.task_id, args.core_identity, selected_ids=args.source)["snapshot"]
+                output = {"prediction": judgments.predict(snapshot, args.question, args.verdict, args.reason,
+                                                           predicate=predicate, uncertainty=args.uncertainty)}
+        elif args.command == "assess-judgment":
+            output = {"assessment": judgments.assess(args.node_id)}
+        elif args.command == "experiences":
+            output = {"experiences": judgments.experiences(args.task_id), "parameter_updates": 0}
+        else:
+            output = judgments.carry(args.node_ids)
+            output["packed_hex"] = output.pop("packed").hex()
+    elif args.command.startswith("board-"):
+        from .agent import context
+        from .scratchboard import Scratchboard
+        from .steps import strict_json
+        board = Scratchboard(memory)
+        if args.command in {"board-add", "board-reserve"}:
+            snapshot = context(memory, args.task_id, args.core_identity, selected_ids=args.source)["snapshot"]
+            node = (board.add(snapshot, strict_json(args.spec.read_text())) if args.command == "board-add"
+                    else board.reserve(snapshot, args.count, constraints=args.constraints))
+            output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command == "board-show":
+            output = board.slot(args.node_id, args.slot) if args.slot is not None else board.describe(args.node_id)
+        elif args.command == "board-bind":
+            node = board.bind(args.node_id, args.index, args.target_id)
+            output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command == "board-import":
+            snapshot = context(memory, args.task_id, args.core_identity, selected_ids=args.source)["snapshot"]
+            node = board.import_node(args.node_id, snapshot, relevance=args.relevance, reason=args.reason)
+            output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command in {"board-branch", "board-revise", "board-refine", "board-latest", "board-reshape"}:
+            if args.command == "board-branch":
+                node = board.branch(args.node_id, reason=args.reason)
+            elif args.command == "board-revise":
+                snapshot = None
+                if args.refresh:
+                    if args.source is None:
+                        raise ValueError("Refresh requires explicit --source selection")
+                    prior = memory.state["scratchboard"][args.node_id]["snapshot"]
+                    snapshot = context(memory, prior["task_id"], prior["core_identity"], selected_ids=args.source)["snapshot"]
+                elif args.source is not None:
+                    raise ValueError("Source selection requires --refresh")
+                node = board.revise(args.node_id, strict_json(args.spec.read_text()), reason=args.reason, snapshot=snapshot)
+            elif args.command == "board-refine":
+                node = board.refine(args.node_id, args.parts, reason=args.reason)
+            elif args.command == "board-reshape":
+                node = board.reshape_tensor(args.node_id, args.shape, reason=args.reason)
+            else:
+                node = board.latest(args.node_id)
+            output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command == "board-note":
+            node = board.quantity(args.step_id, language=args.language)
+            output = {"node": node, "view": board.describe(node["id"])}
+        else:
+            proposal = board.propose_document(args.node_id, filename=args.filename)
+            receipt = memory.commit(proposal["id"], core_identity=proposal["snapshot"]["core_identity"]) if args.commit else None
+            output = {"proposal": proposal, "receipt": receipt,
+                      "artifact_path": str(memory.root / receipt["path"]) if receipt else None, "model_calls": 0}
     else:
         config = json.loads(args.core_config.read_text())
         with JsonlCore(config, stderr_path=args.state / "worker.log") as core:
             output = (calculate(memory, core, args.task_id, domain=args.domain, selected_ids=args.source) if args.command == "calculate"
-                      else run(memory, core, args.task_id, commit=args.commit, observation_ids=args.observation, selected_ids=args.source))
+                      else run(memory, core, args.task_id, commit=args.commit, observation_ids=args.observation,
+                               scratchboard_ids=args.board, selected_ids=args.source))
     print(json.dumps(output, ensure_ascii=False, indent=2))
 
 

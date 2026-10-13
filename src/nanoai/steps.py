@@ -67,12 +67,17 @@ def quantity_catalogue(sources):
 class Steps:
     def __init__(self, memory: Memory):
         self.memory = memory
-        self.implementation = file_digest(__file__)
+        from . import relations
+        self.implementation = digest_bytes(canonical({"steps": file_digest(__file__),
+                                                       "relations": file_digest(relations.__file__)}))
 
     @staticmethod
     def parents(operator, arguments):
         if not isinstance(arguments, dict):
             raise ValueError("Step arguments must be an object")
+        from .relations import OPERATORS, validate_arguments
+        if operator in OPERATORS:
+            return validate_arguments(operator, arguments)
         if operator == "source.read":
             if set(arguments) != {"source"}:
                 raise ValueError("source.read arguments")
@@ -127,6 +132,8 @@ class Steps:
         normalized = {"inputs": [row["digest"] for row in observations]}
         if step["operator"] in {"json.field", "quantity.field"}:
             normalized["path"] = step["arguments"]["path"]
+        if step["operator"].startswith("relation."):
+            normalized["parameters"] = {k: deepcopy(v) for k, v in step["arguments"].items() if k != "step"}
         return normalized, observations
 
     def _calculate(self, step, inputs):
@@ -136,6 +143,9 @@ class Steps:
             return {"value": row["text"], "sources": [f"{row['id']}@{row['revision']}"],
                     "scope": "Exact recorded source bytes"}
         refs = sorted({ref for row in inputs for ref in row["result"]["sources"]})
+        if operator.startswith("relation."):
+            from .relations import calculate
+            return calculate(operator, args, inputs[0]["result"])
         if operator in {"json.field", "quantity.field"}:
             text = inputs[0]["result"]["value"]
             if not isinstance(text, str):

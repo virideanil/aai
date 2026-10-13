@@ -1,0 +1,12 @@
+{
+  "version": 2,
+  "scope": "Authored BF16 operation choice followed by host-directed symbolic composition and revision",
+  "task": "rails",
+  "goal": "Calculate the total length of all identical rails by multiplying the length of one rail by the rail count. Prepare the measurement note in Turkish. Include the inspection code from the selected working unit when it is provided.",
+  "review_code": "PERA-73",
+  "source": {"length": {"value": 23, "unit": "cm"}, "count": {"value": 3, "unit": "count"}},
+  "correction": {"length": {"value": 23, "unit": "cm"}, "count": {"value": 4, "unit": "count"}},
+  "operator": "quantity.product",
+  "paths": [["length"], ["count"]],
+  "answers": [69, 92]
+}

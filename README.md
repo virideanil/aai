@@ -2,9 +2,11 @@
 
 nano'ai develops a continuing learning agent that understands, reasons, creates, acts and learns from correction. The selected architecture connects **System Zero's exact knowledge/representation contracts, one jointly trained core, and an exact work graph**. Quantum patching, recurrent memory, nested BF16 capacity and action heads share that core's learning objective. Identity, character, perception, editable creation, hardware efficiency and the wider requirements retain their scope.
 
-This repository implements the current research foundation: original-BF16 model admission, native generation, versioned evidence/task memory, typed operations, a common vocabulary bridge, dictionary views, local artifact publication and observed recovery. The new joint neural core is a design and training research direction. Existing Qwen models supply complete experimental instruments; Qwen/Kimi mechanisms inform our own architecture.
+This repository implements the current research foundation: original-BF16 model admission, native generation, versioned evidence/task memory, typed operations, a common vocabulary bridge, modular working representations, judgments and checked experience, local artifact publication and observed recovery. The new joint neural core is a design and training research direction. Existing Qwen models supply complete experimental instruments; Qwen/Kimi mechanisms inform our own architecture.
 
 - [Complete System Zero and joint-core design](docs/system-zero.md)
+- [Modular scratchboard and revision contracts](docs/scratchboard.md)
+- [Persistent joint alternatives and their queries](docs/relations.md)
 - [State, learning and execution contracts](docs/design.md)
 - [Measured results and retained failures](docs/results.md)
 - [Evaluation contract](evals/CONTRACT.md)
@@ -52,12 +54,27 @@ python -m nanoai.cli --state .local/work resume report
 
 System Zero's optional lexicon is prepared from explicit source manifests with `tools/prepare_syszero.py --source MANIFEST --source MANIFEST --out .local/system-zero`. Native adapters retain source hashes, model namespaces and normalization residuals. Common segmentation is a lexical reference and is never silently substituted for a native model's input tokenizer.
 
+The scratchboard holds exact text/source spans, reviewed quantities, artifacts, compositions, unresolved ranges and BF16/F32 tensor blobs. Its nodes share the journal and dependency checks. `note` already uses this path. To inspect or pass a reviewed node to the model, replace `NODE_ID` with the ID returned by `board-note`:
+
+```sh
+python -m nanoai.cli --state .local/work board-note STEP_ID --language tr
+python -m nanoai.cli --state .local/work dictionary report --source survey --board NODE_ID
+python -m nanoai.cli --state .local/work run report --source survey --board NODE_ID --core-config .local/core/core.json
+python -m nanoai.cli --state .local/work board-branch NODE_ID --reason "Keep this candidate for comparison"
+```
+
+`board-reserve`, `board-bind`, `board-add`, `board-revise`, `board-refine`, `board-reshape` and `board-latest` expose the structural operations. Their `--help` lists inputs. A revision preserves history and invalidates dependent work; exact refinement and tensor reshape enforce their declared invariants. The [scratchboard contract](docs/scratchboard.md) defines bounds, basis compatibility and the distinction between structural modularity and a learned editing policy.
+
+`judge`, `assess-judgment`, `carry-judgments` and `experiences` expose provisional judgments, independent numerical or joint-relation property checks, exact ternary/BF16 carriers and attributed feedback. A model can choose the wrong label or cause; the original prediction remains visible. Recording or packing an experience does not train the model. The `step` command also exposes admitted pure relation queries, conditional refinement, conservative extension and hypothetical state maps through JSON arguments. The [relation contract](docs/relations.md) defines the input and limits. `board-import` supports explicit cross-task reuse with current source dependencies and a recorded relevance judgment. Exact units retain provenance across core versions; tensor-dependent units require a compatible basis.
+
 ## Verification
 
 ```sh
 PYTHONPATH=src python -m unittest discover -s tests -v
 python tools/evaluate_core.py --config .local/core/core.json --out .local/core-evaluation
 python tools/evaluate_steps.py --config .local/core/core.json --panel evals/quantity-panel.json --mode typed-quantities --out .local/quantity-evaluation
+python tools/evaluate_scratchboard.py --config .local/core/core.json --out .local/scratchboard-evaluation
+python tools/evaluate_judgments.py --config .local/core/core.json --out .local/judgment-evaluation
 ```
 
 `NANOAI_HARMONY_LIB` selects the built native codec for its tests. `NANOAI_BF5P_REFERENCE` selects the existing independent BF5P encoder; tests report skips when these optional native dependencies are absent. Use one model process at a time and retain the configured request, footprint and swap guards. Full evaluation paths are documented by each script's `--help` and the [contract](evals/CONTRACT.md).

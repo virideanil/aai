@@ -1,0 +1,15 @@
+{
+  "schema": "nanoai.judgment-panel.v1",
+  "source": {
+    "length": {"value": 23, "unit": "cm"},
+    "count": {"value": 2, "unit": "count"},
+    "first": {"value": 18, "unit": "s"},
+    "second": {"value": 24, "unit": "s"}
+  },
+  "cases": [
+    {"id": "product_true", "question": "Do two rails of 23 cm each have a combined length of exactly 46 cm?", "operator": "quantity.product", "fields": ["length", "count"], "expected": {"value": 46, "dimensions": {"cm": 1}}, "verdict": "yes"},
+    {"id": "product_false", "question": "Do two rails of 23 cm each have a combined length of exactly 45 cm?", "operator": "quantity.product", "fields": ["length", "count"], "expected": {"value": 45, "dimensions": {"cm": 1}}, "verdict": "no"},
+    {"id": "unavailable_color", "question": "Are both rails blue?", "operator": null, "fields": [], "expected": null, "verdict": "maybe"},
+    {"id": "sum_true", "question": "Does the sum of the first duration (18 seconds) and second duration (24 seconds) equal exactly 42 seconds?", "operator": "quantity.sum", "fields": ["first", "second"], "expected": {"value": 42, "dimensions": {"s": 1}}, "verdict": "yes"}
+  ]
+}

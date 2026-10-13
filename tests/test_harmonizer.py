@@ -1,4 +1,5 @@
 import copy
+import json
 import tempfile
 import unittest
 
@@ -6,6 +7,7 @@ from nanoai.agent import DEFAULT_IDENTITY, context
 from nanoai.harmonizer import Harmonizer
 from nanoai.memory import Memory, StaleState
 from nanoai.steps import Steps
+from nanoai.scratchboard import Scratchboard
 
 
 class HarmonizerTests(unittest.TestCase):
@@ -57,6 +59,42 @@ class HarmonizerTests(unittest.TestCase):
         steps.review(calculation["step_id"], "rejected", reviewer="independent-case-check", reason="The chosen work omitted an exception")
         with self.assertRaises(StaleState):
             harmonizer.validate(packet)
+
+    def test_working_units_share_dictionary_model_context_and_revision_dependencies(self):
+        board = Scratchboard(self.memory)
+        unit = board.add(self.snapshot, {"kind":"literal", "text":"Inspection code: PERA-73 [survey@1]"})
+        prepared = context(self.memory, "report", "test-core", selected_ids=["survey", "opinion"], scratchboard_ids=[unit["id"]])
+        packet = Harmonizer(self.memory).view(prepared["snapshot"])
+        entry = next(row for row in packet["entries"] if row["kind"] == "working_unit")
+        payload = json.loads(prepared["messages"][1]["content"])
+        self.assertEqual(payload["working_units"], [entry])
+        self.assertTrue(entry["preview_complete"])
+        self.assertIn("PERA-73", entry["preview"])
+        self.assertTrue(any(r["kind"] == "graph_rule" and r["id"] == "scratchboard.import" for r in packet["entries"]))
+        proposal = self.memory.record_proposal(prepared["snapshot"], {"filename":"result.md", "content":entry["preview"], "citations":["survey@1"]})
+        board.add(self.snapshot, {"kind":"literal", "text":"Independent candidate"})
+        self.assertEqual(Harmonizer(self.memory).validate(packet)["identity"], packet["identity"])
+        board.revise(unit["id"], {"kind":"literal", "text":"Inspection code: PERA-74 [survey@1]"}, reason="Adopt corrected inspection code")
+        with self.assertRaises(StaleState): Harmonizer(self.memory).validate(packet)
+        with self.assertRaises(StaleState): self.memory.commit(proposal["id"], core_identity="test-core")
+
+    def test_dictionary_keeps_unresolved_and_truncated_views_explicit(self):
+        board = Scratchboard(self.memory)
+        slots = board.reserve(self.snapshot, 10_000_000, constraints="Future work remains unresolved")
+        literal = board.add(self.snapshot, {"kind":"literal", "text":"Ş"*1500})
+        prepared = context(self.memory, "report", "test-core", selected_ids=["survey", "opinion"], scratchboard_ids=[slots["id"],literal["id"]])
+        units = json.loads(prepared["messages"][1]["content"])["working_units"]
+        self.assertEqual(units[0]["unresolved_slots"], 10_000_000)
+        self.assertIsNone(units[0]["preview"])
+        self.assertFalse(units[0]["preview_complete"])
+        self.assertFalse(units[1]["representation_complete"])
+        self.assertNotIn("text", units[1]["representation"])
+        self.assertEqual(units[1]["representation"]["text_prefix"], "Ş"*512)
+        other = context(self.memory, "report", "another-core", selected_ids=["survey", "opinion"], scratchboard_ids=[literal["id"]])
+        self.assertEqual(json.loads(other["messages"][1]["content"])["working_units"][0]["representation"],units[1]["representation"])
+        tensor = board.tensor(self.snapshot,b"\x00\x00",shape=[1])
+        with self.assertRaises(StaleState):
+            context(self.memory, "report", "another-core", selected_ids=["survey", "opinion"], scratchboard_ids=[tensor["id"]])
 
 
 if __name__ == "__main__":
