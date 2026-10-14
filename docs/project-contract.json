@@ -1,0 +1,1139 @@
+{
+  "schema": "nanoai.portable-project-contract.v1",
+  "date": "2026-10-14",
+  "count": 107,
+  "scope": "Curated project requirement statements and dispositions. Original messages and raw local evidence remain with their source owner. Current user instructions and source code govern further work.",
+  "requirements": [
+    {
+      "id": "Q-01",
+      "requirement": "Real-time computational circumstances influence internal units and effort",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        4,
+        7
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-02",
+      "requirement": "User/task context can select or construct useful operators",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        6
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-03",
+      "requirement": "Binary state produces natural signed ternary changes",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-04",
+      "requirement": "Native ternary values and multi-plane signed digits are distinct",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-05",
+      "requirement": "Bits and trits can be jointly packed",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-06",
+      "requirement": "Compression remains part of the design",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5,
+        7
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-07",
+      "requirement": "Compression is not the only role of bits and ternaries",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-08",
+      "requirement": "Plane outputs can feed compatible plane inputs directly",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-09",
+      "requirement": "Matryoshka enriches rather than fixes a low-capacity ceiling",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        4
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-10",
+      "requirement": "Parameters and matrices are optimized, not just the wrapper",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        6,
+        9
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-11",
+      "requirement": "Existing useful state and work are reused",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        3,
+        8,
+        9
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-12",
+      "requirement": "Memory hierarchy and movement are first-class costs",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        7
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-13",
+      "requirement": "CPU/GPU and bit/ternary roles are selected jointly",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        7
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-14",
+      "requirement": "Original detail remains accessible where exactness is required",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        4,
+        5,
+        9
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-15",
+      "requirement": "Knowledge access can include external evidence and tools",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        2,
+        3,
+        9
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-16",
+      "requirement": "New graph direction unifies earlier work",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        1,
+        3
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-17",
+      "requirement": "Kovan and other projects remain parallel contributions",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        1
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "Q-18",
+      "requirement": "Four agent surfaces must not maintain incompatible project truths",
+      "scope": "unified_architecture",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        1,
+        3
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-01",
+      "requirement": "Keep the named master and all drafter components at original BF16 precision in the exact laptop profile.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5,
+        8
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-02",
+      "requirement": "Distinguish source bits, floating-point arithmetic, token identity, task quality and provenance.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        5,
+        11
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-03",
+      "requirement": "Target about ten seconds to the next useful visible agent step.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        8
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-04",
+      "requirement": "Respect the reported 16 GB Apple M5 laptop and the other applications.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        7
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-05",
+      "requirement": "Preserve the model’s own thinking and no artificial output cap in the native acceptance profile.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        8
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-06",
+      "requirement": "Retain the full 262144-token context option without misreporting its performance.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        7,
+        8
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-07",
+      "requirement": "English first; Turkish at the model’s existing capability.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        8
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-08",
+      "requirement": "Preserve the patched engine base, receipts, baselines, and review history.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        7,
+        11
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-09",
+      "requirement": "Retain System Zero, System One and System Two as distinct parts of the design.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        8
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-10",
+      "requirement": "Keep unfinished work and negative results visible.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        11
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-11",
+      "requirement": "Do not restart heavy jobs or restore/delete model stores as part of migration.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        11
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "E-12",
+      "requirement": "Account for a complete agent loop rather than only a favorable token rate.",
+      "scope": "exact_laptop_profile",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        2,
+        8,
+        12
+      ],
+      "group": "archive_requirements"
+    },
+    {
+      "id": "A-01",
+      "requirement": "Preserve one complete system purpose and the named contributions from every source.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        1,
+        2
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-02",
+      "requirement": "Complete and verify unfamiliar agent tasks while preserving general capability.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        2,
+        6,
+        12
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-03",
+      "requirement": "Keep source-addressed memory, corrections, uncertainty and valid dependency reuse.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        3,
+        9
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-04",
+      "requirement": "Teach and evaluate The Sea's seven virtues, honesty, loyalty, wisdom and concern for wellbeing and agency.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        10
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-05",
+      "requirement": "Support versioned executable genomes and reversible structural development.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        9
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-06",
+      "requirement": "Evaluate QM observation, correction, prediction and allocation separately.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        6
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-07",
+      "requirement": "Develop resource-conditioned internal representations with recoverable detail and trained compatibility.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        4
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-08",
+      "requirement": "Join learned interpretation, formal reasoning, source binding and language.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        6
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-09",
+      "requirement": "Retain source-grounded perception and meaningful editable creation as system capabilities.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        2,
+        3
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-10",
+      "requirement": "Adapt physical execution to measured hardware and complete simultaneous memory costs.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        7
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-11",
+      "requirement": "Separate evidence from instructions and proposals from authorized effects; support correction and uncertain-effect recovery.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        2,
+        3
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-12",
+      "requirement": "Demonstrate learning through changed parameters and held-out transfer with retention.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        9,
+        10
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-13",
+      "requirement": "Measure complete useful latency and costs without silently changing quality or truncating work.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        7,
+        8,
+        12
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-14",
+      "requirement": "Preserve source scope and contrary results; qualify whole behavior beyond component checks.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        11,
+        12
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-15",
+      "requirement": "Retain independently identified cooperating organisms with typed exchanges and separately evaluated learned compatibility.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        9
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-16",
+      "requirement": "Preserve named identities, existing owners and parked work during synthesis.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        1,
+        11
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-17",
+      "requirement": "Preserve useful artistic expression and interaction tied to actual system work.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        2,
+        11
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "A-18",
+      "requirement": "Keep shared contracts portable across providers and explicit native dependencies.",
+      "scope": "whole_system",
+      "disposition": "retained_design_requirement",
+      "implementation_claim": false,
+      "brief_sections": [
+        3,
+        7,
+        9
+      ],
+      "group": "system_requirements"
+    },
+    {
+      "id": "K-01",
+      "requirement": "Make both complete upstream source trees available locally with exact versions and licenses.",
+      "brief_sections": [
+        13
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "implemented_and_source_verified"
+    },
+    {
+      "id": "K-02",
+      "requirement": "Curate each contribution into the cumulative AI architecture while preserving original sources and existing owner boundaries.",
+      "brief_sections": [
+        9,
+        13
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "curated_design"
+    },
+    {
+      "id": "K-03",
+      "requirement": "Try bounded actual model paths and retain failures, supported repair candidates and limits for later adoption decisions.",
+      "brief_sections": [
+        11,
+        13
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "bounded_consumer_checks_complete"
+    },
+    {
+      "id": "K-04",
+      "requirement": "Name the intended integrated system nano'ai and preserve bits, ternaries, the earlier discussions and wider wishes in its design.",
+      "brief_sections": [
+        1,
+        4,
+        5,
+        9,
+        13
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "integrated_into_canonical_design"
+    },
+    {
+      "id": "K-05",
+      "requirement": "Preserve micrograd as pinned source and adapt its inspectable learning machinery into the integrated system with actual consumer evidence.",
+      "brief_sections": [
+        13,
+        14
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "bounded_consumer_checks_complete"
+    },
+    {
+      "id": "K-06",
+      "requirement": "Brainstorm how hardware, bits and ternaries, learning, memory and agency form a coherent system while preserving the full earlier dreams and ideas.",
+      "brief_sections": [
+        2,
+        3,
+        4,
+        5,
+        6,
+        7,
+        8,
+        9,
+        10,
+        12,
+        14
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "working_architecture_proposal"
+    },
+    {
+      "id": "K-07",
+      "requirement": "Read Fables notes, reconcile them with the full brief and source evidence, and proceed with supported implementation and verification.",
+      "brief_sections": [
+        8,
+        14,
+        15
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "review_reconciled_and_bounded_changes_consumer_checked"
+    },
+    {
+      "id": "K-08",
+      "requirement": "Interpret the corrected direction as ternary weight values carried by binary storage and execution; retain training, encoding and arithmetic as separate contracts.",
+      "brief_sections": [
+        5,
+        16
+      ],
+      "clarifies": [
+        "Q-03",
+        "Q-04",
+        "Q-05"
+      ],
+      "historical_record_policy": "Preserve original wording. Binary state-change identities and mixed packing remain separate optional mechanisms.",
+      "group": "upstream_requirements",
+      "status_at_export": "current_interpretation_applied_with_exact_codec_evidence"
+    },
+    {
+      "id": "K-09",
+      "requirement": "Assess using Qwen weights as a comparison and source of initialization or training supervision to give nanoai and the complete architecture a head start.",
+      "brief_sections": [
+        9,
+        13,
+        16
+      ],
+      "execution_scope": "No Qwen training, inference restart or weight conversion in this pass.",
+      "group": "upstream_requirements",
+      "status_at_export": "source_grounded_design_proposal_with_header_inspection"
+    },
+    {
+      "id": "K-10",
+      "requirement": "Acquire and add qualified original Fable and Kimi K3 matrices or BF16 MTP/proposer candidates alongside Qwen, preserving native source precision, exact provenance and the complete nanoai purpose.",
+      "brief_sections": [
+        5,
+        8,
+        9,
+        16,
+        17
+      ],
+      "limits": "No public Fable weights or MTP artifact found; complete K3 target exceeds current local storage; no original K3 MTP layers in the pinned release; DSpark is a separately trained K3-dependent candidate without runtime admission.",
+      "group": "upstream_requirements",
+      "status_at_export": "available_selected_payloads_acquired_and_bounded_consumers_checked"
+    },
+    {
+      "id": "K-11",
+      "requirement": "Start a real learning experiment using Qwen and Kimi material to develop nanoai ternary weights carried by bits while retaining identity, personality, earlier dreams and Claude messages.",
+      "brief_sections": [
+        5,
+        9,
+        10,
+        18
+      ],
+      "limits": "Fragmented generated replies, no dependable source-init advantage, curriculum retention cost and no acquired character or production admission.",
+      "group": "upstream_requirements",
+      "status_at_export": "twelve_matched_local_language_training_runs_completed_with_packed_checkpoint_verification"
+    },
+    {
+      "id": "K-12",
+      "requirement": "Determine the intended complete system and its learning, identity, memory, agency and hardware contracts before further building; derive the next learner from those needs.",
+      "brief_sections": [
+        19
+      ],
+      "limits": "Design proposal and source/resource review; no new model construction, training, learned character or whole-system acceptance.",
+      "group": "upstream_requirements",
+      "status_at_export": "architecture_decision_and_dependency_order_reconciled"
+    },
+    {
+      "id": "K-13",
+      "requirement": "Work with Claude to choose and test a capable resident core, then implement and verify memory and recovery while retaining identity, personality and all earlier dreams; track the project with aai branches.",
+      "brief_sections": [
+        20
+      ],
+      "limits": "Complete-system superiority remains a research objective requiring matched evaluation.",
+      "group": "upstream_requirements",
+      "status_at_export": "active"
+    },
+    {
+      "id": "K-14",
+      "requirement": "Study how Qwen and Kimi mechanisms work to develop stronger nanoai computation, potentially beyond K3 and Qwen3.8. Matrix cropping for language-knowledge transfer was the assistant’s mistaken interpretation; the resident model is an experimental baseline rather than the final architecture.",
+      "brief_sections": [
+        20
+      ],
+      "limits": "Complete-system superiority remains a research objective requiring matched evaluation.",
+      "group": "upstream_requirements",
+      "status_at_export": "active"
+    },
+    {
+      "id": "K-15",
+      "requirement": "Develop harmonious individual, combined and parallel use of binary and ternary representations while retaining the original BF16 model; measure actual information, storage and complete computation effects.",
+      "brief_sections": [
+        5,
+        21
+      ],
+      "limits": "Exact reconstruction, reference arithmetic, native inference and whole-system capability have separate evidence.",
+      "group": "upstream_requirements",
+      "status_at_export": "active"
+    },
+    {
+      "id": "K-16",
+      "requirement": "Read Fables room message 101 before continuing and reconcile its source-selection, artifact-fact, supersession and recovery-provenance findings.",
+      "brief_sections": [
+        21
+      ],
+      "limits": "Peer review, journal checks and generated artifact behavior retain separate evidence.",
+      "group": "upstream_requirements",
+      "status_at_export": "implemented_pending_final_integration_receipt"
+    },
+    {
+      "id": "K-17",
+      "requirement": "Seek the fuller architecture with Fable, retaining original precision and complete quality while improving useful work per expensive computation; validate proposals against task evidence rather than treating model agreement as semantic truth.",
+      "brief_sections": [
+        22
+      ],
+      "limits": "Program predicates and bounded generated-task checks establish their stated scope; broader neural improvements need their own trained and matched consumer.",
+      "group": "upstream_requirements",
+      "status_at_export": "design_selected_representative_consumer_under_evaluation"
+    },
+    {
+      "id": "K-18",
+      "requirement": "Read the actual human messages in Claude files, including queued commands, and build the complete architecture: new-form AI and acting Colibri/System One intent, full precision, exceptional speed and low total cost on ordinary computers, with every earlier ambition preserved.",
+      "brief_sections": [
+        22
+      ],
+      "limits": "Historical runtime permissions keep their scope. Small baseline models are instruments. Literal nanosecond fresh reasoning and frontier superiority remain unestablished.",
+      "group": "upstream_requirements",
+      "status_at_export": "original_sources_reconciled_and_whole_architecture_selected"
+    },
+    {
+      "id": "K-19",
+      "requirement": "Build System Zero as a common vocabulator that harvests open native vocabularies while retaining exact bytes, source identity, native meanings and the wider bits/ternaries architecture.",
+      "brief_sections": [
+        23
+      ],
+      "limits": "Exact representation and bounded generated-task consumers are measured; new jointly trained capability, universal quality, hardware speed and human acceptance require their own evidence.",
+      "group": "upstream_requirements",
+      "status_at_export": "real_native_adapters_and_full_witness_maps_verified"
+    },
+    {
+      "id": "K-20",
+      "requirement": "Extend System Zero into a common knowledge harmonizer and source/rule dictionary for Quantum tokening; recurate shadow tokening/tensoring and connect variable text/output size, including the ten-million-token aspiration, to quality, information and full cost.",
+      "brief_sections": [
+        23
+      ],
+      "limits": "Exact representation and bounded generated-task consumers are measured; new jointly trained capability, universal quality, hardware speed and human acceptance require their own evidence.",
+      "group": "upstream_requirements",
+      "status_at_export": "exact_dictionary_in_real_consumer; joint_neural_harmonizer_and_large_output_quality_unqualified"
+    },
+    {
+      "id": "K-21",
+      "requirement": "Think through the complete architecture with Fable, preserving every earlier dream and seeking the strongest coherent learning and execution path.",
+      "brief_sections": [
+        23
+      ],
+      "limits": "Exact representation and bounded generated-task consumers are measured; new jointly trained capability, universal quality, hardware speed and human acceptance require their own evidence.",
+      "group": "upstream_requirements",
+      "status_at_export": "joint_core_and_exact_graph_selected_with_source_bound_learning_contract"
+    },
+    {
+      "id": "K-22",
+      "requirement": "Represent symbolic token/tensor scratch space with sparse, composable working units and a large address range; distinguish reserved capacity, created information and materialized output cost.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "exact_scratchboard_and_real_BF16_consumer_verified"
+    },
+    {
+      "id": "K-23",
+      "requirement": "Permit useful changes of representation, granularity, shape and precision throughout work while preserving declared invariants, source detail and original BF16 model precision.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "revision_refinement_and_reshape_consumers_verified; learned_refinement_open"
+    },
+    {
+      "id": "K-24",
+      "requirement": "Make structural modularity a real core capability and train the shared action head to use it well.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "intrinsic_typed_state_modularity_implemented; useful_learned_editing_untrained"
+    },
+    {
+      "id": "K-25",
+      "requirement": "Preserve and harmonize every important earlier requirement in the integrated architecture and actual consumers.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "all_prior69_requirement_values_retained; architecture_and_source_graph_reconciled"
+    },
+    {
+      "id": "K-26",
+      "requirement": "Develop each component toward its best justified internal structure and function while evaluating how the whole system works together.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "component_contracts_and_complete_task_measurements_separate; global_optimality_unestablished"
+    },
+    {
+      "id": "K-27",
+      "requirement": "Connect dictionary-grounded developmental learning, atomic tensor/representation use, mathematical question formation and improvement through each use to the shared core and reviewed experience.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "typed_experience_and_exact_relation_targets_connected; full_BF16_training_resource_limit_measured; useful_learned_question_formation_open"
+    },
+    {
+      "id": "K-28",
+      "requirement": "Consider yes/maybe/no ternary judgments carried by ordinary binary storage and declared tensor views as an optional recommendation harmonized with the full design.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "typed_predictions_assessments_and_exact_carriers_verified; semantic_failures_retained"
+    },
+    {
+      "id": "K-29",
+      "requirement": "Explore the guarded 3x3 trit math computer and a working visual diagram with Fable; assess binary capacity, unknown-state conventions and the proposed relationship to pi mathematically.",
+      "brief_sections": [
+        24
+      ],
+      "limits": "Exact carriers and runtime operations have bounded consumer evidence. Learned reasoning, question formation, editing quality and shared-core development require separate training and whole-task evidence; original precision and authority remain in force.",
+      "group": "upstream_requirements",
+      "status_at_export": "actual_JavaScript_and_independent_integer_math_verified; pi_proofs_reviewed; GUI_interaction_and_human_acceptance_unobserved"
+    },
+    {
+      "id": "K-30",
+      "requirement": "Curate the modified 0/1/both structure into persistent relational state, preserving branch identity, dependencies, actions, experience and extensibility; connect learning and SJQL throughout the complete nanoai architecture, with curiosity as one use. Research and prove clearly scoped properties.",
+      "brief_sections": [
+        25
+      ],
+      "limits": "Exact finite-state semantics, persistence and scoped proofs are checked. The seven-case BF16 consumer has 3/7 correct coarse labels and 1/7 correct labels with their intended cause. Useful learned inquiry, generalization and whole-system superiority remain separately evaluated.",
+      "group": "upstream_requirements",
+      "status_at_export": "whole-state_design_and_scoped_proofs_written; finite_relations_integrated_and_real_BF16_consumer_measured"
+    },
+    {
+      "id": "K-31",
+      "requirement": "Understand the intended whole from the relevant original conversations; interpret humour, metaphors and examples in context rather than turning every phrase into a separate literal technical claim. Preserve all earlier goals.",
+      "brief_sections": [
+        25
+      ],
+      "limits": "Exact finite-state semantics, persistence and scoped proofs are checked. The seven-case BF16 consumer has 3/7 correct coarse labels and 1/7 correct labels with their intended cause. Useful learned inquiry, generalization and whole-system superiority remain separately evaluated.",
+      "group": "upstream_requirements",
+      "status_at_export": "relevant_original_and_queued_sources_read; whole-state_synthesis_and_peer_interpretation_reconciled"
+    },
+    {
+      "id": "K-32",
+      "requirement": "The middle arrows in the schematic represent both judgment revision and transfer between encodings; retain revision lineage and verify meaning-preserving carrier transformations.",
+      "brief_sections": [
+        25
+      ],
+      "limits": "Exact finite-state semantics, persistence and scoped proofs are checked. The seven-case BF16 consumer has 3/7 correct coarse labels and 1/7 correct labels with their intended cause. Useful learned inquiry, generalization and whole-system superiority remain separately evaluated.",
+      "group": "upstream_requirements",
+      "status_at_export": "both_meanings_recorded; separate_revision_and_binary_BF16_carrier_consumers_verified"
+    },
+    {
+      "id": "K-33",
+      "requirement": "Treat superposition and humble position as a continuing learning stance: carry alternatives, make a reasoned attempt, retain its consequences and revise the next position. Interpret pi as the open continuation analogy in the whole brief, and assess improvement through task benefit, new understanding and retained capabilities.",
+      "brief_sections": [
+        25
+      ],
+      "limits": "Architecture and current experience contracts preserve the stance; durable learned conduct requires candidate training and representative evaluation.",
+      "group": "upstream_requirements",
+      "status_at_export": "developmental_stance_integrated_with_scoped_assessments_and_revision_history"
+    },
+    {
+      "id": "K-34",
+      "requirement": "Apply the developmental design throughout nanoai with Claude and actually build and run the loop from words to contextual meanings, choices, observed consequences and parameter learning.",
+      "brief_sections": [
+        26
+      ],
+      "limits": "Current implementation and measured outcomes remain bounded; the full generative learned core, transfer, conduct and whole-system quality retain their explicit evaluations.",
+      "group": "upstream_requirements",
+      "status_at_export": "bounded_learning_and_artifact_loop_executed_without_quality_admission"
+    },
+    {
+      "id": "K-35",
+      "requirement": "Before further additions, carefully place and compare the complete architecture and the best justified mechanisms for realizing it, preserving the earlier ambitions while improving the design beyond their initial formulations.",
+      "brief_sections": [
+        26
+      ],
+      "limits": "Current implementation and measured outcomes remain bounded; the full generative learned core, transfer, conduct and whole-system quality retain their explicit evaluations.",
+      "group": "upstream_requirements",
+      "status_at_export": "whole_design_consolidated_with_explicit_alternatives_and_deciding_consumers"
+    },
+    {
+      "id": "K-36",
+      "requirement": "Continue with Claude toward actual meaning learning and development from experience, measuring quality on real tasks while preserving every prior objective.",
+      "brief_sections": [
+        27
+      ],
+      "limits": "Scoped executable semantics and learned whole-task transfer require their own evidence; exact coding alone does not establish understanding.",
+      "group": "upstream_requirements",
+      "status_at_export": "Scoped semantic data and saved full-source adapter exist; three-arm comparison stopped on host-swap growth and no candidate was admitted. Tokenizer-first and current local preview/Git preparation govern the next run."
+    },
+    {
+      "id": "K-37",
+      "requirement": "Read the full Dust research and compare activation credit, EGGROLL and backpropagation with the complete nanoai design.",
+      "brief_sections": [
+        27
+      ],
+      "limits": "Scoped executable semantics and learned whole-task transfer require their own evidence; exact coding alone does not establish understanding.",
+      "group": "upstream_requirements",
+      "status_at_export": "Full article, appendix and pinned released implementation reviewed; local Dust training unmeasured."
+    },
+    {
+      "id": "K-38",
+      "requirement": "Core data connects English and mathematics bidirectionally with faithful meaning and real executable ability. Development includes trial, consequence and revision beyond a parameter optimizer.",
+      "brief_sections": [
+        27
+      ],
+      "limits": "Scoped executable semantics and learned whole-task transfer require their own evidence; exact coding alone does not establish understanding.",
+      "group": "upstream_requirements",
+      "status_at_export": "58 authored bidirectional records and independent finite-meaning checks implemented; linked separating situations exercised. The learned comparison stopped before candidate evaluation and supplies no semantic admission."
+    },
+    {
+      "id": "K-39",
+      "requirement": "Read the latest original human requests in Claude, discuss the design with Fable, and reconcile their intent before dependent changes.",
+      "brief_sections": [
+        28
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "Both named original Claude dialogues were read and reconciled; current design and Fable coordination retained with their exact source records."
+    },
+    {
+      "id": "K-40",
+      "requirement": "Preserve the accepted research-page design and improve its substance, figures and actual behavior with source-verified claims and the complete nanoai design.",
+      "brief_sections": [
+        28
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "Research note rewritten with accepted layout retained, source-built figures/tables, meaning controls and stopped-run outputs. Source/controller and loopback HTTP checks pass; browser layout, interaction and user acceptance remain unobserved."
+    },
+    {
+      "id": "K-41",
+      "requirement": "Use Qwen3.8 and Kimi K3 vocabulary sources, curate diverse available open tokenizer heads into a harmonious master tokenization, and finalize its C++ implementation before starting the model learning run.",
+      "brief_sections": [
+        28
+      ],
+      "limits": "Source inventory, sound tokenization, learned semantic transfer and full-system speed retain separate evidence. Imported native IDs preserve their original namespace and tokenizer behavior.",
+      "group": "upstream_requirements",
+      "status_at_export": "Frozen 24,664-piece byte artifact and C++20 consumer qualified: 22 native sources, 127 Python/native probes, independent probability checks, sanitizers and fixed BF16 data consumer. Zero neural updates in finalization; browser frozen-byte port pending owner parity."
+    },
+    {
+      "id": "K-42",
+      "requirement": "Read the complete relevant dialogue in Claude’s Codex parallel processing analysis and Restore SEE test_frame.py fixture chats, preserve their decisions and completed work, and use that understanding to improve the active implementation.",
+      "group": "upstream_requirements",
+      "status_at_export": "Both named chats read completely and reconciled. Frozen tokenizer, durable catalogue and actual SEE consumer now executed, with source and ownership boundaries retained."
+    },
+    {
+      "id": "K-43",
+      "requirement": "Integrate a live language catalogue with exact byte barcodes, source witnesses, lexical evidence, alternatives and revision history; observed use contributes experience while the instance runs, with qualified tokenizer and model versions preserved.",
+      "group": "upstream_requirements",
+      "status_at_export": "The durable API and CLI catalogue preserve exact barcodes, native witnesses, followers, current/history views and correction recovery. The real writing consumer now automatically observes generated artifacts. Learned semantic use remains a separate evaluation."
+    },
+    {
+      "id": "K-44",
+      "requirement": "Connect the existing SEE perception rebuild and its exact source, region, mask and scaling evidence to nanoai; integrate the separately requested Monet, Repin, Van Gogh and other retained-work catalogue as a companion to the accepted research note.",
+      "group": "upstream_requirements",
+      "status_at_export": "Actual SEE source and mask identities independently checked through the durable nanoai port; a real Monet consumer and source-correction recovery passed. Ten-work SEE catalogue linked and served with the research note; visual interaction acceptance remains separate."
+    },
+    {
+      "id": "K-45",
+      "requirement": "Finalize the upgrades carefully, rewrite their explanations from scratch around verified behavior, and prepare each owned part for Git review.",
+      "brief_sections": [
+        29
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "Explanations and owned research surfaces are reconciled with measured behavior. The final source suite passes 178 tests with zero skips; independent Python/C++/JavaScript tokenizer conformance and isolated installed SQLite recovery pass. Local aai commit f508d4966230f7b49d873fb07e8cb61f3b8bb38c records the implementation; its working tree is clean. Publication and broader speed/accuracy qualification remain outside this result."
+    },
+    {
+      "id": "K-46",
+      "requirement": "Treat the numerical error and pi examples as illustrations of a general fallible learning system: reduce observed error frequency and consequences, retain uncertainty, detect mistakes and revise from experience across language, perception, action and learning. Declare assumptions for every error estimate and preserve exact scoped contracts.",
+      "brief_sections": [
+        29
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "General error-reduction principle applied to the architecture, implementation design and research note. Frequency, consequences, uncertainty, correction and transfer are distinct assessment targets; pi remains an illustration."
+    },
+    {
+      "id": "K-47",
+      "requirement": "Recurate the tokenizer into a natural, refined and shareable standalone capability that can improve ordinary tokenization in independent use, with a separate Git publication considered afterward.",
+      "group": "upstream_requirements",
+      "status_at_export": "Standalone nanoai-tokens package extracted and installed with the frozen bytes, C++ binding, Python reference and native CLI. Distribution and independent consumer checks passed; 20 shared malformed fixtures also agree across C++, Python and Fable's JavaScript owner. Publication remains unrequested."
+    },
+    {
+      "id": "K-48",
+      "requirement": "Use this stage to refine the complete nanoai system into its most coherent integrated form with sustained care. Harmonious binary, ternary and mixed use, alternatives, refinement, exact source detail, original precision, learning and every applicable prior ambition determine the common core and module boundaries, including the independently usable tokenizer.",
+      "reason": "Latest user clarification resolves the earlier narrow interpretation of packing every mechanism into the tokenizer library.",
+      "group": "upstream_requirements",
+      "status_at_export": "Whole-core design compared and implemented through the shared native tokenizer boundary, journal, catalogue, writing and teaching paths. Exact carriers remain separate from the jointly learned destination; broader semantic gains remain unestablished."
+    },
+    {
+      "id": "K-49",
+      "requirement": "Before Git delivery, choose the most effective suitable implementation languages and execution boundaries throughout the affected system, preserving complete behavior and applying Karpathy simplicity; measure and verify justified improvements and propagate this standing habit through its maintained owners.",
+      "group": "upstream_requirements",
+      "status_at_export": "Standing language review propagated to maintained owners. C++ tokenization preserves the result and reduces the measured 28-text panel median from 4.66 ms to 1.13 ms. Python retains orchestration, SQLite owns durable metadata, and native tensor consumers retain original binary payloads."
+    },
+    {
+      "id": "K-50",
+      "requirement": "Reconcile Fable’s writing proposal and The Sea’s retained wishes into the coherent nanoai architecture, then build and run an agentic writing attempt with language, mathematics, source grounding, continuing work, practical judgment and learning placed together. Treat literary quality and broad knowledge as capabilities requiring evidence.",
+      "group": "upstream_requirements",
+      "status_at_export": "The Sea source reconciliation and integrated writing design are complete. Actual plan, draft, critique, correction and fresh-process continuation ran and recovered once. Strict brief checks and causal reading preserve the observed writing failures; this is not book-quality or learning admission."
+    },
+    {
+      "id": "K-51",
+      "requirement": "Use more effective, teachable ground rules, source-grounded examples and checked corrections to develop applicable capability, then test transfer and retention.",
+      "group": "upstream_requirements",
+      "status_at_export": "Nine authored lessons, source quotations, checked corrections and complete-attempt practice are implemented. Actual guided writing retained quality failures. Full-source teaching stopped before an update on host swap; later native collection produced no final answer in 1317 seconds. Further teaching and thinking-enabled practice depend on a qualified execution path with acceptable complete-task cost."
+    },
+    {
+      "id": "K-52",
+      "requirement": "Enable thinking by default across active nanoai inference. Use natural completion without an artificial thinking-token quota. Observe actual reasoning, task checks, revisions and time as effort; retain finite context, resource protection and cancellation.",
+      "group": "upstream_requirements",
+      "status_at_export": "Generation defaults to thinking with natural completion and no reasoning-token quota or per-generation deadline. Sampling observations, completed responses, resource stops and cancellations are retained. The unsuitable streamed teaching run is stopped; two mapped Metal startup attempts hit the unchanged swap guard. No candidate or sampler earned promotion."
+    },
+    {
+      "id": "K-53",
+      "requirement": "Use SQLite for tensor holdings metadata, provenance, versions and learning history. Preserve native binary tensor payloads for efficient exact streaming. This split is the current interpretation of the user request.",
+      "group": "upstream_requirements",
+      "status_at_export": "Typed SQLite tensor inventory, versions and learning events are connected to native preparation, candidate publication and native load. Actual 335-tensor source and 10-tensor adapter loads verify their catalogue. The reproduced metadata-to-payload binding gap is repaired and rejected by store and loaded-session tests; an isolated installed consumer verifies recovery without the SJQL package."
+    },
+    {
+      "id": "K-54",
+      "requirement": "Restore the central requirement of extremely fast and accurate complete work, including the stated nanosecond ambition. Diagnose the current latency and quality mismatch, select execution from measured hardware and whole-system cost, and qualify useful task accuracy before extending the learning rollout. Preserve thinking, original precision and the intended new nanoai architecture.",
+      "brief_sections": [
+        7,
+        8,
+        22
+      ],
+      "limits": "A scalar-operation time, exact representation or saved result does not establish a nanosecond fresh response or learned accuracy.",
+      "group": "upstream_requirements",
+      "status_at_export": "CPU-only scheduling was identified and an explicit mapped Metal option added. The 1317-second streamed run is stopped; both actual Metal attempts stopped on host swap before an output. Guards and original precision are preserved. Whole-task speed, accuracy and the nanosecond response ambition remain unmet."
+    },
+    {
+      "id": "K-55",
+      "requirement": "Add techtheist/engram and TencentCloud/TencentDB-Agent-Memory as source-grounded mechanism candidates in the whole nanoai design inquiry. Preserve existing speed, accuracy, learning, original-precision and exact-source requirements.",
+      "brief_sections": [
+        31
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "Pinned default-branch sources, licenses, selected code paths and evaluation boundaries were reviewed. Typed graph retrieval and revision-bound progressive evidence views are selected as design contracts over the existing SQLite journal. An isolated source sanitizer check demonstrated Unicode changes. Complete products, new memory runtime behavior and task benefit remain unqualified."
+    },
+    {
+      "id": "K-56",
+      "requirement": "Preserve the complete retained purpose and achieved mechanisms; investigate the concrete lack of harmonization, repair the actual shared consumer, and verify integration through current work and observed effects.",
+      "brief_sections": [
+        32
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "Authoring, writing and authored teaching share one presentation contract; checked training uses the exact recorded prompt. The installed public writing command checks current selected work and recovers its artifact before model startup. The retained 191-test suite and installed consumer pass. Three sampled native attempts produced no final answer; the direct-request candidate was restored to v1, retaining independently reproduced calculation and judgment label repairs. Full native task quality, complete-work speed and broader learned capability remain open."
+    },
+    {
+      "id": "K-57",
+      "requirement": "Specify proper whole-system wiring and use while preserving the complete retained requirements; exercise and repair shared boundaries, and distinguish useful computation, source-bound recovery, assessed outcomes and learned capability.",
+      "brief_sections": [
+        33
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "Whole-system execution placement is specified. The installed completion failure is repaired and verified on the preserved native state; all 197 source tests and fresh installed writing/recovery checks pass. No new neural execution or learned capability is claimed. Current native quality and host resource limits remain."
+    },
+    {
+      "id": "K-58",
+      "requirement": "Keep the reviewed pi proof, shared alternatives and continuing refinement central to the complete operating design and explain their implemented and learned roles.",
+      "brief_sections": [
+        34
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "Reviewed proof is retained; current pi arithmetic and installed relational consumers pass. Learned selection and general capability remain open."
+    },
+    {
+      "id": "K-59",
+      "requirement": "Welcome Argon to the project with the full design, retained requirements, proof, current evidence and usable setup, and push the reviewed project to a private Git repository.",
+      "brief_sections": [
+        34
+      ],
+      "group": "upstream_requirements",
+      "status_at_export": "The portable project handoff includes all 107 requirements, the complete design, reviewed pi proof, current evidence and runnable checks. The configured repository has been verified private. Remote commit delivery and Argon execution are separate observations."
+    }
+  ]
+}

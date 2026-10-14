@@ -1,0 +1,417 @@
+{
+  "schema": "nanoai.research-context-export.v1",
+  "date": "2026-10-14",
+  "scope": "Curated project context and executable reference material. No raw transcripts, credentials, live journals or model payloads are included.",
+  "sources": [
+    {
+      "source": "THE-AI.md",
+      "source_digest": "shake256:3767e15426746d6043151f094e1185c239b026b386933c72f0929c9a70f30d1d31bf4adf89dbe60e2fa0ca94107c2fc0cba9af2e98b684135ec2590ebf87962e",
+      "export": "docs/project-brief.md",
+      "transformation": "Repository-relative links and explicit local-evidence markers; source text otherwise retained."
+    },
+    {
+      "source": "NANOAI-ARCHITECTURE.md",
+      "source_digest": "shake256:8e5ae3ddad1000a5b4803ce16ebd75aa4b1a99b9c316b842695701ee06c830a06c7d8d7d05f7d87fae012c60eb1ac12b0a1ba589212604ee5aca33cb3e74d859",
+      "export": "docs/whole-system.md",
+      "transformation": "Repository-relative links and explicit local-evidence markers; source text otherwise retained."
+    },
+    {
+      "source": "audit/bf16-harmony-20261013/ternary-curation/pi-proof-reviewed.md",
+      "source_digest": "shake256:876f293fc336887a2af157eaa458bba8696527048de9374046b83aa2780171328a272a0f0e0a555662bd9f6d8fe82021aa83d8724a3d6682c5120067ffa91707",
+      "export": "docs/pi-proof.md",
+      "transformation": "Qualified two previously reviewed editorial phrases; added current scope header."
+    },
+    {
+      "source": "requirements.json",
+      "source_digest": "shake256:c05f0e4f7777b346eab96aeafc2bc45effbf02b57832b5f5ba54d9af07629214e25c0262bd6cb2baddc522e016f5e119e34bb070a32ef461aca2889114a3c4b4",
+      "export": "docs/project-contract.json",
+      "transformation": "All 107 requirement statements and applicable dispositions; source-message fields omitted."
+    },
+    {
+      "source": "lab/trit-computer/index.html",
+      "source_digest": "shake256:e3c1b9261c6a0cc531f5afc5c132f6b11e47ad0e8a7cccd01ef38fb63e8bd61c13d7ebca7273f5626ba955da6fcb1e25d82f8d00e9a3491426e5d881ec1e2343",
+      "export": "examples/trit-computer.html",
+      "transformation": "Exact bytes."
+    }
+  ],
+  "local_evidence_references": [
+    {
+      "label": "Fables review reconciliation",
+      "source": "FABLES-RECONCILIATION.md"
+    },
+    {
+      "label": "qualified source additions",
+      "source": "MODEL-CANDIDATES.md"
+    },
+    {
+      "label": "first language learning experiment",
+      "source": "experiments/ternary-001/RESULTS.md"
+    },
+    {
+      "label": "Intent and source map",
+      "source": "SOURCE-MAP.md#intent-and-coverage"
+    },
+    {
+      "label": "Source reconciliation",
+      "source": "SOURCE-MAP.md#reconciled-decisions"
+    },
+    {
+      "label": "Existing graph contract",
+      "source": "../../tensor/FULL-SYSTEM-DESIGN.md#892-four-records-with-different-meanings"
+    },
+    {
+      "label": "Current check",
+      "source": "audit/ternary-qwen/codec-check.json"
+    },
+    {
+      "label": "Recorded trial",
+      "source": "../../tensor/evidence/qm-internal-20261005/RESULTS.md"
+    },
+    {
+      "label": "Run receipt",
+      "source": "audit/algebra-checks-20261012.json"
+    },
+    {
+      "label": "Host receipt",
+      "source": "audit/local-source-state.json"
+    },
+    {
+      "label": "Historical failure",
+      "source": "audit/strict-profile-probe.json"
+    },
+    {
+      "label": "current policy probe",
+      "source": "audit/strict-profile-fix.json"
+    },
+    {
+      "label": "Karpathy source integration",
+      "source": "KARPATHY-INTEGRATION.md"
+    },
+    {
+      "label": "Source-bound virtue design",
+      "source": "../../tensor/VIRTUES.md"
+    },
+    {
+      "label": "integration record",
+      "source": "KARPATHY-INTEGRATION.md"
+    },
+    {
+      "label": "requirement map",
+      "source": "curation/architecture-map.json"
+    },
+    {
+      "label": "local adaptation",
+      "source": "lab/micrograd_ternary.py"
+    },
+    {
+      "label": "executed probe",
+      "source": "audit/micrograd/result.json"
+    },
+    {
+      "label": "review reconciliation",
+      "source": "FABLES-RECONCILIATION.md"
+    },
+    {
+      "label": "tensor adaptation",
+      "source": "lab/torch_ternary.py"
+    },
+    {
+      "label": "Results",
+      "source": "audit/tensor-ternary/result.json"
+    },
+    {
+      "label": "metadata read",
+      "source": "audit/qwen-header-20261012.json"
+    },
+    {
+      "label": "model-source addition",
+      "source": "MODEL-CANDIDATES.md"
+    },
+    {
+      "label": "Experiment 001",
+      "source": "experiments/ternary-001/RESULTS.md"
+    },
+    {
+      "label": "identity contract",
+      "source": "experiments/ternary-001/identity.json"
+    },
+    {
+      "label": "design review",
+      "source": "audit/design-first-20261013/design-review.json"
+    },
+    {
+      "label": "Resource arithmetic",
+      "source": "audit/design-first-20261013/resource-model.json"
+    },
+    {
+      "label": "the resident audit",
+      "source": "audit/resident-core-20261013"
+    },
+    {
+      "label": "The source extraction",
+      "source": "audit/bf16-harmony-20261013/claude-user-intent.json"
+    },
+    {
+      "label": "the exact source record",
+      "source": "audit/bf16-harmony-20261013/system-zero-user-intent.json"
+    },
+    {
+      "label": "the scratchboard request",
+      "source": "audit/bf16-harmony-20261013/scratchboard-user-intent.json"
+    },
+    {
+      "label": "modularity requests",
+      "source": "audit/bf16-harmony-20261013/modularity-user-intent.json"
+    },
+    {
+      "label": "developmental requests",
+      "source": "audit/bf16-harmony-20261013/developmental-user-intent.json"
+    },
+    {
+      "label": "handwritten schematic",
+      "source": "audit/bf16-harmony-20261013/ternary-sketch/Photo-1.jpg"
+    },
+    {
+      "label": "math-computer request",
+      "source": "audit/bf16-harmony-20261013/ternary-sketch/math-computer-intent.json"
+    },
+    {
+      "label": "request to read Claude",
+      "source": "audit/bf16-harmony-20261013/ternary-sketch/read-claude-intent.json"
+    },
+    {
+      "label": "qualified contract",
+      "source": "audit/bf16-harmony-20261013/ternary-sketch/ASSESSMENT.md#review-of-the-proposed-maybe-equation"
+    },
+    {
+      "label": "latest explanations",
+      "source": "audit/bf16-harmony-20261013/ternary-curation/latest-user-intent.json"
+    },
+    {
+      "label": "interpretation corrections",
+      "source": "audit/bf16-harmony-20261013/ternary-curation/interpretation-corrections.json"
+    },
+    {
+      "label": "formal synthesis",
+      "source": "audit/bf16-harmony-20261013/ternary-curation/FORMAL-MODEL.md"
+    },
+    {
+      "label": "two latest requests",
+      "source": "audit/whole-design-20261013/user-intent.json"
+    },
+    {
+      "label": "the assessment",
+      "source": "audit/capability-learning-20261013/dust-review/ASSESSMENT.md"
+    },
+    {
+      "label": "original human messages",
+      "source": "audit/tokenizer-finalization-20261013/intent.json"
+    },
+    {
+      "label": "tokenizer contract",
+      "source": "lab/trit-computer/MASTER-TOKENIZER-CONTRACT.md"
+    },
+    {
+      "label": "reconciled",
+      "source": "audit/tokenizer-finalization-20261013/named-chats/RECONCILIATION.md"
+    },
+    {
+      "label": "ten-work SEE catalogue",
+      "source": "lab/see-catalogue/index.html"
+    },
+    {
+      "label": "research note",
+      "source": "lab/note/index.html"
+    },
+    {
+      "label": "standalone token core",
+      "source": "audit/standalone-tokenizer-20261013/user-intent.json"
+    },
+    {
+      "label": "writing",
+      "source": "audit/agentic-writing-20261013/user-intent.json"
+    },
+    {
+      "label": "teaching",
+      "source": "audit/applicable-teaching-20261013/user-intent.json"
+    },
+    {
+      "label": "thinking",
+      "source": "audit/thinking-default-20261013/user-intent.json"
+    },
+    {
+      "label": "storage",
+      "source": "audit/sqlite-tensor-20261013/user-intent.json"
+    },
+    {
+      "label": "performance correction",
+      "source": "audit/performance-correction-20261014/user-intent.json"
+    },
+    {
+      "label": "Engram and TencentDB Agent Memory",
+      "source": "MEMORY-SOURCES.md"
+    },
+    {
+      "label": "harmonization correction",
+      "source": "audit/harmonization-20261014/user-intent.json"
+    },
+    {
+      "label": "request for better wiring without compromise",
+      "source": "audit/proper-use-20261014/user-intent.json"
+    },
+    {
+      "label": "restores the pi proof to the current wiring discussion",
+      "source": "audit/pi-integration-20261014/user-intent.json"
+    },
+    {
+      "label": "requests Argon's welcome and a private Git handoff",
+      "source": "audit/pi-integration-20261014/argon-intent.json"
+    },
+    {
+      "label": "whole-design correction",
+      "source": "audit/whole-design-20261013/user-intent.json"
+    },
+    {
+      "label": "memory-source addition",
+      "source": "MEMORY-SOURCES.md"
+    },
+    {
+      "label": "consumer harmonization repair",
+      "source": "audit/harmonization-20261014/DECISION.md"
+    },
+    {
+      "label": "requirement map",
+      "source": "curation/architecture-map.json"
+    },
+    {
+      "label": "original sources",
+      "source": "SOURCE-MAP.md"
+    },
+    {
+      "label": "previous complete architecture",
+      "source": "audit/whole-design-20261013/preimages/NANOAI-ARCHITECTURE.md"
+    },
+    {
+      "label": "local tokenizer probe",
+      "source": "audit/harmonization-20261014/template-continuation.json"
+    },
+    {
+      "label": "master tokenizer finalization contract",
+      "source": "lab/trit-computer/MASTER-TOKENIZER-CONTRACT.md"
+    },
+    {
+      "label": "English/mathematics requirement",
+      "source": "audit/capability-learning-20261013/semantic-foundation/intent.json"
+    },
+    {
+      "label": "Proof and transition contracts",
+      "source": "audit/bf16-harmony-20261013/ternary-curation/FORMAL-MODEL.md"
+    },
+    {
+      "label": "mathematical assessment",
+      "source": "audit/bf16-harmony-20261013/ternary-sketch/ASSESSMENT.md"
+    },
+    {
+      "label": "named-chat reconciliation",
+      "source": "audit/tokenizer-finalization-20261013/named-chats/RECONCILIATION.md"
+    },
+    {
+      "label": "full Dust review",
+      "source": "audit/capability-learning-20261013/dust-review/ASSESSMENT.md"
+    },
+    {
+      "label": "owner's record",
+      "source": "lab/trit-computer/VOCAB-CORE.md#reading-order-curiosity-against-corpus-order-13-oct-1750-bst"
+    },
+    {
+      "label": "the execution decision",
+      "source": "audit/performance-correction-20261014/execution-decision.json"
+    },
+    {
+      "label": "SEE catalogue",
+      "source": "lab/see-catalogue/index.html"
+    },
+    {
+      "label": "research note",
+      "source": "lab/note/index.html"
+    },
+    {
+      "label": "independent vocabulary repair check",
+      "source": "audit/whole-design-20261013/vocab-review/results-v4.json"
+    },
+    {
+      "label": "The peer-review reconciliation",
+      "source": "audit/whole-design-20261013/review.json"
+    },
+    {
+      "label": "latest request",
+      "source": "audit/agentic-writing-20261013/user-intent.json"
+    },
+    {
+      "label": "source map",
+      "source": "audit/agentic-writing-20261013/sea-reconciliation.json"
+    },
+    {
+      "label": "teaching request",
+      "source": "audit/applicable-teaching-20261013/user-intent.json"
+    },
+    {
+      "label": "thinking correction",
+      "source": "audit/thinking-default-20261013/user-intent.json"
+    },
+    {
+      "label": "SQLite request",
+      "source": "audit/sqlite-tensor-20261013/user-intent.json"
+    },
+    {
+      "label": "Engram and TencentDB Agent Memory review",
+      "source": "MEMORY-SOURCES.md"
+    },
+    {
+      "label": "proper-use request",
+      "source": "audit/proper-use-20261014/user-intent.json"
+    },
+    {
+      "label": "The decision record",
+      "source": "audit/proper-use-20261014/DECISION.md"
+    },
+    {
+      "label": "pi correction",
+      "source": "audit/pi-integration-20261014/user-intent.json"
+    },
+    {
+      "label": "Argon handoff",
+      "source": "aai/docs/start-here.md"
+    }
+  ],
+  "qualified_anchor_links": [
+    {
+      "target": "NANOAI-ARCHITECTURE.md#2-bits-trits-and-refinement",
+      "reason": "Source heading absent; exported link retains the document"
+    },
+    {
+      "target": "NANOAI-ARCHITECTURE.md#14-qwen-mechanisms-comparisons-and-optional-teaching",
+      "reason": "Source heading absent; exported link retains the document"
+    },
+    {
+      "target": "NANOAI-ARCHITECTURE.md#17-design-decision-before-the-next-build",
+      "reason": "Source heading absent; exported link retains the document"
+    },
+    {
+      "target": "NANOAI-ARCHITECTURE.md#20-the-whole-architecture-after-reading-the-original-human-messages",
+      "reason": "Source heading absent; exported link retains the document"
+    },
+    {
+      "target": "NANOAI-ARCHITECTURE.md#21-system-zero-and-the-jointly-trained-core",
+      "reason": "Source heading absent; exported link retains the document"
+    },
+    {
+      "target": "NANOAI-ARCHITECTURE.md#22-modular-work-judgment-and-developmental-learning",
+      "reason": "Source heading absent; exported link retains the document"
+    },
+    {
+      "target": "NANOAI-ARCHITECTURE.md#23-persistent-relational-state-and-the-modified-ternary",
+      "reason": "Source heading absent; exported link retains the document"
+    }
+  ]
+}

@@ -1,0 +1,230 @@
+<title>Trit Computer</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=IBM+Plex+Sans:wght@400;600&family=Fraunces:opsz,wght@9..144,600&display=swap">
+<style>
+/* Layout: one column of panels, each a working instrument; codes in mono, judgments in colour, numbers tabular. */
+:root{
+  --bg:#f6f4ee; --panel:#fffdf8; --fg:#1f1d19; --muted:#5b5750; --line:#d9d4c7;
+  --accent:#2b4a8b; --yes:#1d7549; --no:#ae3838; --maybe:#8b5b17; --guard:#646464;
+  --yes-bg:#d7efe2; --no-bg:#f6dada; --maybe-bg:#f7e7c4; --guard-bg:#e4e4e4;
+  --display:"Fraunces",Georgia,serif; --body:"IBM Plex Sans",system-ui,sans-serif; --mono:"IBM Plex Mono",ui-monospace,Menlo,monospace;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#17171a; --panel:#202024; --fg:#ece9e1; --muted:#b2ada2; --line:#3a3a40;
+  --accent:#8fb0ff; --yes:#6fd39a; --no:#ff8a8a; --maybe:#ffcf6b; --guard:#a7a7a7;
+  --yes-bg:#1d3b2b; --no-bg:#4a2323; --maybe-bg:#4a3a14; --guard-bg:#333; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#17171a; --panel:#202024; --fg:#ece9e1; --muted:#b2ada2; --line:#3a3a40;
+  --accent:#8fb0ff; --yes:#6fd39a; --no:#ff8a8a; --maybe:#ffcf6b; --guard:#a7a7a7;
+  --yes-bg:#1d3b2b; --no-bg:#4a2323; --maybe-bg:#4a3a14; --guard-bg:#333; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font-family:var(--body);line-height:1.5;padding-inline:16px;padding-block:24px 48px;max-width:980px;margin-inline:auto}
+h1{font-family:var(--display);font-size:2.2rem;line-height:1.1;margin:0 0 .3rem;text-wrap:balance}
+h2{font-family:var(--display);font-size:1.35rem;margin:0 0 .6rem;text-wrap:balance}
+p{max-width:68ch;margin:.4rem 0}
+.lede{color:var(--muted);max-width:70ch}
+section{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:18px;margin-top:22px;min-width:0}
+.row{display:flex;flex-wrap:wrap;gap:14px;align-items:flex-start}
+.row>*{min-width:0}
+.grow{flex:1 1 280px}
+code,.mono{font-family:var(--mono);font-variant-numeric:tabular-nums}
+table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums}
+th,td{border:1px solid var(--line);padding:6px 8px;text-align:left;vertical-align:top}
+th{font-weight:600;font-size:.85rem;letter-spacing:.03em;text-transform:uppercase;color:var(--muted)}
+.tw{overflow-x:auto}
+.pill{display:inline-block;padding:2px 9px;border-radius:999px;font-family:var(--mono);font-weight:600;border:1px solid transparent}
+.v1{background:var(--yes-bg);color:var(--yes)} .vm1{background:var(--no-bg);color:var(--no)} .v0{background:var(--maybe-bg);color:var(--maybe)} .vg{background:var(--guard-bg);color:var(--guard)}
+button,select,input[type=text]{font:inherit;color:var(--fg);background:var(--panel);border:1px solid var(--line);border-radius:6px;padding:6px 10px}
+button{cursor:pointer} button:hover{border-color:var(--accent)} button:focus-visible,select:focus-visible,input:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+button.sel{border-color:var(--accent);box-shadow:inset 0 0 0 1px var(--accent)}
+.grid3{display:grid;grid-template-columns:auto repeat(3,1fr);gap:4px;max-width:360px}
+.grid3 div{padding:8px 6px;text-align:center;border-radius:6px;font-family:var(--mono);font-weight:600}
+.grid3 .hd{background:transparent;color:var(--muted);font-family:var(--body);font-weight:600;font-size:.85rem}
+.junction{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;align-items:center;max-width:420px;text-align:center;margin-top:10px}
+.junction .x{font-family:var(--display);font-size:2rem;line-height:1}
+.junction .out{grid-column:1/4}
+.small{font-size:.88rem;color:var(--muted)}
+canvas{max-width:100%;height:auto;border:1px solid var(--line);border-radius:6px;background:var(--panel)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-top:10px}
+.stats div{border:1px solid var(--line);border-radius:8px;padding:8px 10px}
+.stats b{display:block;font-family:var(--mono);font-size:1.05rem}
+.stats span{font-size:.8rem;color:var(--muted);text-transform:uppercase;letter-spacing:.03em}
+input[type=range]{width:100%}
+.lineage{font-family:var(--mono);font-size:.9rem;white-space:pre-wrap;border:1px dashed var(--line);border-radius:6px;padding:8px;min-height:3.5em}
+.bits{font-family:var(--mono);font-size:1.05rem;letter-spacing:.08em;word-break:break-all}
+.bits i{font-style:normal;background:var(--guard-bg);color:var(--guard);padding:0 3px;border-radius:3px}
+@media (prefers-reduced-motion: reduce){*{transition:none!important}}
+</style>
+
+<h1>Trit Computer</h1>
+<p class="lede">Three values, yes, no and maybe, carried by two binary bits. The page shows what the three values can do in a 3×3 junction, how they are stored and guarded, and how the third value computes π with exact bounds: the maybe cells are the unknown, carried as a value, and refinement shrinks them.</p>
+
+<section id="codec">
+  <h2>1. Carrying a trit in two bits</h2>
+  <div class="row">
+    <div class="grow tw">
+      <table>
+        <tr><th>value</th><th>name</th><th>balanced</th><th>two bits</th><th>tensor view</th></tr>
+        <tr><td><span class="pill v1">yes</span></td><td>decided, affirmed</td><td class="mono">+1</td><td class="mono">01</td><td class="mono">[0, 0, 1] or +1.0</td></tr>
+        <tr><td><span class="pill vm1">no</span></td><td>decided, denied</td><td class="mono">−1</td><td class="mono">10</td><td class="mono">[1, 0, 0] or −1.0</td></tr>
+        <tr><td><span class="pill v0">maybe</span></td><td>open; you may call it π</td><td class="mono">0</td><td class="mono">00</td><td class="mono">[0, 1, 0] or 0.0</td></tr>
+        <tr><td><span class="pill vg">guard</span></td><td>never a value; a trap</td><td class="mono">—</td><td class="mono">11</td><td class="mono">rejected</td></tr>
+      </table>
+      <p class="small">A trit holds log₂3 = 1.585 bits of information. Two bits per trit use 79.2% of their capacity and leave one code free as the guard. Packing five trits per byte (3⁵ = 243 of 256 codes) uses 99.1%, which is Codex's judgment codec: digits little-endian, unused high digits zero; its 13 spare codes are its guard, and they too miss every change from one valid code to another.</p>
+    </div>
+    <div class="grow">
+      <label for="seq">Type a judgment sequence (y, n, m)</label><br>
+      <input type="text" id="seq" value="ymnyy mnn" style="width:100%;box-sizing:border-box" spellcheck="false">
+      <p class="small">Two bits per trit:</p>
+      <div class="bits" id="bits2"></div>
+      <p class="small">Five trits per byte (base-3 number per group, canonical tail):</p>
+      <div class="bits" id="bits5"></div>
+      <div class="row" style="margin-top:8px"><button id="flip">Flip one random bit</button><button id="restore">Restore</button></div>
+      <p class="small" id="flipnote">A flip that lands on 11 is caught by the guard. A flip between two valid codes changes the judgment silently. Under uniform symbols and flips the guard catches one third of single-bit errors; that is the honest limit of one spare code.</p>
+      <p class="small">Decoded: <span id="decoded" class="mono"></span></p>
+    </div>
+  </div>
+</section>
+
+<section id="junction">
+  <h2>2. The 3×3 junction</h2>
+  <p>Two judgments meet and combine; the result is again a trit, so junctions compose. Choose the operation the node names.</p>
+  <div class="row">
+    <div class="grow">
+      <label for="op">Operation</label>
+      <select id="op">
+        <option value="and">Kleene AND (min): no beats maybe, maybe beats yes</option>
+        <option value="or">Kleene OR (max): yes beats maybe, maybe beats no</option>
+        <option value="cons">Consensus: agree gives the value, disagree gives maybe</option>
+        <option value="imp">Łukasiewicz implication</option>
+        <option value="prod">Arithmetic: balanced ternary product (sign product)</option>
+        <option value="sum">Arithmetic: balanced ternary sum, a + b = 3·carry + digit</option>
+      </select>
+      <div class="grid3" id="table3" style="margin-top:10px"></div>
+      <p class="small">Unary NOT swaps yes and no and leaves maybe. Kleene's strong three-valued logic is the one where maybe means unknown; Łukasiewicz differs only at maybe→maybe, which it calls yes. The two arithmetic operations use a different typed alphabet: there all three values are known numbers, so −1 is a quantity and never an unknown, and a sum needs a carry trit because one trit cannot hold −2 or +2. A judgment alphabet and an arithmetic alphabet may share the same two-bit codes; they must never share a node.</p>
+    </div>
+    <div class="grow">
+      <p class="small">Your schematic as a live junction. Pick the two inputs.</p>
+      <div class="junction">
+        <div id="inA"></div><div class="x">×</div><div id="inB"></div>
+        <div class="out">result: <span id="outv" class="pill v0">maybe</span> <span class="mono small" id="outbits"></span></div>
+      </div>
+      <h2 style="font-size:1.05rem;margin-top:18px">Supersession, not mutation</h2>
+      <p class="small">A judgment node is immutable. Moving maybe to yes or no creates a new version with lineage; the old one stays as evidence.</p>
+      <div class="row">
+        <button data-j="1">Supersede with yes</button><button data-j="-1">Supersede with no</button><button data-j="0">Reopen as maybe</button><button id="reset">Start over</button>
+      </div>
+      <div class="lineage" id="lineage" style="margin-top:8px"></div>
+    </div>
+  </div>
+</section>
+
+<section id="pi">
+  <h2>3. π by three-valued judgment</h2>
+  <p>Cut the unit quarter disk into n×n cells. Judge each cell: <span class="pill v1">yes</span> when its far corner is inside the circle, <span class="pill vm1">no</span> when its near corner is outside, <span class="pill v0">maybe</span> otherwise. The yes cells are inside for certain, the maybe cells are the boundary band. Then</p>
+  <p class="mono">4·yes/n² ≤ π ≤ 4·(yes + maybe)/n²</p>
+  <p>Every count is an integer and every comparison is exact, so the bounds are true, not approximate. Refining n shrinks the maybe band, and the band's width bounds the error: 4·maybe/n² ≈ 8/n. π is bracketed ever more tightly and never reached, which is what the open value means.</p>
+  <div class="row">
+    <div class="grow"><canvas id="cv" width="420" height="420"></canvas></div>
+    <div class="grow">
+      <label for="nr">Cells per side n = <b id="nlab" class="mono">40</b></label>
+      <input type="range" id="nr" min="0" max="620" value="160">
+      <div class="row" style="margin-top:6px"><button id="dbl">Double n</button><button id="half">Halve n</button></div>
+      <div class="stats">
+        <div><span>yes cells</span><b id="sY">0</b></div>
+        <div><span>maybe cells</span><b id="sM">0</b></div>
+        <div><span>no cells</span><b id="sN">0</b></div>
+        <div><span>lower bound</span><b id="sLo">0</b></div>
+        <div><span>upper bound</span><b id="sHi">0</b></div>
+        <div><span>width</span><b id="sW">0</b></div>
+      </div>
+      <p style="margin-top:10px">π settled so far: <b id="digits" class="mono"></b></p>
+      <p class="small" id="drawnote"></p>
+    </div>
+  </div>
+  <p class="small">Why the corner test is exact: the disk is convex, so a cell whose far corner is inside is wholly inside; and in the first quadrant the near corner is the cell's closest point to the origin, so a cell whose near corner is outside has no interior point of the disk. Checked against a brute-force cell-by-cell count for n up to 200 before this page was published; the row formula uses integer square roots only.</p>
+</section>
+
+<script>
+(function(){
+  const VAL={1:'yes','-1':'no',0:'maybe'};
+  const CLS={1:'v1','-1':'vm1',0:'v0'};
+  const CODE={1:'01','-1':'10',0:'00'};
+  const DECODE={'01':1,'10':-1,'00':0,'11':null};
+  function pill(v){return '<span class="pill '+CLS[v]+'">'+VAL[v]+'</span>';}
+
+  // ---------- 1. codec ----------
+  const seq=document.getElementById('seq'), bits2=document.getElementById('bits2'), bits5=document.getElementById('bits5'), decoded=document.getElementById('decoded');
+  let current2='';
+  function parseSeq(s){const out=[];for(const ch of s.toLowerCase()){if(ch==='y')out.push(1);else if(ch==='n')out.push(-1);else if(ch==='m')out.push(0);}return out;}
+  function render2(bitstr){ // mark guard codes
+    let h='';for(let i=0;i<bitstr.length;i+=2){const c=bitstr.slice(i,i+2);h+=(c==='11')?'<i>11</i>':c;h+=' ';}return h;}
+  function pack5(tr){ // nanoai.judgments.pack: five trits per byte, digit = t+1, little-endian (first trit is 3^0), unused high digits zero, tail length kept beside
+    let h='';for(let i=0;i<tr.length;i+=5){const g=tr.slice(i,i+5);let v=0;for(let k=0;k<g.length;k++){v+=(g[k]+1)*Math.pow(3,k);}h+=v.toString(2).padStart(8,'0')+' <span class="small">('+v+')</span> ';}
+    return h+'<span class="small">(tail length '+(tr.length?(tr.length%5||5):0)+')</span>';}
+  function showCodec(){const tr=parseSeq(seq.value);current2=tr.map(t=>CODE[t]).join('');bits2.innerHTML=render2(current2)||'<span class="small">type y, n or m</span>';bits5.innerHTML=pack5(tr);decoded.textContent=tr.map(t=>VAL[t]).join(' ');}
+  seq.addEventListener('input',showCodec);
+  document.getElementById('flip').addEventListener('click',()=>{
+    if(!current2)return;const i=Math.floor(Math.random()*current2.length);const b=current2[i]==='0'?'1':'0';const flipped=current2.slice(0,i)+b+current2.slice(i+1);
+    bits2.innerHTML=render2(flipped);
+    const vals=[];let guard=false;for(let k=0;k<flipped.length;k+=2){const d=DECODE[flipped.slice(k,k+2)];if(d===null){guard=true;vals.push('GUARD');}else vals.push(VAL[d]);}
+    decoded.textContent=vals.join(' ');
+    document.getElementById('flipnote').textContent=guard?'Bit '+(i+1)+' flipped into code 11: the guard caught it and the sequence is rejected.':'Bit '+(i+1)+' flipped between two valid codes: the judgment changed silently. One spare code catches one third of single-bit errors under uniform symbols (none from 00, half from 01 and from 10); detecting the rest needs a second guard bit, and even the five-per-byte codec with its 13 spare codes misses every change from one valid code to another.';
+  });
+  document.getElementById('restore').addEventListener('click',()=>{showCodec();document.getElementById('flipnote').textContent='Restored.';});
+  showCodec();
+
+  // ---------- 2. junction ----------
+  const OPS={
+    and:(a,b)=>Math.min(a,b),
+    or:(a,b)=>Math.max(a,b),
+    cons:(a,b)=>a===b?a:0,
+    imp:null, // defined below on the {0, 1/2, 1} scale
+    prod:(a,b)=>a*b,
+    sum:(a,b)=>{const s=a+b;return s>1?-1:(s<-1?1:s);}
+  };
+  // Łukasiewicz on {-1,0,1} mapped to {0,1/2,1}: a→b = min(1, 1-a'+b'); map back.
+  OPS.imp=(a,b)=>{const ap=(a+1)/2,bp=(b+1)/2;const r=Math.min(1,1-ap+bp);return Math.round(r*2)-1;};
+  const carry=(a,b)=>{const s=a+b;return s>1?1:(s<-1?-1:0);};
+  const opSel=document.getElementById('op'), table3=document.getElementById('table3');
+  let A=0,B=1;
+  const NUM={1:'+1','-1':'−1',0:'0'};
+  function arith(){return opSel.value==='prod'||opSel.value==='sum';}
+  function lab(v){return arith()?NUM[v]:VAL[v];} // arithmetic trits are known numbers, never judgments
+  function renderTable(){const op=OPS[opSel.value];const vs=[-1,0,1];let h='<div class="hd">a \\ b</div>';for(const b of vs)h+='<div class="hd">'+lab(b)+'</div>';
+    for(const a of vs){h+='<div class="hd">'+lab(a)+'</div>';for(const b of vs){const r=op(a,b);const c=(opSel.value==='sum'&&carry(a,b)!==0)?' <span class="small">carry '+(carry(a,b)>0?'+1':'−1')+'</span>':'';h+='<div class="'+CLS[r]+'">'+lab(r)+c+'</div>';}}
+    table3.innerHTML=h;renderJunction();}
+  function inputButtons(id,cur,set){const el=document.getElementById(id);el.innerHTML=[-1,0,1].map(v=>'<button class="'+(v===cur?'sel':'')+'" data-v="'+v+'">'+lab(v)+'</button>').join(' ');el.querySelectorAll('button').forEach(b=>b.addEventListener('click',()=>{set(+b.dataset.v);renderJunction();}));}
+  function renderJunction(){inputButtons('inA',A,v=>A=v);inputButtons('inB',B,v=>B=v);const r=OPS[opSel.value](A,B);const o=document.getElementById('outv');o.textContent=lab(r);o.className='pill '+CLS[r];document.getElementById('outbits').textContent=CODE[A]+' × '+CODE[B]+' → '+CODE[r]+(opSel.value==='sum'&&carry(A,B)?'  carry '+(carry(A,B)>0?'+1':'−1'):'');}
+  opSel.addEventListener('change',renderTable);renderTable();
+
+  // supersession
+  let chain=[];function resetChain(){chain=[{v:0,reason:'opened'}];renderChain();}
+  function renderChain(){const el=document.getElementById('lineage');el.innerHTML=chain.map((n,i)=>'v'+(i+1)+'  '+pill(n.v)+'  '+CODE[n.v]+'  '+n.reason+(i<chain.length-1?'  → superseded by v'+(i+2):'  (current)')).join('\n');}
+  document.querySelectorAll('button[data-j]').forEach(b=>b.addEventListener('click',()=>{const v=+b.dataset.j;const last=chain[chain.length-1];if(last.v===v){return;}chain.push({v,reason:v===0?'reopened: evidence conflicts':'decided: evidence recorded'});renderChain();}));
+  document.getElementById('reset').addEventListener('click',resetChain);resetChain();
+
+  // ---------- 3. pi ----------
+  function isqrt(v){if(v<0)return -1;let r=Math.floor(Math.sqrt(v));while(r*r>v)r--;while((r+1)*(r+1)<=v)r++;return r;}
+  function counts(n){const n2=n*n;let Y=0,M=0,N=0;for(let j=0;j<n;j++){const a=n2-(j+1)*(j+1);const inside=a>=0?Math.min(n,isqrt(a)):0;const b=n2-j*j;const outside=n-Math.min(n,isqrt(b-1)+1);Y+=inside;N+=outside;M+=n-inside-outside;}return {Y,M,N};}
+  function judge(i,j,n){const n2=n*n;if((i+1)*(i+1)+(j+1)*(j+1)<=n2)return 1;if(i*i+j*j>=n2)return -1;return 0;}
+  const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+  const nr=document.getElementById('nr');
+  function nFromSlider(x){return Math.max(2,Math.round(Math.pow(10,1+x/100)));} // 10^(1..7.2)
+  function fmt(x){return x.toLocaleString('en-US');}
+  // Exact rational arithmetic: lower = 4Y/n^2, upper = 4(Y+M)/n^2. Settled digits are the longest decimal prefix with equal integer floors; shown bounds round outward.
+  function ratDigits(num,den,k,up){const s=10n**BigInt(k);let q=(num*s)/den;if(up&&(num*s)%den!==0n)q+=1n;const str=q.toString().padStart(k+1,'0');return k?str.slice(0,-k)+'.'+str.slice(-k):str;}
+  function settled(Y,M,n){const den=BigInt(n)*BigInt(n),lo=4n*BigInt(Y),hi=4n*BigInt(Y+M);let best='none yet';for(let k=0;k<=12;k++){const s=10n**BigInt(k);if((lo*s)/den===(hi*s)/den)best=ratDigits(lo,den,k,false);else break;}return best;}
+  function draw(n){const W=cv.width;ctx.clearRect(0,0,W,W);const css=getComputedStyle(document.documentElement);const col={1:css.getPropertyValue('--yes-bg'),'-1':css.getPropertyValue('--no-bg'),0:css.getPropertyValue('--maybe')};
+    const m=Math.min(n,160);const s=W/m;const note=document.getElementById('drawnote');
+    if(n<=160){for(let j=0;j<n;j++)for(let i=0;i<n;i++){ctx.fillStyle=col[judge(i,j,n)];ctx.fillRect(i*s,W-(j+1)*s,Math.ceil(s),Math.ceil(s));}note.textContent='Every cell drawn; counts and bounds are exact for this n.';}
+    else{for(let j=0;j<m;j++)for(let i=0;i<m;i++){ctx.fillStyle=col[judge(i,j,m)];ctx.globalAlpha=.35;ctx.fillRect(i*s,W-(j+1)*s,Math.ceil(s),Math.ceil(s));ctx.globalAlpha=1;}note.textContent='Grid too fine to draw at n = '+fmt(n)+'; the picture shows n = 160, the numbers are exact for n = '+fmt(n)+'.';}
+    ctx.strokeStyle=css.getPropertyValue('--fg');ctx.lineWidth=1.5;ctx.beginPath();ctx.arc(0,W,W,-Math.PI/2,0);ctx.stroke();}
+  function update(){const n=nFromSlider(+nr.value);document.getElementById('nlab').textContent=fmt(n);const c=counts(n);const lo=4*c.Y/(n*n),hi=4*(c.Y+c.M)/(n*n);
+    document.getElementById('sY').textContent=fmt(c.Y);document.getElementById('sM').textContent=fmt(c.M);document.getElementById('sN').textContent=fmt(c.N);
+    const den=BigInt(n)*BigInt(n);document.getElementById('sLo').textContent=ratDigits(4n*BigInt(c.Y),den,9,false);document.getElementById('sHi').textContent=ratDigits(4n*BigInt(c.Y+c.M),den,9,true);document.getElementById('sW').textContent=(hi-lo).toExponential(2);
+    document.getElementById('digits').textContent=settled(c.Y,c.M,n);draw(n);}
+  let t=null;nr.addEventListener('input',()=>{clearTimeout(t);t=setTimeout(update,60);});
+  document.getElementById('dbl').addEventListener('click',()=>{nr.value=Math.min(620,+nr.value+30);update();});
+  document.getElementById('half').addEventListener('click',()=>{nr.value=Math.max(0,+nr.value-30);update();});
+  update();
+})();
+</script>

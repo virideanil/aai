@@ -12,6 +12,11 @@ original-BF16 model interface. Its learning experiments have produced real updat
 and recoverable state. **No learned candidate has yet earned admission through a
 reliable task-quality improvement.**
 
+Argon and other contributors can start with the [project handoff](docs/start-here.md).
+It includes the [complete architecture](docs/whole-system.md),
+[all retained requirements](docs/requirements.md) and the [reviewed pi proof](docs/pi-proof.md),
+with runnable consumers and explicit evidence boundaries.
+
 ## Try the frozen tokenizer
 
 Use Python 3.14 or newer, a C++20 compiler and OpenSSL development files.

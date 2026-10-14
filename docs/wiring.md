@@ -7,8 +7,8 @@ installed-consumer observations are in [measured results](results.md#shared-comp
 
 ## The organizing decision
 
-Use one continuing task, one durable evidence/work journal and one capable
-generative core. Route each operation to the component that can perform it under
+Use one continuing task, one durable evidence/work journal, an explicit working
+state of related alternatives and one capable generative core. Route each operation to the component that can perform it under
 its actual contract. The core interprets, creates and proposes; exact operators
 execute declared mathematics and transformations; the journal preserves sources,
 dependencies, attempts and consequences. Assessed experience returns to the same
@@ -17,18 +17,22 @@ task and supplies separately reviewed candidate learning.
 ```mermaid
 flowchart TD
     T[Current task, identity, grants and source revisions] --> J[Shared work and evidence journal]
-    J --> H[Harmonizer: selected eligible context]
+    J --> S[Related alternatives, certificates and open questions]
+    S --> H[Harmonizer: selected eligible context]
     H --> R{What does the current obligation need?}
     R -->|Previously observed work| U[Verify dependencies, bytes and recorded outcome]
     R -->|Declared exact operation| E[Typed Steps executor]
+    R -->|Question about represented alternatives| F[Query, refine or extend the shared state]
     R -->|Interpretation or new creation| C[Original-precision generative core]
     C --> P[Proposed action or editable work]
     E --> O[Observed result]
+    F --> O
     U --> O
     P --> V[Current dependency and effect checks]
     V --> O
     O --> A[Scoped task assessment]
     A --> J
+    A --> S
     A --> L[Attributed experience and checked correction]
     L --> B[Candidate learning with replay]
     B --> G[Quality, retention, recovery and total-cost evaluation]
@@ -47,6 +51,7 @@ remain unqualified. A new coordinator class alone would not supply either.
 | Task and journal | Preserve the full goal, authority, revisions, open obligations and independent completed work | Exact event sequence and source/effect identities |
 | System Zero and tokenizer | Recover bytes, literal references, explicit rules and native tokenizer witnesses | Exact spans, declared types and reversible encoding |
 | Harmonizer and memory views | Supply relevant eligible sources, unresolved alternatives, reviewed results and selected working units | Selection/dependency identity and a route back to source detail |
+| Relational working state | Preserve joint alternatives, shared identities, certificates and the questions they can answer; refine, revise or extend with a stated reason | Witnesses, assumptions, transition identity and correction/recovery behavior |
 | Learned core and workspace | Interpret unfamiliar language, choose useful operations, create and revise | Actual input, sampled output, proposed action, compatible state and uncertainty |
 | Steps and editable work | Execute declared operations and preserve connected editable units | Actual result, operator version, dependencies and invariant checks |
 | Effect owner and assessment | Observe what happened and whether it satisfies the named task criteria | Verified materialization plus an independently attributed verdict and scope |
@@ -56,6 +61,51 @@ Byte equality does not establish shared meaning. An exact multiplication does no
 establish that multiplication answered the request. A teacher's preferred answer
 does not replace observation. These distinctions are needed at the interfaces,
 where the next component can actually use them.
+
+## Pi, shared structure and continuing refinement
+
+The [reviewed pi proof](pi-proof.md) supplies a precise example of the organizing
+idea. On an `n` by `n` grid over the unit square, `Y` cells lie inside a quarter
+disk and `M` cells contain both inside and outside points. Integer comparisons
+certify each class. Their areas give
+
+```text
+L_n = 4Y/n² ≤ π ≤ 4(Y+M)/n² = U_n
+M ≤ 3n, so U_n − L_n ≤ 12/n → 0.
+```
+
+Pi is the unique real value in every such bracket. Its irrationality means a
+rational-endpoint bracket cannot collapse to pi at a finite stage. A finite
+requested decision, including displayed digits, can still be fully certified
+when the whole bracket gives the same answer. Dyadic subdivision preserves
+nested bounds; arbitrary changes of grid size need a containment check.
+
+The boundary cells share one curve. That relation lets the proof bound their
+number by `3n`, while the entire grid has `n²` cells. It motivates preserving
+shared structure and directing work toward relevant unresolved parts. It supplies
+neither a universal convergence rate for thought nor a neural speed estimate.
+
+The operating loop uses this principle in five connected ways:
+
+1. Keep the state, source identities, shared dependencies and alternatives behind
+   each visible answer. A `both` result retains witnesses for both possibilities.
+2. Ask the task's actual question of that state. A settled answer to one question
+   can coexist with other open questions.
+3. Choose a useful observation, exact computation or learned proposal. Refine
+   under an explicit valid premise and retain the certificate or scoped evidence.
+4. Reopen affected conclusions on correction. Extend the state for a new question
+   without silently discarding earlier alternatives.
+5. Preserve the attempt, consequence and reason for revision as experience.
+   Candidate learning is assessed for useful transfer and retained capabilities.
+
+The current [relation consumer](relations.md) implements the finite-state query,
+refinement, extension, hypothetical map, witness and recovery contracts in the
+same journal. Equal, opposite and independent pairs can have identical marginal
+`maybe` labels but different answers about equality. Keeping their joint state
+preserves that distinction. The pi demonstration is an independent mathematical
+consumer; it is not installed as a general learned refinement policy. Learning
+which representation, question and transition are useful remains substantive
+core work. The complete [architecture](whole-system.md) retains that objective.
 
 ## Close the loop at its real outcome
 

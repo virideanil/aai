@@ -1,6 +1,6 @@
 # Computation, memory and continuing agency
 
-Status: implementation contract, 14 October 2026. The parent research package retains the consolidated architecture in `NANOAI-ARCHITECTURE.md`; this repository carries its implementation contract. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
+Status: implementation contract, 14 October 2026. The parent research package retains the consolidated architecture in `NANOAI-ARCHITECTURE.md`; this repository carries a [portable complete snapshot](whole-system.md) and this implementation contract. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
 
 [Execution wiring](wiring.md) specifies the chosen division of work, shared
 completion evidence and next native qualification boundary. It preserves the
@@ -109,6 +109,8 @@ Exact work can outlive a producing core version. Numerical basis checks follow a
 The current exact work graph also carries finite joint alternatives through `relation.decode`, `relation.query`, `relation.refine`, `relation.extend` and `relation.map`. [The relation contract](relations.md) specifies syntax, limits and evidence. Shared variable identity remains intact; the visible ternary answer is a projection of this richer state. Conditional refinement and conservative extension keep their distinct meanings, and a hypothetical map grants no external effect.
 
 The shared neural core must learn useful questions, transitions and representations throughout the full architecture. Its predictions are preserved separately from executed relation images. Both-valued images can supply checked scoped targets; empty inconsistent models, missing evaluations and resource limits retain their different statuses. Current-source eligibility follows the same journal dependencies as other experience. Executor source identity now includes the relation module and is checked through inherited observation dependencies.
+
+The [reviewed pi proof](pi-proof.md) and its [operating placement](wiring.md#pi-shared-structure-and-continuing-refinement) make the shared-structure and certified-refinement principle explicit. Finite task questions may settle while the continuing state retains open detail. This mathematical instance guides the design; useful learned choice of questions and transitions remains part of the complete core objective.
 
 
 ## Developmental learning and the governing design correction

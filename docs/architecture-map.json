@@ -1,0 +1,681 @@
+{
+  "schema": "nanoai.architecture-map.v1",
+  "document": "docs/whole-system.md",
+  "scope": "Requirement-to-architecture map with explicit implemented and proposed mechanisms; consumer and human acceptance remain separate; portable snapshot with local evidence explicitly identified",
+  "mechanisms": [
+    {
+      "id": "coherence",
+      "sections": [
+        1,
+        2,
+        5,
+        12
+      ],
+      "requirement_ids": [
+        "Q-16",
+        "Q-18",
+        "A-01",
+        "K-04",
+        "K-06"
+      ],
+      "proposal": "One versioned purpose and typed state transitions; independent owners remain explicit.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "representations",
+      "sections": [
+        3,
+        8
+      ],
+      "requirement_ids": [
+        "Q-03",
+        "Q-04",
+        "Q-05",
+        "Q-06",
+        "Q-07",
+        "Q-08",
+        "Q-14",
+        "E-02",
+        "K-08"
+      ],
+      "proposal": "Ternary weights carried by bits; exact coding, arithmetic and learned approximation retain separate evidence.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "learned-core",
+      "sections": [
+        1,
+        4,
+        6
+      ],
+      "requirement_ids": [
+        "Q-02",
+        "Q-10",
+        "A-08",
+        "K-09"
+      ],
+      "proposal": "Resident independently useful core initialized from coherent pretrained capability, with a gated learned workspace, typed outputs and separately qualified Qwen/Kimi teaching.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "refinement",
+      "sections": [
+        3,
+        7
+      ],
+      "requirement_ids": [
+        "Q-01",
+        "Q-09",
+        "A-07"
+      ],
+      "proposal": "Four independent refinement axes and jointly trained compatibility.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "hardware",
+      "sections": [
+        7,
+        8
+      ],
+      "requirement_ids": [
+        "Q-12",
+        "Q-13",
+        "E-03",
+        "E-04",
+        "E-05",
+        "E-06",
+        "E-07",
+        "A-10",
+        "A-13",
+        "A-18",
+        "K-54"
+      ],
+      "proposal": "Measured full costs, actual headroom and qualified modes; exact profile retained.",
+      "implementation_status": "CPU streamed consumer has inadequate response cost; explicit mapped Metal reaches guarded native startup but both attempts stop on host swap before outputs. Whole-task speed and quality remain unmet."
+    },
+    {
+      "id": "memory",
+      "sections": [
+        2,
+        4,
+        5
+      ],
+      "requirement_ids": [
+        "Q-11",
+        "A-03",
+        "A-05"
+      ],
+      "proposal": "Exact and episodic memory, recurrent learned working state and caches have distinct updates; task correction and model migration rebuild affected latent state from evidence.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "agency",
+      "sections": [
+        4,
+        5,
+        7
+      ],
+      "requirement_ids": [
+        "Q-15",
+        "A-02",
+        "A-11",
+        "E-09",
+        "E-12"
+      ],
+      "proposal": "Whole tasks, effect receipts, correction/recovery and Zero/One/Two.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "education",
+      "sections": [
+        6,
+        9
+      ],
+      "requirement_ids": [
+        "A-04",
+        "A-06",
+        "A-12"
+      ],
+      "proposal": "Joint task and conduct education with general-capability replay, continuing identity, tested character transfer and separately evaluated QM responsibilities.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "identity-and-cooperation",
+      "sections": [
+        2,
+        9,
+        10
+      ],
+      "requirement_ids": [
+        "Q-17",
+        "A-15",
+        "A-16"
+      ],
+      "proposal": "Named owners, typed organism exchange and separately evaluated latent compatibility.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "perception-and-creation",
+      "sections": [
+        4,
+        6,
+        10
+      ],
+      "requirement_ids": [
+        "A-09",
+        "A-17"
+      ],
+      "proposal": "Grounded perception, editable creation and actual expressive interaction remain capabilities.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "sources-and-evidence",
+      "sections": [
+        8,
+        11
+      ],
+      "requirement_ids": [
+        "E-01",
+        "E-08",
+        "E-10",
+        "E-11",
+        "A-14",
+        "K-01",
+        "K-02",
+        "K-03",
+        "K-05"
+      ],
+      "proposal": "Preserved sources, strict profile, adverse evidence and separate scale/platform qualification.",
+      "implementation_status": "integrated_design_with_scoped_implemented_consumers_and_unqualified_learned_components"
+    },
+    {
+      "id": "proposer-entry",
+      "sections": [
+        4,
+        7
+      ],
+      "requirement_ids": [
+        "K-07",
+        "K-05",
+        "Q-01",
+        "Q-09",
+        "Q-10",
+        "Q-15",
+        "A-12",
+        "E-01",
+        "E-02"
+      ],
+      "proposal": "A separately evaluated learned proposer is one entry path; full memory, education and agent requirements retain their scope.",
+      "implementation_status": "proposed_proposer_with_executed_tensor_learning_reference"
+    },
+    {
+      "id": "pretrained-source-transfer",
+      "sections": [
+        4,
+        11
+      ],
+      "requirement_ids": [
+        "K-10",
+        "K-09",
+        "A-08",
+        "E-01"
+      ],
+      "proposal": "Original native-precision matrices, separately identified proposers and compatible teaching routes retain source identity, target-state dependencies and character/whole-system requirements.",
+      "implementation_status": "selected_source_payloads_acquired_and_matrix_consumers_checked; transfer_quality_and_target_runtime_unqualified"
+    },
+    {
+      "id": "first-language-learning",
+      "sections": [
+        6,
+        11
+      ],
+      "requirement_ids": [
+        "K-11"
+      ],
+      "proposal": "Small independently identified source-initialized learner, matched controls, retained identity contract and quality/retention evaluation.",
+      "implementation_status": "executed_twelve_runs_packed_weights_verified_language_and_conduct_unqualified"
+    },
+    {
+      "id": "design-before-construction",
+      "sections": [
+        1,
+        12
+      ],
+      "requirement_ids": [
+        "K-12"
+      ],
+      "proposal": "Choose the intended consumer, complete neural computation, memory and education interfaces before model dimensions or another training run; retain exploratory evidence and compare against the complete-task baseline.",
+      "implementation_status": "source_grounded_design_proposal_no_new_runtime"
+    },
+    {
+      "id": "mechanism-first-resident-experiment",
+      "sections": [
+        1,
+        4,
+        11,
+        12
+      ],
+      "requirement_ids": [
+        "K-13",
+        "K-14"
+      ],
+      "proposal": "Original-model mechanism understanding informs nanoai architecture, with a capable resident instrument and verified memory/recovery; full ambition retained.",
+      "implementation_status": "design_recorded_comparison_and_implementation_in_progress"
+    },
+    {
+      "id": "bf16-native-harmony",
+      "sections": [
+        8,
+        11
+      ],
+      "requirement_ids": [
+        "K-15",
+        "K-16"
+      ],
+      "proposal": "Original BF16 values with measured per-block binary/ternary coding, qualified native arithmetic and source/task/effect dependencies.",
+      "implementation_status": "native_codec_and_memory_consumers_verified; full_model_storage_restored_exactly_with_two_matching_generated_outputs; live_packed_weight_speed_unqualified"
+    },
+    {
+      "id": "whole-acting-architecture",
+      "sections": [
+        1,
+        2,
+        4,
+        5,
+        6,
+        10,
+        12
+      ],
+      "requirement_ids": [
+        "K-17",
+        "K-18",
+        "K-13",
+        "K-14"
+      ],
+      "proposal": "Learned actor, trained workspace, exact work graph, conditional BF16 capacity, valid reuse, preparation, continuing identity and task-based education; original human messages govern.",
+      "implementation_status": "typed_work_graph_and_actual_BF16_consumer_implemented; neural_workspace_and_conditional_capacity_require_training_and_matched_evaluation"
+    },
+    {
+      "id": "system-zero-joint-core",
+      "sections": [
+        3,
+        4,
+        6,
+        7
+      ],
+      "requirement_ids": [
+        "K-19",
+        "K-20",
+        "K-21"
+      ],
+      "proposal": "Exact common byte/evidence/rule dictionary with one jointly trained causal patch core, recurrent workspace, nested BF16 capacity and action heads; shadow preparation and large output obey the same work, fidelity and cost contracts.",
+      "implementation_status": "111_real_vocabulary_checks_and_24_BF16_dictionary_task_checks_pass; neural_harmonization_and_joint_core_untrained"
+    },
+    {
+      "id": "modular-experience-and-ternary-math",
+      "sections": [
+        3,
+        5,
+        6,
+        8
+      ],
+      "requirement_ids": [
+        "K-22",
+        "K-23",
+        "K-24",
+        "K-25",
+        "K-26",
+        "K-27",
+        "K-28",
+        "K-29"
+      ],
+      "proposal": "One jointly trained core consumes a source-bound dictionary, intrinsically modular exact scratchboard and typed judgments. Experience connects current predictions with independently assessed scoped outcomes; optional binary/ternary carriers preserve declared meanings. Arithmetic, unknown-state semantics and pi computation retain distinct contracts.",
+      "implementation_status": "scratchboard_and_typed_judgment_BF16_consumers_measured; full_BF16_training_host_limit_measured; math_computer_and_scoped_pi_proofs_checked"
+    },
+    {
+      "id": "persistent-relational-state",
+      "sections": [
+        2,
+        3,
+        5
+      ],
+      "requirement_ids": [
+        "K-19",
+        "K-24",
+        "K-25",
+        "K-27",
+        "K-28",
+        "K-29",
+        "K-30",
+        "K-31",
+        "K-32",
+        "K-33"
+      ],
+      "proposal": "A continuing state retains joint alternatives, identity, dependencies, actions, experience and new directions. Public trits are question-specific projections. The same SJQL graph supports conditional refinement, conservative extension and separately checked revision/encoding, while the shared core learns useful use. Each attempt leaves attributable experience and a revisable next position; approximate representation has an explicit conservative inclusion contract.",
+      "implementation_status": "15_mathematical_reference_checks_and_84_distinct_tests_pass;16_real_BF16_integration_checks_pass;3_of7_coarse_labels_and1_of7_typed_predictions_correct; learned_inquiry_unqualified"
+    },
+    {
+      "id": "whole-design-and-developmental-loop",
+      "sections": [
+        1,
+        4,
+        5,
+        6,
+        11,
+        12
+      ],
+      "requirement_ids": [
+        "K-34",
+        "K-35",
+        "K-12",
+        "K-21",
+        "K-25",
+        "K-26",
+        "K-27"
+      ],
+      "proposal": "A capable generative memory/action path retains exact detail and accountable experience; staged shared learning precedes conditional complexity. The frozen-feature menu learner remains a negative diagnostic, with its complete controls and recovery verified before another learner.",
+      "implementation_status": "complete_bounded_controls_and_actual_artifact_recovery_executed; negative_quality_result; useful_general_learning_unqualified"
+    },
+    {
+      "id": "bidirectional-mathematical-language",
+      "sections": [
+        3,
+        5,
+        6,
+        11,
+        12
+      ],
+      "requirement_ids": [
+        "K-36",
+        "K-37",
+        "K-38",
+        "K-19",
+        "K-25",
+        "K-34"
+      ],
+      "proposal": "Train the complete generative core on source-bound English, typed mathematical meanings, checked consequences, faithful reconstructions and counterexamples. Preserve ambiguity and distinguish exact coding, scoped denotation and learned transfer. Compare parameter-credit alternatives inside the wider experience loop.",
+      "implementation_status": "semantic_checker_and_saved_adapter_exist; comparison_stopped_on_host_swap_guard; further_learning_deferred_until_tokenizer_finalization; no_semantic_admission"
+    },
+    {
+      "id": "master-tokenizer-finalization",
+      "sections": [
+        3,
+        6,
+        11,
+        12
+      ],
+      "requirement_ids": [
+        "K-39",
+        "K-40",
+        "K-41",
+        "K-19",
+        "K-25"
+      ],
+      "proposal": "Source-bound tokenizer inventory, reversible shared units, explicit native adapters, normalized segmentation law and frozen C++ consumer precede the next model learning run. Accepted research presentation uses the verified versions and retains prior failures.",
+      "implementation_status": "22_pinned_sources; frozen_24664_byte_pieces; 127_python_cpp_probes_pass; native_api_sanitizers_and_bf16_data_boundary_pass; browser_port_pending; model_learning_deferred_for_current_preview_and_git_review",
+      "evidence": [
+        "data/master-tokenizer-v1/manifest.json"
+      ],
+      "local_evidence": [
+        "audit/tokenizer-finalization-20261013/master-build-helper-parity.json",
+        "audit/tokenizer-finalization-20261013/git-preparation/full-tests.log"
+      ]
+    },
+    {
+      "id": "language-and-perception-catalogue",
+      "sections": [
+        3,
+        5,
+        10,
+        11
+      ],
+      "requirement_ids": [
+        "K-42",
+        "K-43",
+        "K-44"
+      ],
+      "proposal": "Versioned byte observations, native witnesses and SEE sample/mask identities join the existing source/work journal. Contextual interpretation retains separate evidence. The ten-work perception catalogue accompanies the accepted research note.",
+      "implementation_status": "explicit API/CLI, real SEE and generated-writing observations integrated; fresh SQLite recovery passes; learned semantic use and visual acceptance remain separate",
+      "evidence": [],
+      "local_evidence": [
+        "audit/tokenizer-finalization-20261013/named-chats/RECONCILIATION.md",
+        "audit/tokenizer-finalization-20261013/catalogue-consumer-v1/result.json",
+        "lab/see-catalogue/measurements.json"
+      ]
+    },
+    {
+      "id": "reviewable-implementation-and-explanations",
+      "sections": [
+        11,
+        12
+      ],
+      "requirement_ids": [
+        "K-40",
+        "K-45"
+      ],
+      "proposal": "Rewritten source-grounded explanations accompany a reproducible installation, executable examples, explicit data dependencies and locally reviewable source changes.",
+      "implementation_status": "178 source tests pass with zero skips; installed examples and SQLite recovery pass; independent Python/C++/JavaScript parity passes; local aai commit f508d4966230f7b49d873fb07e8cb61f3b8bb38c is recorded with a clean working tree. Whole-system speed and learned accuracy remain unqualified.",
+      "evidence": [],
+      "local_evidence": [
+        "audit/tokenizer-finalization-20261013/git-preparation/documented-consumer.json",
+        "audit/tokenizer-finalization-20261013/git-preparation/live-run.json",
+        "audit/performance-correction-20261014/local-git-receipt.json"
+      ]
+    },
+    {
+      "id": "fallibility-and-correction",
+      "sections": [
+        1,
+        5,
+        6,
+        11
+      ],
+      "requirement_ids": [
+        "K-46",
+        "K-33"
+      ],
+      "proposal": "Reduce observed error frequency and consequences across language, perception, action and learning, preserve uncertainty, detect mistakes and assess correction and retention. Probability estimates declare their event, horizon and dependence assumptions.",
+      "implementation_status": "design_and_current_explanations_reconciled; exact_contracts_checked; broad_learned_error_reduction_requires_task_evidence"
+    },
+    {
+      "id": "standalone-shared-token-core",
+      "sections": [
+        3,
+        8,
+        13
+      ],
+      "requirement_ids": [
+        "K-47",
+        "K-48",
+        "K-49"
+      ],
+      "proposal": "A shared native byte-token core preserves the frozen law and source witnesses in independent use and through nanoai integration. Execution boundaries follow measured complete consumer cost.",
+      "implementation_status": "standalone_package_and_native_integration_pass; shared_python_cpp_js_conformance_pass; broader_language_advantage_unestablished",
+      "evidence": [],
+      "local_evidence": [
+        "audit/standalone-tokenizer-20261013/distribution-check.json",
+        "audit/standalone-tokenizer-20261013/native-integrated.json",
+        "audit/applicable-teaching-20261013/js-owner-shared-conformance.log"
+      ]
+    },
+    {
+      "id": "continuing-writing-and-applicable-teaching",
+      "sections": [
+        6,
+        9,
+        13,
+        14
+      ],
+      "requirement_ids": [
+        "K-50",
+        "K-51"
+      ],
+      "proposal": "The existing task, source, language, exact-operation, artifact and experience owners support complete writing episodes, attributed criticism, checked correction, practice, training and independent evaluation.",
+      "implementation_status": "actual writing and guided episode retain quality failures; full-source and native teaching attempts are stopped; thinking-enabled practice and matched learning await execution qualification",
+      "evidence": [],
+      "local_evidence": [
+        "audit/agentic-writing-20261013/trial-01/initial.json",
+        "audit/agentic-writing-20261013/trial-01/continuation.json",
+        "audit/applicable-teaching-20261013/strict-baseline.json",
+        "audit/applicable-teaching-20261013/story-01/result.json"
+      ]
+    },
+    {
+      "id": "natural-thinking-and-explicit-policy",
+      "sections": [
+        7,
+        14
+      ],
+      "requirement_ids": [
+        "K-52"
+      ],
+      "proposal": "Enable native thinking by default, allow natural completion within context and host constraints, and retain exact decoding policy, actual tokens, checks and elapsed cost as evidence of effort.",
+      "implementation_status": "thinking enabled without a quota; native policy observations and natural completions retained; unsuitable streamed rollout stopped; mapped Metal resource admission failed",
+      "evidence": [],
+      "local_evidence": [
+        "audit/thinking-default-20261013/native-probe.json",
+        "audit/thinking-default-20261013/sampling-decision.json",
+        "audit/thinking-default-20261013/streamed-sampled-01/assessment-correction.json",
+        "audit/thinking-default-20261013/streamed-context-01/summary.json"
+      ]
+    },
+    {
+      "id": "sqlite-tensor-holdings",
+      "sections": [
+        2,
+        8,
+        14
+      ],
+      "requirement_ids": [
+        "K-53"
+      ],
+      "proposal": "Typed SQLite rows own tensor inventory, immutable lineage and evolving learning observations. Native binary payloads retain exact numerical values and qualified consumer formats.",
+      "implementation_status": "typed_catalogue_and_learning_events_integrated; real_model_and_adapter_load_pass; metadata_payload_binding_repaired; isolated_installed_sqlite_consumer_pass",
+      "evidence": [],
+      "local_evidence": [
+        "audit/sqlite-tensor-20261013/model-registration.json",
+        "audit/sqlite-tensor-20261013/upstream-reader-comparison.json",
+        "audit/sqlite-tensor-20261013/integrated-native-tests.log",
+        "audit/sqlite-tensor-20261013/native-inventory-binding.log",
+        "audit/sqlite-tensor-20261013/installed-consumer.json",
+        "audit/applicable-teaching-20261013/native-adapter-port/result.json"
+      ]
+    },
+    {
+      "id": "external-memory-source-review",
+      "sections": [
+        2,
+        5,
+        7,
+        8,
+        15
+      ],
+      "requirement_ids": [
+        "K-55"
+      ],
+      "proposal": "One exact SQLite journal, explicit reasons/conflicts/supersession, and revision-bound progressive evidence views feed the same generative core. Reusable procedures retain their prerequisites, outcomes and authority.",
+      "implementation_status": "Source review and isolated Unicode-transform check complete. Existing journal remains implemented; semantic graph delivery, progressive memory views and their whole-task benefit remain proposed.",
+      "evidence": [],
+      "local_evidence": [
+        "MEMORY-SOURCES.md",
+        "audit/memory-design-20261014/offload-unicode-check.json",
+        "curation/engram/source-lock.json",
+        "curation/tencentdb-agent-memory/source-lock.json"
+      ]
+    },
+    {
+      "id": "shared-generation-context",
+      "sections": [
+        2,
+        5,
+        11,
+        12,
+        13
+      ],
+      "requirement_ids": [
+        "K-56"
+      ],
+      "proposal": "One selected eligible context and task envelope feed general authoring, writing and authored teaching. Checked learning preserves actual recorded prompts; exact retained work is checked before worker startup. Dependency corrections and observed artifacts govern reuse.",
+      "implementation_status": "Retained implementation passes 191 source tests and the refreshed isolated installed public CLI. Three original-BF16 task attempts produced no final answer; v2 failed its frozen retention gate and v1 was restored. Useful native completion and full task speed remain open.",
+      "evidence": [],
+      "local_evidence": [
+        "audit/harmonization-20261014/DECISION.md",
+        "audit/harmonization-20261014/context-baseline.json",
+        "audit/harmonization-20261014/context-after.json",
+        "audit/harmonization-20261014/full-tests.json",
+        "audit/harmonization-20261014/installed-writing/result.json",
+        "audit/harmonization-20261014/retained-v1/full-tests.json",
+        "audit/harmonization-20261014/installed-consumer-retained.json",
+        "audit/harmonization-20261014/installed-writing-retained/result.json",
+        "audit/harmonization-20261014/retained-v1/operation-labels.json",
+        "audit/harmonization-20261014/native-shared/summary.json",
+        "audit/harmonization-20261014/native-direct/summary.json",
+        "audit/harmonization-20261014/direct-request-candidate/restoration.json",
+        "audit/harmonization-20261014/retained-v1/native-source-integrity.json"
+      ]
+    },
+    {
+      "id": "shared-outcome-and-proper-use",
+      "sections": [
+        2,
+        5,
+        7,
+        12,
+        16
+      ],
+      "requirement_ids": [
+        "K-57"
+      ],
+      "proposal": "Use one task and journal with explicit routes for verified reuse, declared exact operations and new semantic work. Feed observed consequences and independent scoped assessments into recovery, the next decision and candidate learning. Preserve original precision, natural thinking, source identity and effect authority.",
+      "implementation_status": "Shared outcome projection joins Memory.completed/status, writing and practice; empty/truncated/assessed-failed work remains unfinished, and nonempty generation is an independent assessment invariant. 197 source tests and installed recovery/writing checks pass. General learned routing and continuous numerical writing remain unqualified.",
+      "evidence": [
+        "docs/wiring.md"
+      ],
+      "local_evidence": [
+        "audit/proper-use-20261014/DECISION.md",
+        "audit/proper-use-20261014/completion-baseline.json",
+        "audit/proper-use-20261014/full-tests.json",
+        "audit/proper-use-20261014/installed-consumer.json"
+      ]
+    },
+    {
+      "id": "certified-refinement-and-continuing-inquiry",
+      "sections": [
+        2,
+        3,
+        7,
+        16
+      ],
+      "requirement_ids": [
+        "K-58"
+      ],
+      "proposal": "Preserve shared alternatives, question-specific certificates, relevant refinement, correction and extension in the operating loop, with the reviewed pi proof as an exact motivating instance.",
+      "implementation_status": "Current pi arithmetic and installed finite relation consumers verified; useful learned selection and general convergence remain open.",
+      "evidence": [
+        "docs/wiring.md",
+        "docs/pi-proof.md"
+      ],
+      "local_evidence": [
+        "audit/pi-integration-20261014/pi-consumer.json",
+        "audit/pi-integration-20261014/installed-relations.json"
+      ]
+    },
+    {
+      "id": "argon-private-project-handoff",
+      "sections": [
+        16
+      ],
+      "requirement_ids": [
+        "K-59"
+      ],
+      "proposal": "Deliver a portable source-bound snapshot of the full design and all retained requirements with setup, verified status and concrete next work through the private repository.",
+      "implementation_status": "Portable handoff includes complete project snapshots and runnable checks. Repository verified private; compare the actual remote commit before claiming delivery, and record Argon execution separately.",
+      "evidence": [
+        "AGENTS.md",
+        "docs/start-here.md",
+        "docs/project-contract.json"
+      ],
+      "local_evidence": []
+    }
+  ]
+}

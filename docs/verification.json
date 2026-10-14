@@ -1,0 +1,57 @@
+{
+  "schema": "nanoai.portable-verification.v1",
+  "date": "2026-10-14",
+  "environment": "macOS arm64, Python 3.14.7, existing C++20/OpenSSL and Node runtimes",
+  "installation": "Fresh offline build and install from an exported Git source tree. The documented NANOAI_OPENSSL_ROOT fallback selected existing OpenSSL when pkg-config was unavailable. Only nanoai-tokens and nanoai-research were installed.",
+  "checks": {
+    "installed_runtime_modules_match": 32,
+    "installed_relation_tests_passed": 13,
+    "native_tokenizer_roundtrips": 3,
+    "formal_reference_checks": 15,
+    "finite_refinement_cases": 384,
+    "conservative_extension_cases": 255,
+    "niven_polynomial_cases": 12,
+    "pi_grids": 75,
+    "pi_bruteforce_grids": 64,
+    "pi_dyadic_stages": 17,
+    "model_calls": 0
+  },
+  "artifacts": {
+    "src/nanoai/relations.py": {
+      "digest": "shake256:6593ed0c8e8b4973cec9d633a19ee1e629c57dce6dc55bf19aa81904f40ab309626aed37acaa5747b0db98e0bced272653f6720f38e304ac43f448f5ef0bcd30",
+      "bytes": 8018
+    },
+    "tests/test_relations.py": {
+      "digest": "shake256:bcf476473bd6b96b7585581f5d990749f9487a3191cf114ec66ee467fdbf9b36f66a065fd1b8fc913239b03d70c9be2d585827196cb03631388673b9428ab72c",
+      "bytes": 12862
+    },
+    "tools/verify_relational_math.py": {
+      "digest": "shake256:868155123a20148e0e1e658fd821505647a3b57f3322b1fd381beac2010e73970d9803e03d1a7f99b3f9e5c699b058319ddc104668a94ebebb22a7cc94da7dfb",
+      "bytes": 8756
+    },
+    "tools/verify_pi_refinement.py": {
+      "digest": "shake256:3cf7bfd3a202512cb99146f8b17beff32b49b38e9aea3a96c01390c64b5c61aabe7b776ceffeee44db446d720143bddca0b1a8a2bc5f7920b2da9c2e04e6b371",
+      "bytes": 4032
+    },
+    "examples/trit-computer.html": {
+      "digest": "shake256:e3c1b9261c6a0cc531f5afc5c132f6b11e47ad0e8a7cccd01ef38fb63e8bd61c13d7ebca7273f5626ba955da6fcb1e25d82f8d00e9a3491426e5d881ec1e2343",
+      "bytes": 20479
+    },
+    "docs/pi-proof.md": {
+      "digest": "shake256:a7e352145a07a73f6c43d20c93aa4a2cfb6001f3d45010d9e505a169c9e7f7c5b9457f81030d5ea926d4edb62ad1565c91a3bacfa2b98a43829b1ca6714b7d94",
+      "bytes": 12647
+    }
+  },
+  "commands": [
+    "python -m unittest discover -s tests -p test_relations.py -v",
+    "python tools/verify_relational_math.py",
+    "python tools/verify_pi_refinement.py"
+  ],
+  "prior_full_suite": {
+    "tests": 197,
+    "skips": 0,
+    "source_commit": "d71fc54787c48bc22154ec871a977a42d19c6e8e",
+    "scope": "Earlier full local integration run with separately configured native dependencies; no runtime modules changed in this handoff."
+  },
+  "scope": "Source installation, exact mathematics, tokenizer, finite joint-state, correction and recovery. Raw local receipts remain with the project owner. General learned task quality, native fresh-response speed, other OS platforms, browser interaction and Argon execution are separate checks."
+}

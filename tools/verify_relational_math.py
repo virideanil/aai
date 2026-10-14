@@ -1,0 +1,175 @@
+"""Finite mathematical reference, not a learned model or the production engine."""
+from fractions import Fraction as F
+from itertools import product
+from pathlib import Path
+import hashlib
+import json
+import math
+import argparse
+
+
+def judgment(values):
+    values = set(values)
+    return {frozenset({0}): "no", frozenset({1}): "yes",
+            frozenset({0, 1}): "maybe", frozenset(): "conflict"}[frozenset(values)]
+
+
+def outcomes(worlds, predicate):
+    return {predicate(w) for w in worlds}
+
+
+def entropy(probabilities):
+    return -sum(float(p) * math.log2(float(p)) for p in probabilities if p)
+
+
+def information(joint):
+    """Exact rational probabilities; logarithms are binary64 approximations."""
+    assert sum(joint.values()) == 1 and all(p >= 0 for p in joint.values())
+    ps, po = {}, {}
+    for (s, o), p in joint.items():
+        ps[s] = ps.get(s, F(0)) + p
+        po[o] = po.get(o, F(0)) + p
+    expected_after = sum(float(p) * entropy([
+        joint.get((s, o), F(0)) / p for s in ps]) for o, p in po.items() if p)
+    kl = sum(float(p) * math.log2(float(p / (ps[s] * po[o])))
+             for (s, o), p in joint.items() if p)
+    reduction = entropy(ps.values()) - expected_after
+    assert abs(kl - reduction) < 1e-12
+    return {"prior_entropy_bits": entropy(ps.values()),
+            "expected_posterior_entropy_bits": expected_after,
+            "information_bits": kl}
+
+
+def main(output=None):
+    checks = []
+    def check(name, condition, evidence):
+        checks.append({"name": name, "passed": bool(condition), "evidence": evidence})
+        assert condition, name
+
+    same = {(0, 0), (1, 1)}
+    opposite = {(0, 1), (1, 0)}
+    independent = set(product((0, 1), repeat=2))
+    marginals = lambda worlds: [judgment(w[i] for w in worlds) for i in (0, 1)]
+    equal = lambda w: int(w[0] == w[1])
+    labels = {name: judgment(outcomes(worlds, equal)) for name, worlds in
+              [("same", same), ("opposite", opposite), ("independent", independent)]}
+    check("identical marginal trits require different relational answers",
+          marginals(same) == marginals(opposite) == marginals(independent) == ["maybe", "maybe"]
+          and labels == {"same": "yes", "opposite": "no", "independent": "maybe"}, labels)
+    check("shared unknown XOR itself is resolved without observing it",
+          outcomes(same, lambda w: w[0] ^ w[1]) == {0}, {"exact": "no", "cartesian_trits": "maybe"})
+
+    worlds = sorted(independent)
+    compared = 0
+    for mask in range(1, 16):
+        before = {w for i, w in enumerate(worlds) if mask & (1 << i)}
+        for observed in (0, 1):
+            after = {w for w in before if w[0] == observed}
+            if not after:
+                continue
+            for truth_table in range(16):
+                predicate = lambda w, t=truth_table: (t >> (2*w[0]+w[1])) & 1
+                assert outcomes(after, predicate) <= outcomes(before, predicate)
+                compared += 1
+    check("sound filtering preserves every predicate enclosure", compared == 384,
+          {"finite_refinement_cases": compared})
+    check("empty consistent-world set is explicit conflict", judgment([]) == "conflict", {})
+    toggle = {(1 - w[0],) for w in {(0,)}}
+    check("an action transition differs from evidence filtering", toggle == {(1,)}
+          and not toggle <= {(0,)}, {"before": [[0]], "after_toggle": [[1]]})
+
+    noise = information({(s, o): F(1, 4) for s in (0, 1) for o in (0, 1)})
+    reveal = information({(0, 0): F(1, 2), (1, 1): F(1, 2)})
+    check("unpredictable independent observation gives zero epistemic information",
+          noise["information_bits"] == 0, noise)
+    check("a reliable observation can resolve a shared open possibility",
+          reveal["information_bits"] == 1, reveal)
+
+    one, both = {}, {}
+    for x, y in independent:
+        one[(x ^ y, x)] = one.get((x ^ y, x), F(0)) + F(1, 4)
+        both[(x ^ y, (x, y))] = F(1, 4)
+    single, joint = information(one), information(both)
+    check("two observations can have value missed by a one-step policy",
+          single["information_bits"] == 0 and joint["information_bits"] == 1,
+          {"first_bit": single, "both_bits": joint, "loss_before": "1/2",
+           "two_query_cost": "1/5"})
+
+    surprising = information({(0, 0): F(1, 4), (1, 0): F(1, 4), (1, 1): F(1, 2)})
+    check("an individual observation may increase entropy despite positive expected gain",
+          1 > surprising["prior_entropy_bits"] and surprising["information_bits"] > 0,
+          {**surprising, "posterior_entropy_if_observation_zero": 1})
+    check("one maybe label does not determine a probability",
+          entropy([F(1, 2), F(1, 2)]) > entropy([F(1, 100), F(99, 100)]),
+          {"equal_prior_bits": 1, "unequal_prior_bits": entropy([F(1,100), F(99,100)])})
+
+    costs = []
+    for c in (F(1, 100), F(1, 5), F(1, 2), F(1)):
+        losses = {"guess": F(1,2), "defer": F(1,4), "reveal": c}
+        costs.append({"query_cost": str(c), "minimum_loss": str(min(losses.values())),
+                      "optimal_actions": [a for a,l in losses.items() if l == min(losses.values())]})
+    check("the chosen observation depends on its declared complete cost",
+          costs[0]["optimal_actions"] == ["reveal"] and costs[-1]["optimal_actions"] == ["defer"], costs)
+    k = 20
+    grouped_entropy = sum(F(n, 2**n) for n in range(1, k+1)) + F(k, 2**k)
+    check("infinite support can have finite entropy", grouped_entropy == 2 - F(1,2**(k-1)),
+          {"distribution": "p(n)=2^-n, n>=1", "analytic_entropy_bits": 2,
+           "finite_tail_grouped_entropy": str(grouped_entropy)})
+
+    extensions = 0
+    for mask in range(1,16):
+        before = {w for i,w in enumerate(worlds) if mask & (1 << i)}
+        # Test all nonempty fibers independently: {0}, {1} or {0,1}.
+        for choices in product(((0,), (1,), (0,1)), repeat=len(before)):
+            after = {(*w,z) for w,fiber in zip(sorted(before),choices) for z in fiber}
+            assert {w[:2] for w in after} == before
+            for table in range(16):
+                q = lambda w, t=table:(t >> (2*w[0]+w[1])) & 1
+                assert outcomes(after,q) == outcomes(before,q)
+            extensions += 1
+    check("conservative extensions preserve every old binary query", extensions == 255,
+          {"extensions":extensions,"old_truth_tables_per_extension":16})
+    base = set(product((0,1),repeat=2))
+    accepted = {w for w in base if w[0]==1}
+    retracted = set(base)
+    check("retracting a premise can reopen alternatives while preserving its prior state",
+          accepted < retracted and outcomes(accepted,lambda w:w[0])=={1}
+          and outcomes(retracted,lambda w:w[0])=={0,1},
+          {"before_retraction_worlds":len(accepted),"after_retraction_worlds":len(retracted)})
+
+    # Independent exact polynomial arithmetic checks Niven's algebraic steps.
+    # 22/7 is only a test rational; its sine endpoint is not asserted to vanish.
+    def derivative(p):
+        return [F(i)*p[i] for i in range(1,len(p))] or [F(0)]
+    def evaluate_polynomial(p,x):
+        return sum(c*x**i for i,c in enumerate(p))
+    for n in range(1,13):
+        a,b = 22,7
+        f = [F(0)]*(2*n+1)
+        for k in range(n+1):
+            f[n+k] = F(math.comb(n,k)*a**(n-k)*(-b)**k,math.factorial(n))
+        derivatives = [f]
+        for _ in range(2*n+2):derivatives.append(derivative(derivatives[-1]))
+        for k,p in enumerate(derivatives):
+            assert p[0].denominator==1
+            assert evaluate_polynomial(p,F(a,b))==(-1)**k*p[0]
+        total = [sum(((-1)**j)*derivatives[2*j][k] for j in range(n+1)
+                     if k<len(derivatives[2*j])) for k in range(len(f))]
+        dd = derivative(derivative(total))
+        assert [c+(dd[k] if k<len(dd) else 0) for k,c in enumerate(total)]==f
+    check("Niven endpoint integrality symmetry and differential identity", True,
+          {"tested_polynomial_orders":12,"hypothetical_rational":"22/7",
+           "scope":"Polynomial identities only; the contradiction for pi uses the written analytic proof"})
+
+    result = {"scope": "Finite mathematical reference and counterexamples; no model training, runtime speed, human psychology or universal-world claim.",
+              "checks": checks, "passed": len(checks),
+              "source_digest": "shake256:" + hashlib.shake_256(Path(__file__).read_bytes()).hexdigest(64)}
+    if output is not None:
+        output.write_text(json.dumps(result, indent=2)+"\n")
+    print(json.dumps({"passed": len(checks), "relational_answers": labels, "refinement_cases": compared}))
+
+
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(description=__doc__)
+    parser.add_argument("--output", type=Path)
+    main(parser.parse_args().output)
