@@ -107,6 +107,31 @@ consumer; it is not installed as a general learned refinement policy. Learning
 which representation, question and transition are useful remains substantive
 core work. The complete [architecture](whole-system.md) retains that objective.
 
+### Completion belongs to the current question
+
+Fable's subsequent design review proposes a task-relative completion rule: deliver
+the requested result when its mandatory criteria are satisfied at the declared
+tolerance, and retain other open questions in the continuing state. A numerical
+enclosure certifies such a decision when every enclosed value gives the required
+answer. Declared exact tasks can use their verified result directly. This is a
+useful operating rule for inquiry that continues after a completed delivery.
+
+The completion criterion and the production of a deliverable need separate
+mechanisms. The current [native worker](../src/nanoai/native_worker.py) requests a
+non-streaming completion and returns the model's final content; the
+[experience owner](../src/nanoai/experience.py) assesses the observed artifact
+afterward. A task owner cannot assess missing final bytes or obtain them merely
+by changing the completion rule. An incremental candidate/delivery protocol, or
+an applicable exact producer, must supply something that can actually be checked.
+The three empty-final trials remain failures until that path is exercised.
+
+Writing checks such as length, required details and canon have their stated
+scope. They are not guaranteed numerical enclosures of literary or semantic
+quality. The completed question, remaining obligations, evaluator and uncertainty
+must remain explicit. Conditional `relation.refine` narrows under a premise;
+`relation.extend` adds a coordinate while preserving prior alternatives. Both can
+serve continuing work, and their contracts remain distinct.
+
 ## Close the loop at its real outcome
 
 Artifact integrity, natural generation termination and task quality have
