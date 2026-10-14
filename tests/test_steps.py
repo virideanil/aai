@@ -190,7 +190,96 @@ class StepConsumerTests(unittest.TestCase):
         self.assertEqual(after_corr["operators"]["integer.product"]["band"], "escalate")
         self.assertEqual(after_corr["operators"]["integer.product"]["conduct_flags"], 1)
 
+    def test_hybrid_decision_integration_unfamiliar_tasks_and_core_judgment(self):
+        from nanoai.judgments import Judgments
+        snap = self.snapshot()
+        first = self.steps.calculate_fields(snap, self.plan)
+        field_steps = list(first["step"]["arguments"]["steps"])
+        self.steps.review(first["step_id"], "confirmed", reviewer="audit-1", reason="Verified product")
+        second = self.steps.propose(snap, "integer.product", {"steps": field_steps})
+        self.steps.execute(second["id"])
+        self.steps.review(second["id"], "confirmed", reviewer="audit-2", reason="Verified second product")
+
+        # 1. In a familiar task ("display"), 2 confirmations justify rule firing when context is aligned,
+        #    EXCEPT when the learned core signals context-sensitive uncertainty ("maybe" or low usefulness).
+        uncertain_act = self.steps.band_proposal(
+            snap,
+            "integer.product",
+            {"steps": field_steps},
+            core_signal={"verdict": "maybe", "usefulness": 0.45, "uncertainty": "missing_evidence"},
+        )
+        self.assertEqual(uncertain_act["band"], "propose")
+        self.assertFalse(uncertain_act["executed"])
+        self.assertEqual(uncertain_act["signals"]["calibration"]["trigger"], "learned_core_uncertainty_override")
+
+        conflict_act = self.steps.band_proposal(
+            snap,
+            "integer.product",
+            {"steps": field_steps},
+            core_signal={"verdict": "no", "usefulness": 0.1, "uncertainty": "conflict"},
+        )
+        self.assertEqual(conflict_act["band"], "escalate")
+        self.assertFalse(conflict_act["executed"])
+
+        # 2. On an unfamiliar task ("unfamiliar_bridge"), two confirmations on "display" alone do NOT
+        #    automatically fire act_now without context-sensitive core endorsement.
+        self.memory.set_task("unfamiliar_bridge", "Compute bridge load on unfamiliar structure.", filenames=["bridge.md"])
+        unfamiliar_snap = context(self.memory, "unfamiliar_bridge", "test-core", selected_ids=["spec"])["snapshot"]
+        r1 = self.steps.propose(unfamiliar_snap, "source.read", {"source": "spec"})
+        self.steps.execute(r1["id"])
+        f1 = self.steps.propose(unfamiliar_snap, "json.field", {"step": r1["id"], "path": ["rail", "length_cm"]})
+        self.steps.execute(f1["id"])
+        f2 = self.steps.propose(unfamiliar_snap, "json.field", {"step": r1["id"], "path": ["rail", "count"]})
+        self.steps.execute(f2["id"])
+
+        unfamiliar_cal = self.steps.calibration("unfamiliar_bridge")
+        self.assertFalse(unfamiliar_cal["operators"]["integer.product"]["task_familiar"])
+        self.assertTrue(unfamiliar_cal["operators"]["integer.product"]["cross_task_transfer_eligible"])
+        self.assertEqual(unfamiliar_cal["operators"]["integer.product"]["band"], "propose")
+
+        without_core = self.steps.band_proposal(
+            unfamiliar_snap, "integer.product", {"steps": [f1["id"], f2["id"]]}
+        )
+        self.assertEqual(without_core["band"], "propose")
+        self.assertFalse(without_core["executed"])
+        self.assertEqual(
+            without_core["signals"]["calibration"]["trigger"],
+            "unfamiliar_task_requires_core_or_review",
+        )
+
+        # When the learned core records a context-sensitive "yes" judgment on the unfamiliar task,
+        # cross-task history + core endorsement combine to authorize act_now.
+        j_node = Judgments(self.memory).predict(
+            unfamiliar_snap,
+            "Does integer.product apply to unfamiliar_bridge rail length and count?",
+            "yes",
+            "Same multiplicative schema applies to bridge segments",
+        )
+        with_core = self.steps.band_proposal(
+            unfamiliar_snap,
+            "integer.product",
+            {"steps": [f1["id"], f2["id"]]},
+            judgment_node_id=j_node["id"],
+        )
+        self.assertEqual(with_core["band"], "act_now")
+        self.assertTrue(with_core["executed"])
+        self.assertEqual(with_core["observation"]["result"]["value"], 46)
+        self.assertEqual(
+            with_core["signals"]["calibration"]["trigger"],
+            "cross_task_history_plus_core_endorsement",
+        )
+
+        # 3. Verify decision_support_audit answers "Does this hybrid make well-supported decisions in practice?"
+        self.steps.review(with_core["step"]["id"], "confirmed", reviewer="audit-3", reason="Valid transfer")
+        support = self.steps.decision_support_audit()
+        self.assertEqual(support["question"], "Does this hybrid make well-supported decisions in practice?")
+        self.assertEqual(support["verdict"], "well_supported")
+        self.assertEqual(support["well_supported_rate"], 1.0)
+        self.assertEqual(support["unfamiliar_task_decisions"], 3)
+        self.assertEqual(support["unfamiliar_task_precision"], 1.0)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

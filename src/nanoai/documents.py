@@ -153,3 +153,290 @@ def relation_note(memory, step_id, *, open_step_ids=(), language="en", filename=
     node = board.relation(step_id, open_step_ids=open_step_ids, language=language)
     return board.propose_document(node["id"], filename=filename)
 
+
+VISUAL_RULES = (
+    {
+        "id": "visual.hierarchy",
+        "name": "Monotonic Heading Hierarchy",
+        "contract": "Start with a single H1 title and advance heading levels monotonically without skipping levels.",
+    },
+    {
+        "id": "visual.table_alignment",
+        "name": "Uniform Table Geometry",
+        "contract": "Every Markdown table requires a header row, a delimiter row and identical column counts across all rows.",
+    },
+    {
+        "id": "visual.code_fences",
+        "name": "Closed Language-Tagged Code Fences",
+        "contract": "Every fenced code block must specify a language tag on its opening fence and close cleanly.",
+    },
+    {
+        "id": "visual.citation_grounding",
+        "name": "Verified Source Attribution",
+        "contract": "Every bracketed citation [source@rev] must match an admitted source reference.",
+    },
+    {
+        "id": "visual.perception_grounding",
+        "name": "SEE Region Coordinate Fidelity",
+        "contract": "Referenced visual region IDs and bounding boxes [x, y, w, h] must match measured SEE perception records.",
+    },
+    {
+        "id": "visual.density_balance",
+        "name": "Scannable Structural Density",
+        "contract": "Sections must contain non-empty body content and balanced inline formatting.",
+    },
+)
+
+
+def audit_visual_presentation(
+    content: str,
+    *,
+    allowed_sources=None,
+    perception_regions=None,
+    require_title: bool = True,
+):
+    """Deterministically audit Markdown/visual output against nano'ai's visual presentation rules."""
+    import re
+    from .memory import document_references
+
+    if not isinstance(content, str):
+        raise ValueError("Visual audit content must be a string")
+
+    lines = content.splitlines()
+    violations = []
+    in_fence = False
+    fence_open_line = None
+    code_block_count = 0
+    headings = []
+    table_blocks = []
+    current_table = []
+
+    for idx, raw_line in enumerate(lines, start=1):
+        stripped = raw_line.strip()
+        if stripped.startswith("```"):
+            if not in_fence:
+                in_fence = True
+                fence_open_line = idx
+                code_block_count += 1
+                lang = stripped[3:].strip()
+                if not lang:
+                    violations.append({
+                        "rule_id": "visual.code_fences",
+                        "line": idx,
+                        "message": "Opening code fence is missing an explicit language tag",
+                    })
+            else:
+                in_fence = False
+                fence_open_line = None
+            continue
+
+        if in_fence:
+            continue
+
+        if stripped.startswith("|") and stripped.endswith("|"):
+            current_table.append((idx, stripped))
+        else:
+            if current_table:
+                table_blocks.append(current_table)
+                current_table = []
+
+        m_head = re.match(r"^(#{1,6})\s+(.*)$", stripped)
+        if m_head:
+            level = len(m_head.group(1))
+            title_text = m_head.group(2).strip()
+            headings.append((idx, level, title_text))
+            if not title_text:
+                violations.append({
+                    "rule_id": "visual.density_balance",
+                    "line": idx,
+                    "message": "Heading has empty title text",
+                })
+
+    if current_table:
+        table_blocks.append(current_table)
+
+    if in_fence:
+        violations.append({
+            "rule_id": "visual.code_fences",
+            "line": fence_open_line or len(lines),
+            "message": "Unclosed fenced code block",
+        })
+
+    # Rule 1: Heading hierarchy
+    if require_title:
+        h1_list = [h for h in headings if h[1] == 1]
+        if not headings or headings[0][1] != 1:
+            violations.append({
+                "rule_id": "visual.hierarchy",
+                "line": headings[0][0] if headings else 1,
+                "message": "Document must begin with a top-level H1 (#) heading",
+            })
+        elif len(h1_list) > 1:
+            violations.append({
+                "rule_id": "visual.hierarchy",
+                "line": h1_list[1][0],
+                "message": "Document contains multiple H1 headings; use H2 (##) or deeper for sections",
+            })
+    prev_level = 0
+    for idx, level, _ in headings:
+        if prev_level > 0 and level > prev_level + 1:
+            violations.append({
+                "rule_id": "visual.hierarchy",
+                "line": idx,
+                "message": f"Heading level jumped from H{prev_level} to H{level}",
+            })
+        prev_level = level
+
+    # Rule 2: Table geometry
+    for block in table_blocks:
+        if len(block) < 2:
+            violations.append({
+                "rule_id": "visual.table_alignment",
+                "line": block[0][0],
+                "message": "Markdown table must have at least a header row and a delimiter row",
+            })
+            continue
+        col_counts = [len([c for c in row_str.strip("|").split("|")]) for _, row_str in block]
+        delim_cells = [c.strip() for c in block[1][1].strip("|").split("|")]
+        if not all(re.match(r"^:?-{3,}:?$", c) for c in delim_cells):
+            violations.append({
+                "rule_id": "visual.table_alignment",
+                "line": block[1][0],
+                "message": "Second row of Markdown table must be a valid delimiter row (|---|)",
+            })
+        if len(set(col_counts)) != 1:
+            violations.append({
+                "rule_id": "visual.table_alignment",
+                "line": block[0][0],
+                "message": f"Inconsistent table column counts across rows: {col_counts}",
+            })
+
+    # Rule 4: Citation grounding
+    refs = sorted(document_references(content))
+    if allowed_sources is not None:
+        allowed_set = set(allowed_sources)
+        for ref in refs:
+            if ref not in allowed_set:
+                violations.append({
+                    "rule_id": "visual.citation_grounding",
+                    "line": 1,
+                    "message": f"Citation [{ref}] is not in allowed sources {sorted(allowed_set)}",
+                })
+
+    # Rule 5: SEE perception grounding
+    perception_mentions = re.findall(r"\[region:(\d+)\s+bbox=\[(\d+),\s*(\d+),\s*(\d+),\s*(\d+)\]\]", content)
+    if perception_regions is not None:
+        expected_regions = {
+            int(r["region_id"]): tuple(int(v) for v in r["bbox"])
+            for r in perception_regions
+            if "region_id" in r and "bbox" in r
+        }
+        for reg_str, x_s, y_s, w_s, h_s in perception_mentions:
+            rid = int(reg_str)
+            bbox = (int(x_s), int(y_s), int(w_s), int(h_s))
+            if rid not in expected_regions:
+                violations.append({
+                    "rule_id": "visual.perception_grounding",
+                    "line": 1,
+                    "message": f"Referenced SEE region:{rid} is not present in measured perception records",
+                })
+            elif expected_regions[rid] != bbox:
+                violations.append({
+                    "rule_id": "visual.perception_grounding",
+                    "line": 1,
+                    "message": f"Referenced SEE region:{rid} bbox {list(bbox)} differs from measured {list(expected_regions[rid])}",
+                })
+
+    # Rule 6: Density & non-empty content
+    if not content.strip():
+        violations.append({
+            "rule_id": "visual.density_balance",
+            "line": 1,
+            "message": "Document content is empty",
+        })
+
+    failed_ids = {v["rule_id"] for v in violations}
+    rules_checked = [
+        {
+            "id": rule["id"],
+            "name": rule["name"],
+            "status": "failed" if rule["id"] in failed_ids else "passed",
+        }
+        for rule in VISUAL_RULES
+    ]
+    passed_count = sum(1 for r in rules_checked if r["status"] == "passed")
+    return {
+        "schema": "nanoai.visual-audit.v1",
+        "passed": len(violations) == 0,
+        "score": round(passed_count / len(VISUAL_RULES), 6),
+        "rules_checked": rules_checked,
+        "violations": violations,
+        "metrics": {
+            "heading_count": len(headings),
+            "table_count": len(table_blocks),
+            "code_block_count": code_block_count,
+            "citation_count": len(refs),
+            "citations": refs,
+            "perception_ref_count": len(perception_mentions),
+        },
+    }
+
+
+def render_visual_report(
+    title: str,
+    sections: list[dict],
+    *,
+    citations=(),
+    perception_regions=(),
+) -> str:
+    """Deterministically render a structured Markdown visual report guaranteed to satisfy VISUAL_RULES."""
+    if not isinstance(title, str) or not title.strip():
+        raise ValueError("Visual report requires a non-empty title")
+    if not isinstance(sections, (list, tuple)) or not 1 <= len(sections) <= 32:
+        raise ValueError("Visual report requires between 1 and 32 sections")
+    lines = [f"# {title.strip()}"]
+    if citations:
+        cite_str = " ".join(f"[{c}]" for c in citations)
+        lines.extend(["", f"Grounded sources: {cite_str}"])
+    for sec in sections:
+        if not isinstance(sec, dict) or not isinstance(sec.get("heading"), str) or not sec["heading"].strip():
+            raise ValueError("Each visual report section requires a non-empty heading")
+        lines.extend(["", f"## {sec['heading'].strip()}"])
+        if sec.get("body"):
+            lines.extend(["", str(sec["body"]).strip()])
+        if sec.get("table"):
+            tbl = sec["table"]
+            headers = [str(h) for h in tbl.get("headers", ())]
+            rows = tbl.get("rows", ())
+            if not headers or any(len(r) != len(headers) for r in rows):
+                raise ValueError("Visual report table requires headers and rows of matching width")
+            lines.append("")
+            lines.append("| " + " | ".join(headers) + " |")
+            lines.append("| " + " | ".join("---" for _ in headers) + " |")
+            for r in rows:
+                lines.append("| " + " | ".join(str(cell) for cell in r) + " |")
+        if sec.get("code"):
+            code_spec = sec["code"]
+            lang = str(code_spec.get("language", "text")).strip() or "text"
+            snippet = str(code_spec.get("snippet", "")).rstrip("\n")
+            lines.extend(["", f"```{lang}", snippet, "```"])
+    if perception_regions:
+        lines.extend(["", "## Visual Perception Grounding", ""])
+        lines.append("| Region ID | Bounding Box | Reference Tag |")
+        lines.append("| --- | --- | --- |")
+        for reg in perception_regions:
+            rid = int(reg["region_id"])
+            bx = [int(v) for v in reg["bbox"]]
+            tag = f"[region:{rid} bbox=[{bx[0]}, {bx[1]}, {bx[2]}, {bx[3]}]]"
+            lines.append(f"| `{rid}` | `{bx}` | `{tag}` |")
+    rendered = "\n".join(lines) + "\n"
+    audit = audit_visual_presentation(
+        rendered,
+        allowed_sources=citations if citations else None,
+        perception_regions=perception_regions if perception_regions else None,
+    )
+    if not audit["passed"]:
+        raise ValueError(f"Rendered visual report failed visual rules: {audit['violations']}")
+    return rendered
+
+

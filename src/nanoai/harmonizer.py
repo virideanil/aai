@@ -221,12 +221,14 @@ class Harmonizer:
 
     def evidence_bundle(self, snapshot):
         """Progressive evidence view surfacing sources, supersession, conflicts, open resolvers and drilldowns."""
+        from .documents import VISUAL_RULES
         from .judgments import Judgments
         from .steps import Steps
         memory = self.memory
         task_id = snapshot["task_id"]
         agenda = Judgments(memory).open_agenda(task_id)
-        calibration = Steps(memory).calibration(task_id)["operators"]
+        cal_full = Steps(memory).calibration(task_id)
+        calibration = cal_full["operators"]
         completed_state = memory.completed(task_id)
         with memory.locked():
             memory._validate_snapshot(snapshot)
@@ -309,8 +311,10 @@ class Harmonizer:
                     "remaining": completed_state["remaining"],
                 },
                 "operator_calibration": calibration,
+                "decision_support": cal_full["decision_support"],
+                "visual_rules": [deepcopy(r) for r in VISUAL_RULES],
                 "drilldowns": {
-                    "available_generators": ["source_lines", "relation_table", "slot_sequence"],
+                    "available_generators": ["source_lines", "relation_table", "slot_sequence", "visual_report"],
                 },
                 "model_calls": 0,
             }

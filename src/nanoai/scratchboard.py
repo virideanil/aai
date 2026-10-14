@@ -194,6 +194,27 @@ class Scratchboard:
                 lines.append(args["template"].replace("{index}", str(idx)).replace("{item}", item_text))
             sep = "" if args["template"].endswith("\n") else "\n"
             return {}, len(args["items"]), sep.join(lines).encode("utf-8")
+        if op == "visual_report":
+            from .documents import render_visual_report
+            allowed_keys = {"title", "sections", "citations", "perception_regions"}
+            if (not set(args) <= allowed_keys or "title" not in args or "sections" not in args
+                    or not isinstance(args["title"], str) or not isinstance(args["sections"], list)):
+                raise ValueError("Generator visual_report contract")
+            allowed_refs = {
+                f"{src_id}@{self.memory.state['sources'][src_id]['revision']}"
+                for src_id in snapshot.get("sources", {})
+                if src_id in self.memory.state["sources"]
+            }
+            citations = list(args.get("citations", sorted(allowed_refs)))
+            if any(c not in allowed_refs for c in citations):
+                raise ValueError("Generator visual_report citation lies outside selected sources")
+            rendered_str = render_visual_report(
+                args["title"],
+                args["sections"],
+                citations=citations,
+                perception_regions=args.get("perception_regions", ()),
+            )
+            return {}, max(1, len(args["sections"])), rendered_str.encode("utf-8")
         raise ValueError("Generator operator is outside the deterministic contract")
 
     def _spec(self, snapshot, spec):
@@ -857,7 +878,27 @@ class Scratchboard:
             return {"node_id": node_id, "bytes": raw, "digest": digest_bytes(raw), "snapshot": deepcopy(node["snapshot"]),
                     "elapsed_ns": time.perf_counter_ns()-start, "model_calls": 0, **stats}
 
-    def propose_document(self, node_id, *, filename=None):
+    def audit_visual(self, node_id, *, perception_regions=None, require_title=True):
+        """Materialize a scratchboard node and audit its output against VISUAL_RULES."""
+        from .documents import audit_visual_presentation
+        rendered = self.materialize(node_id)
+        snapshot = rendered["snapshot"]
+        with self.memory.locked():
+            allowed_refs = [
+                f"{src_id}@{self.memory.state['sources'][src_id]['revision']}"
+                for src_id in snapshot.get("sources", {})
+                if src_id in self.memory.state["sources"]
+            ]
+        content = rendered["bytes"].decode("utf-8")
+        audit = audit_visual_presentation(
+            content,
+            allowed_sources=allowed_refs,
+            perception_regions=perception_regions,
+            require_title=require_title,
+        )
+        return {**audit, "node_id": node_id, "digest": rendered["digest"], "model_calls": 0}
+
+    def propose_document(self, node_id, *, filename=None, enforce_visual_rules=False, perception_regions=None):
         rendered = self.materialize(node_id)
         snapshot = rendered["snapshot"]
         with self.memory.locked():
@@ -869,8 +910,23 @@ class Scratchboard:
                 if len(task["filenames"]) != 1:
                     raise ValueError("Choose one of the task's document filenames")
                 filename = task["filenames"][0]
+            allowed_refs = [
+                f"{src_id}@{self.memory.state['sources'][src_id]['revision']}"
+                for src_id in snapshot.get("sources", {})
+                if src_id in self.memory.state["sources"]
+            ]
         content = rendered["bytes"].decode("utf-8")
+        if enforce_visual_rules:
+            from .documents import audit_visual_presentation
+            audit = audit_visual_presentation(
+                content,
+                allowed_sources=allowed_refs,
+                perception_regions=perception_regions,
+            )
+            if not audit["passed"]:
+                raise ValueError(f"Document failed visual presentation rules: {audit['violations']}")
         return self.memory.record_proposal(snapshot, {"filename": filename, "content": content,
                 "citations": sorted(document_references(content))}, metrics={"renderer": "scratchboard-v1",
                 "scratchboard_node": node_id, "renderer_identity": self.implementation,
                 "render_model_calls": 0, "materialization_ns": rendered["elapsed_ns"]})
+

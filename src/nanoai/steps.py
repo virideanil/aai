@@ -286,64 +286,229 @@ class Steps:
             memory._append({"kind": "correction.issued", "correction": correction})
             return deepcopy(correction)
 
+    def _resolve_core_signal(self, snapshot, *, core_signal=None, judgment_node_id=None):
+        """Extract the learned core's context-sensitive judgment, usefulness and uncertainty."""
+        if core_signal is not None and judgment_node_id is not None:
+            raise ValueError("Provide at most one of core_signal or judgment_node_id")
+        if judgment_node_id is not None:
+            node = self.memory.state["scratchboard"].get(judgment_node_id)
+            if not node or node["spec"].get("kind") != "judgment":
+                raise ValueError("Calibration judgment_node_id must reference a scratchboard judgment node")
+            if any(node["snapshot"].get(k) != snapshot.get(k) for k in ("task_id", "task_revision", "identity")):
+                raise StaleState("Calibration judgment node belongs to a different or stale task snapshot")
+            spec = node["spec"]
+            verdict = spec["verdict"]
+            uncertainty = spec.get("uncertainty")
+            assessed = spec.get("role") == "assessment"
+            default_usefulness = (
+                1.0 if (verdict == "yes" and assessed)
+                else (0.85 if verdict == "yes" else (0.5 if verdict == "maybe" else 0.0))
+            )
+            return {
+                "supplied": True,
+                "source": "judgment_node",
+                "judgment_node_id": judgment_node_id,
+                "verdict": verdict,
+                "usefulness": default_usefulness,
+                "uncertainty": uncertainty,
+                "assessed": assessed,
+            }
+        if core_signal is not None:
+            if not isinstance(core_signal, dict):
+                raise ValueError("Learned core signal must be a dictionary")
+            verdict = core_signal.get("verdict", "yes")
+            if verdict not in {"yes", "maybe", "no"}:
+                raise ValueError("Learned core signal verdict must be yes, maybe or no")
+            usefulness = core_signal.get("usefulness")
+            if usefulness is not None:
+                if type(usefulness) not in (int, float) or not 0.0 <= float(usefulness) <= 1.0:
+                    raise ValueError("Learned core usefulness must lie in [0.0, 1.0]")
+                usefulness = float(usefulness)
+            else:
+                usefulness = 0.85 if verdict == "yes" else (0.5 if verdict == "maybe" else 0.0)
+            uncertainty = core_signal.get("uncertainty")
+            if uncertainty is not None and not isinstance(uncertainty, str):
+                raise ValueError("Learned core uncertainty must be a string or None")
+            return {
+                "supplied": True,
+                "source": "core_estimate",
+                "judgment_node_id": None,
+                "verdict": verdict,
+                "usefulness": round(usefulness, 6),
+                "uncertainty": uncertainty,
+                "assessed": bool(core_signal.get("assessed", False)),
+            }
+        # Inspect whether the active task has an open conflict judgment on the scratchboard
+        task_id = snapshot.get("task_id")
+        for node in self.memory.state["scratchboard"].values():
+            if node["id"] in self.memory.state["scratchboard_revisions"]:
+                continue
+            if node["snapshot"].get("task_id") == task_id and node["spec"].get("kind") == "judgment":
+                if node["spec"].get("verdict") == "maybe" and node["spec"].get("uncertainty") == "conflict":
+                    return {
+                        "supplied": True,
+                        "source": "task_open_conflict",
+                        "judgment_node_id": node["id"],
+                        "verdict": "maybe",
+                        "usefulness": 0.25,
+                        "uncertainty": "conflict",
+                        "assessed": False,
+                    }
+        return {
+            "supplied": False,
+            "source": "none",
+            "judgment_node_id": None,
+            "verdict": None,
+            "usefulness": None,
+            "uncertainty": None,
+            "assessed": False,
+        }
+
+    def decision_support_audit(self, task_id=None, *, min_confirmations=2, threshold=0.8):
+        """Evaluate whether the hybrid system makes well-supported decisions in practice across familiar and unfamiliar tasks."""
+        self.memory.reload()
+        prior_task_conf = {}
+        corrected_steps = {c["step_id"] for c in self.memory.state["corrections"].values()
+                           if task_id is None or c["task_id"] == task_id}
+        decided = 0
+        well_supported = 0
+        familiar_decided = 0
+        familiar_supported = 0
+        unfamiliar_decided = 0
+        unfamiliar_supported = 0
+        replacements = 0
+
+        for sid, step in self.memory.state["steps"].items():
+            st_task = step["snapshot"]["task_id"]
+            op = step["operator"]
+            key = (st_task, op)
+            was_familiar = prior_task_conf.get(key, 0) >= min_confirmations
+            rev = self.memory.state["step_reviews"].get(sid)
+            if rev and rev["decision"] in {"confirmed", "rejected"}:
+                if task_id is None or st_task == task_id:
+                    decided += 1
+                    is_supported = (
+                        rev["decision"] == "confirmed"
+                        and rev.get("replacement") is None
+                        and sid not in corrected_steps
+                    )
+                    if rev.get("replacement") is not None:
+                        replacements += 1
+                    if is_supported:
+                        well_supported += 1
+                    if was_familiar:
+                        familiar_decided += 1
+                        if is_supported:
+                            familiar_supported += 1
+                    else:
+                        unfamiliar_decided += 1
+                        if is_supported:
+                            unfamiliar_supported += 1
+                if rev["decision"] == "confirmed" and rev.get("replacement") is None and sid not in corrected_steps:
+                    prior_task_conf[key] = prior_task_conf.get(key, 0) + 1
+
+        well_supported_rate = round(well_supported / decided, 6) if decided > 0 else 0.0
+        familiar_precision = round(familiar_supported / familiar_decided, 6) if familiar_decided > 0 else None
+        unfamiliar_precision = round(unfamiliar_supported / unfamiliar_decided, 6) if unfamiliar_decided > 0 else None
+        corr_count = len(corrected_steps)
+        if decided >= min_confirmations and well_supported_rate >= threshold and corr_count == 0:
+            verdict = "well_supported"
+        elif decided > 0:
+            verdict = "needs_calibration_or_review"
+        else:
+            verdict = "insufficient_evidence"
+        return {
+            "question": "Does this hybrid make well-supported decisions in practice?",
+            "verdict": verdict,
+            "decided_steps": decided,
+            "well_supported_decisions": well_supported,
+            "well_supported_rate": well_supported_rate,
+            "familiar_task_decisions": familiar_decided,
+            "familiar_task_precision": familiar_precision,
+            "unfamiliar_task_decisions": unfamiliar_decided,
+            "unfamiliar_task_precision": unfamiliar_precision,
+            "correction_count": corr_count,
+            "replacement_count": replacements,
+        }
+
     def calibration(self, task_id=None, *, min_confirmations=2, threshold=0.8):
-        """Derive per-operator System One action bands from journaled review and correction history."""
+        """Derive per-operator System One action bands integrating review history, task familiarity and explicit rules."""
         from .relations import OPERATORS as REL_OPS
         if type(min_confirmations) is not int or min_confirmations < 1 or not 0.0 < threshold <= 1.0:
             raise ValueError("Calibration bounds")
         self.memory.reload()
         admitted = {"source.read", "json.field", "integer.product", "integer.sum",
                     "quantity.field", "quantity.product", "quantity.sum"} | set(REL_OPS)
-        stats = {
-            op: {
+
+        def _empty_row(op):
+            return {
                 "operator": op, "proposed": 0, "observed": 0, "confirmed": 0,
                 "rejected": 0, "cancelled": 0, "replaced": 0, "corrections": 0,
-                "conduct_flags": 0,
+                "conduct_flags": 0, "global_confirmed": 0, "global_rejected": 0,
+                "global_corrections": 0, "global_conduct_flags": 0,
+                "_tasks_confirmed": set(),
             }
-            for op in sorted(admitted)
-        }
+
+        stats = {op: _empty_row(op) for op in sorted(admitted)}
         for sid, step in self.memory.state["steps"].items():
-            if task_id is not None and step["snapshot"]["task_id"] != task_id:
-                continue
             op = step["operator"]
-            row = stats.setdefault(op, {
-                "operator": op, "proposed": 0, "observed": 0, "confirmed": 0,
-                "rejected": 0, "cancelled": 0, "replaced": 0, "corrections": 0,
-                "conduct_flags": 0,
-            })
+            st_task = step["snapshot"]["task_id"]
+            row = stats.setdefault(op, _empty_row(op))
+            rev = self.memory.state["step_reviews"].get(sid)
+            if rev:
+                if rev["decision"] == "confirmed":
+                    row["global_confirmed"] += 1
+                    row["_tasks_confirmed"].add(st_task)
+                elif rev["decision"] == "rejected":
+                    row["global_rejected"] += 1
+            if task_id is not None and st_task != task_id:
+                continue
             row["proposed"] += 1
             if sid in self.memory.state["step_observations"]:
                 row["observed"] += 1
-            rev = self.memory.state["step_reviews"].get(sid)
             if rev:
                 row[rev["decision"]] += 1
                 if rev.get("replacement") is not None:
                     row["replaced"] += 1
         for corr in self.memory.state["corrections"].values():
+            op = corr["operator"]
+            row = stats.setdefault(op, _empty_row(op))
+            row["global_corrections"] += 1
+            if corr.get("conduct_virtue") is not None:
+                row["global_conduct_flags"] += 1
             if task_id is not None and corr["task_id"] != task_id:
                 continue
-            op = corr["operator"]
-            row = stats.setdefault(op, {
-                "operator": op, "proposed": 0, "observed": 0, "confirmed": 0,
-                "rejected": 0, "cancelled": 0, "replaced": 0, "corrections": 0,
-                "conduct_flags": 0,
-            })
             row["corrections"] += 1
             if corr.get("conduct_virtue") is not None:
                 row["conduct_flags"] += 1
+
         operators_out = {}
         for op, row in sorted(stats.items()):
+            tasks_confirmed = sorted(row.pop("_tasks_confirmed"))
             decided = row["confirmed"] + row["rejected"]
             agreement = (row["confirmed"] / decided) if decided > 0 else 0.0
             replacement_rate = (row["replaced"] / decided) if decided > 0 else 0.0
-            if row["conduct_flags"] > 0:
+            g_decided = row["global_confirmed"] + row["global_rejected"]
+            g_agreement = (row["global_confirmed"] / g_decided) if g_decided > 0 else 0.0
+            task_familiar = row["confirmed"] >= min_confirmations
+            cross_task_eligible = (
+                row["global_confirmed"] >= min_confirmations
+                and g_agreement >= threshold
+                and row["global_corrections"] == 0
+                and row["corrections"] == 0
+            )
+            if row["conduct_flags"] > 0 or row["global_conduct_flags"] > 0:
                 band = "escalate"
-            elif row["confirmed"] >= min_confirmations and agreement >= threshold and row["corrections"] == 0:
+            elif task_familiar and agreement >= threshold and row["corrections"] == 0:
                 band = "act_now"
             else:
                 band = "propose"
             operators_out[op] = {
                 **row,
+                "distinct_tasks_confirmed": len(tasks_confirmed),
+                "task_familiar": task_familiar,
+                "cross_task_transfer_eligible": cross_task_eligible,
+                "global_agreement_rate": round(g_agreement, 6),
                 "agreement_rate": round(agreement, 6),
                 "empirical_precision": round(agreement, 6),
                 "replacement_rate": round(replacement_rate, 6),
@@ -353,35 +518,157 @@ class Steps:
             "task_id": task_id,
             "min_confirmations": min_confirmations,
             "threshold": threshold,
+            "hybrid_components": {
+                "learned_core": "Context-sensitive action proposal, usefulness and uncertainty estimation",
+                "review_history": "In-task and cross-task outcome evidence, replacements and audit corrections",
+                "explicit_rules": "Operator admission, argument validity, source scope and conduct boundaries",
+                "calibration": "Signal integration into act_now, propose or escalate with unfamiliar-task safeguards",
+            },
+            "decision_support": self.decision_support_audit(
+                task_id, min_confirmations=min_confirmations, threshold=threshold
+            ),
             "operators": operators_out,
-            "scope": "Derived by replay from journaled step reviews and corrections",
+            "scope": "Derived by replay from journaled step reviews, corrections and task familiarity",
         }
 
-    def band_proposal(self, snapshot, operator, arguments, *, conduct_flag=False, min_confirmations=2, threshold=0.8, execute_act_now=True):
-        """Classify a candidate step into act_now, propose or escalate using journaled calibration."""
+    def band_proposal(
+        self,
+        snapshot,
+        operator,
+        arguments,
+        *,
+        core_signal=None,
+        judgment_node_id=None,
+        conduct_flag=False,
+        min_confirmations=2,
+        threshold=0.8,
+        execute_act_now=True,
+    ):
+        """Classify a candidate step into act_now, propose or escalate by integrating the 4 hybrid signals."""
+        learned_core = self._resolve_core_signal(
+            snapshot, core_signal=core_signal, judgment_node_id=judgment_node_id
+        )
         if conduct_flag:
-            return {"operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
-                    "reason": "Conduct-sensitive step requires explicit escalation"}
+            return {
+                "operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                "signals": {
+                    "learned_core": learned_core,
+                    "explicit_rules": {"valid": False, "conduct_boundary_clear": False, "reason": "conduct_flag"},
+                },
+                "reason": "Conduct-sensitive step requires explicit escalation",
+            }
         norm_args = deepcopy(arguments)
         if operator in {"integer.product", "integer.sum", "quantity.product", "quantity.sum"} and "inputs" in norm_args and "steps" not in norm_args:
             norm_args = {"steps": list(norm_args["inputs"])}
         try:
             self.parents(operator, norm_args)
             if operator == "source.read" and norm_args["source"] not in snapshot.get("sources", {}):
-                return {"operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
-                        "reason": "Source lies outside the task's current evidence selection"}
+                return {
+                    "operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                    "signals": {
+                        "learned_core": learned_core,
+                        "explicit_rules": {"valid": False, "sources_in_scope": False, "reason": "source_outside_selection"},
+                    },
+                    "reason": "Source lies outside the task's current evidence selection",
+                }
         except ValueError as error:
-            return {"operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
-                    "reason": str(error)}
+            return {
+                "operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                "signals": {
+                    "learned_core": learned_core,
+                    "explicit_rules": {"valid": False, "reason": str(error)},
+                },
+                "reason": str(error),
+            }
+
+        explicit_rules = {
+            "valid": True,
+            "operator_admitted": True,
+            "arguments_valid": True,
+            "sources_in_scope": True,
+            "conduct_boundary_clear": True,
+        }
         cal = self.calibration(snapshot.get("task_id"), min_confirmations=min_confirmations, threshold=threshold)
         op_stats = cal["operators"].get(operator)
-        band = op_stats["band"] if op_stats else "propose"
-        if band == "escalate":
+        review_history = {
+            "in_task_confirmed": op_stats["confirmed"] if op_stats else 0,
+            "in_task_rejected": op_stats["rejected"] if op_stats else 0,
+            "in_task_corrections": op_stats["corrections"] if op_stats else 0,
+            "in_task_agreement_rate": op_stats["agreement_rate"] if op_stats else 0.0,
+            "global_confirmed": op_stats["global_confirmed"] if op_stats else 0,
+            "global_agreement_rate": op_stats["global_agreement_rate"] if op_stats else 0.0,
+            "global_corrections": op_stats["global_corrections"] if op_stats else 0,
+            "distinct_tasks_confirmed": op_stats["distinct_tasks_confirmed"] if op_stats else 0,
+            "task_familiar": op_stats["task_familiar"] if op_stats else False,
+            "cross_task_transfer_eligible": op_stats["cross_task_transfer_eligible"] if op_stats else False,
+        }
+
+        if op_stats and (op_stats["conduct_flags"] > 0 or op_stats["global_conduct_flags"] > 0):
             return {
                 "operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
                 "agreement_rate": op_stats["agreement_rate"], "confirmed": op_stats["confirmed"],
-                "corrections": op_stats["corrections"], "reason": "Conduct flag present in history",
+                "corrections": op_stats["corrections"],
+                "signals": {
+                    "learned_core": learned_core,
+                    "review_history": review_history,
+                    "explicit_rules": explicit_rules,
+                    "calibration": {"decision": "escalate", "trigger": "conduct_history"},
+                },
+                "reason": "Conduct flag present in history",
             }
+
+        if learned_core["supplied"] and (learned_core["verdict"] == "no" or learned_core["uncertainty"] == "conflict"):
+            return {
+                "operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                "agreement_rate": op_stats["agreement_rate"] if op_stats else 0.0,
+                "confirmed": op_stats["confirmed"] if op_stats else 0,
+                "corrections": op_stats["corrections"] if op_stats else 0,
+                "signals": {
+                    "learned_core": learned_core,
+                    "review_history": review_history,
+                    "explicit_rules": explicit_rules,
+                    "calibration": {"decision": "escalate", "trigger": "learned_core_conflict_or_rejection"},
+                },
+                "reason": "Learned core context-sensitive judgment opposes action or reports unresolved conflict",
+            }
+
+        core_uncertain = (
+            learned_core["supplied"]
+            and (
+                learned_core["verdict"] == "maybe"
+                or learned_core["uncertainty"] is not None
+                or (learned_core["usefulness"] is not None and learned_core["usefulness"] < threshold)
+            )
+        )
+        core_endorses = (
+            learned_core["supplied"]
+            and learned_core["verdict"] == "yes"
+            and learned_core["uncertainty"] is None
+            and (learned_core["usefulness"] is None or learned_core["usefulness"] >= threshold)
+        )
+
+        if core_uncertain:
+            band = "propose"
+            trigger = "learned_core_uncertainty_override"
+            reason = "Learned core estimates context-sensitive uncertainty or usefulness below threshold; review required"
+        elif op_stats and op_stats["band"] == "act_now":
+            band = "act_now"
+            trigger = "familiar_task_calibrated_rule"
+            reason = "Empirical master agreement meets threshold in familiar task with zero corrections and aligned context"
+        elif op_stats and op_stats["cross_task_transfer_eligible"]:
+            if core_endorses:
+                band = "act_now"
+                trigger = "cross_task_history_plus_core_endorsement"
+                reason = "Unfamiliar task supported by cross-task review history and context-sensitive learned core confirmation"
+            else:
+                band = "propose"
+                trigger = "unfamiliar_task_requires_core_or_review"
+                reason = "Unfamiliar task: prior confirmations on other tasks alone do not establish competence without context-sensitive core judgment"
+        else:
+            band = "propose"
+            trigger = "insufficient_confirmations_or_prior_corrections"
+            reason = "Below confirmation threshold or has prior corrections"
+
         step = self.propose(snapshot, operator, norm_args)
         obs = self.execute(step["id"]) if (band == "act_now" and execute_act_now) else None
         return {
@@ -393,8 +680,13 @@ class Steps:
             "agreement_rate": op_stats["agreement_rate"] if op_stats else 0.0,
             "confirmed": op_stats["confirmed"] if op_stats else 0,
             "corrections": op_stats["corrections"] if op_stats else 0,
-            "reason": ("Empirical master agreement meets threshold with zero corrections"
-                       if band == "act_now" else "Below confirmation threshold or has prior corrections"),
+            "signals": {
+                "learned_core": learned_core,
+                "review_history": review_history,
+                "explicit_rules": explicit_rules,
+                "calibration": {"decision": band, "trigger": trigger},
+            },
+            "reason": reason,
         }
 
     def status(self):

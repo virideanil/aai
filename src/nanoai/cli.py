@@ -128,14 +128,17 @@ def main():
     board_archive.add_argument("--parent")
     board_gen = sub.add_parser("board-generator")
     board_gen.add_argument("task_id")
-    board_gen.add_argument("operator", choices=("source_lines", "relation_table", "slot_sequence"))
+    board_gen.add_argument("operator", choices=("source_lines", "relation_table", "slot_sequence", "visual_report"))
     board_gen.add_argument("arguments", type=Path)
     board_gen.add_argument("--core-identity", default="symbolic-host-v1")
     board_gen.add_argument("--source", action="append", default=[])
+    board_audit = sub.add_parser("board-audit-visual")
+    board_audit.add_argument("node_id")
     board_document = sub.add_parser("board-document")
     board_document.add_argument("node_id")
     board_document.add_argument("--filename")
     board_document.add_argument("--commit", action="store_true")
+    board_document.add_argument("--enforce-visual-rules", action="store_true")
     dictionary = sub.add_parser("dictionary")
     dictionary.add_argument("task_id")
     dictionary.add_argument("--source", action="append", required=True)
@@ -427,8 +430,14 @@ def main():
             output = {"node": node, "view": board.describe(node["id"])}
         elif args.command == "board-archive-tensors":
             output = board.archive_tensors(args.node_ids, recipe=args.recipe, parent=args.parent)
+        elif args.command == "board-audit-visual":
+            output = board.audit_visual(args.node_id)
         else:
-            proposal = board.propose_document(args.node_id, filename=args.filename)
+            proposal = board.propose_document(
+                args.node_id,
+                filename=args.filename,
+                enforce_visual_rules=args.enforce_visual_rules,
+            )
             receipt = memory.commit(proposal["id"], core_identity=proposal["snapshot"]["core_identity"]) if args.commit else None
             output = {"proposal": proposal, "receipt": receipt,
                       "artifact_path": str(memory.root / receipt["path"]) if receipt else None, "model_calls": 0}

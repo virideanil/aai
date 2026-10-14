@@ -365,7 +365,72 @@ class ScratchboardConsumerTests(unittest.TestCase):
             "".join(f"Part {i} [spec@1]\n" for i in range(4)),
         )
 
+    def test_visual_report_generator_and_visual_presentation_audit(self):
+        from nanoai.documents import audit_visual_presentation
+        snap = self.snapshot()
+        node = self.board.generator(
+            snap,
+            "visual_report",
+            {
+                "title": "Argon Structural & Visual Verification",
+                "citations": ["spec@1"],
+                "sections": [
+                    {
+                        "heading": "Quantitative Summary",
+                        "body": "Verified rail geometry and unit alignment [spec@1].",
+                        "table": {
+                            "headers": ["Component", "Length", "Count", "Total"],
+                            "rows": [["Rail", "23 cm", "2", "46 cm"]],
+                        },
+                        "code": {
+                            "language": "python",
+                            "snippet": "total_cm = 23 * 2",
+                        },
+                    }
+                ],
+                "perception_regions": [
+                    {"region_id": 1, "bbox": [10, 20, 120, 64]},
+                ],
+            },
+        )
+        audit = self.board.audit_visual(
+            node["id"],
+            perception_regions=[{"region_id": 1, "bbox": [10, 20, 120, 64]}],
+        )
+        self.assertTrue(audit["passed"])
+        self.assertEqual(audit["score"], 1.0)
+        self.assertEqual(audit["metrics"]["table_count"], 2)
+        self.assertEqual(audit["metrics"]["code_block_count"], 1)
+        self.assertEqual(audit["metrics"]["perception_ref_count"], 1)
+
+        proposal = self.board.propose_document(
+            node["id"],
+            enforce_visual_rules=True,
+            perception_regions=[{"region_id": 1, "bbox": [10, 20, 120, 64]}],
+        )
+        self.assertIn("# Argon Structural & Visual Verification", proposal["output"]["content"])
+
+        # Malformed visual markdown fails audit and blocks enforce_visual_rules proposal
+        bad_node = self.board.add(
+            snap,
+            {
+                "kind": "literal",
+                "text": "### Skipped H1\n\n| A | B |\n| --- |\n\n```\nuntagged code\n",
+            },
+        )
+        bad_audit = audit_visual_presentation(
+            self.board.materialize(bad_node["id"])["bytes"].decode()
+        )
+        self.assertFalse(bad_audit["passed"])
+        rule_ids = {v["rule_id"] for v in bad_audit["violations"]}
+        self.assertIn("visual.hierarchy", rule_ids)
+        self.assertIn("visual.table_alignment", rule_ids)
+        self.assertIn("visual.code_fences", rule_ids)
+        with self.assertRaisesRegex(ValueError, "visual presentation rules"):
+            self.board.propose_document(bad_node["id"], enforce_visual_rules=True)
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

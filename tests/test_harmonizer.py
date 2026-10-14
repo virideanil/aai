@@ -139,8 +139,15 @@ class HarmonizerTests(unittest.TestCase):
         self.assertEqual(len(bundle["corrections"]), 1)
         self.assertEqual(len(bundle["open_agenda"]), 1)
         self.assertIn("source_lines", bundle["drilldowns"]["available_generators"])
+        self.assertIn("visual_report", bundle["drilldowns"]["available_generators"])
+        self.assertEqual(len(bundle["visual_rules"]), 6)
+        self.assertEqual(
+            bundle["decision_support"]["question"],
+            "Does this hybrid make well-supported decisions in practice?",
+        )
 
 
 if __name__ == "__main__":
     unittest.main()
+
 
