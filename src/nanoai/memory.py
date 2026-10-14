@@ -380,6 +380,51 @@ class Memory:
             self._validate_snapshot(snapshot)
         return snapshot
 
+    def _open_questions(self, task_id):
+        """Return current unresolved relational questions retained in this task."""
+        from .steps import Steps
+        executor_identity = Steps(self).implementation
+        seen, rows = set(), []
+        for step_id, step in self.state["steps"].items():
+            if step["snapshot"]["task_id"] != task_id or step["operator"] != "relation.query":
+                continue
+            if step["implementation"] != executor_identity:
+                continue
+            observation = self.state["step_observations"].get(step_id)
+            review = self.state["step_reviews"].get(step_id)
+            if observation is None or (review and review["decision"] in {"rejected", "cancelled"}):
+                continue
+            try:
+                self._validate_snapshot(step["snapshot"])
+            except (ValueError, OSError):
+                continue
+            answer = observation["result"].get("value")
+            if (not isinstance(answer, dict) or answer.get("type") != "relation_answer_v1"
+                    or answer.get("state") != "both"):
+                continue
+            state_step_id = step["arguments"]["step"]
+            key = (state_step_id, canonical(answer["question"]))
+            if key in seen:
+                continue
+            seen.add(key)
+            state_step = self.state["steps"].get(state_step_id)
+            state_obs = self.state["step_observations"].get(state_step_id)
+            rows.append({
+                "step_id": step_id,
+                "state_step_id": state_step_id,
+                "state_operator": state_step["operator"] if state_step else None,
+                "state_scope": state_obs["result"]["scope"] if state_obs else None,
+                "question": deepcopy(answer["question"]),
+                "verdict": answer["verdict"],
+                "state": answer["state"],
+                "possible_values": deepcopy(answer["possible_values"]),
+                "variables": deepcopy(answer["variables"]),
+                "witnesses": deepcopy(answer["witnesses"]),
+                "model_scope": answer["model_scope"],
+                "sources": deepcopy(observation["result"]["sources"]),
+            })
+        return rows
+
     def _artifact_outcome(self, proposal, receipt):
         """Project recorded action evidence separately from artifact integrity.
 
@@ -392,6 +437,52 @@ class Memory:
                    "scope": "Current artifact delivery; task quality assessed separately",
                    "experience_id": None, "reason": None}
         if not linked and "experience_id" not in proposal["metrics"]:
+            node_id = proposal["metrics"].get("scratchboard_node")
+            node = self.state["scratchboard"].get(node_id) if isinstance(node_id, str) else None
+            if node and node["spec"].get("kind") == "relation":
+                step_id = node["spec"]["step_id"]
+                open_ids = node["spec"]["open_step_ids"]
+                obs = self.state["step_observations"].get(step_id)
+                step = self.state["steps"].get(step_id)
+                review = self.state["step_reviews"].get(step_id)
+                if obs and step and isinstance(obs["result"].get("value"), dict):
+                    ans = obs["result"]["value"]
+                    state_step_id = step["arguments"]["step"]
+                    state_step = self.state["steps"].get(state_step_id)
+                    state_obs = self.state["step_observations"].get(state_step_id)
+                    open_questions = []
+                    for oid in open_ids:
+                        oobs = self.state["step_observations"].get(oid)
+                        ostep = self.state["steps"].get(oid)
+                        if oobs and ostep and isinstance(oobs["result"].get("value"), dict):
+                            oans = oobs["result"]["value"]
+                            open_questions.append({
+                                "step_id": oid,
+                                "state_step_id": ostep["arguments"]["step"],
+                                "question": deepcopy(oans["question"]),
+                                "verdict": oans["verdict"],
+                                "state": oans["state"],
+                                "possible_values": deepcopy(oans["possible_values"]),
+                                "witnesses": deepcopy(oans["witnesses"]),
+                            })
+                    return {
+                        **outcome,
+                        "scope": "Certified finite relational enclosure for the settled question; external model completeness and retained open questions remain separate",
+                        "evaluator_identity": review["reviewer"] if review else None,
+                        "completed_question": {
+                            "step_id": step_id,
+                            "state_step_id": state_step_id,
+                            "state_operator": state_step["operator"] if state_step else None,
+                            "state_scope": state_obs["result"]["scope"] if state_obs else None,
+                            "question": deepcopy(ans["question"]),
+                            "verdict": ans["verdict"],
+                            "state": ans["state"],
+                            "possible_values": deepcopy(ans["possible_values"]),
+                            "witnesses": deepcopy(ans["witnesses"]),
+                            "model_scope": ans["model_scope"],
+                        },
+                        "uncertainty": open_questions,
+                    }
             return outcome
         if len(linked) != 1 or proposal["metrics"].get("experience_id") != linked[0]:
             return {**outcome, "status": "unresolved", "allows_completion": False,
@@ -445,6 +536,7 @@ class Memory:
             return {"task_id": task_id, "task_revision": task["revision"],
                     "identity": deepcopy(self.state["identity"]), "artifacts": outputs,
                     "remaining": [name for name in task["filenames"] if name not in outputs],
+                    "open_questions": self._open_questions(task_id),
                     "mode": "observed completed work", "model_calls": 0}
 
     def artifact_outcome(self, operation_id):
@@ -620,7 +712,8 @@ class Memory:
                               "selection_current": selection_current,
                               "task_id": task_id})
         obligations = {task_id: {"completed": sorted(completed[task_id]),
-            "remaining": [name for name in task["filenames"] if name not in completed[task_id]]}
+            "remaining": [name for name in task["filenames"] if name not in completed[task_id]],
+            "open_questions": self._open_questions(task_id)}
             for task_id, task in self.state["tasks"].items()}
         return {"head": self.head, "backend": self.backend, "sequence": self.sequence, "identity": deepcopy(self.state["identity"]),
                 "tasks": deepcopy(self.state["tasks"]), "source_epoch": self.state["source_epoch"],

@@ -511,3 +511,46 @@ Evidence: `../../audit/proper-use-20261014/DECISION.md`,
 `completion-baseline.json`, `regression-before.log`, `full-tests.json`,
 `installed-consumer.json`, `resume-after.json`, `status-after.json` and
 `installed-writing/result.json` at that evidence owner.
+
+## Task-relative relational completion and inquiry consumer, 14 October 2026
+
+Tracing the represented-alternative loop exposed two missing consumer
+transitions between `relations.py`/`Steps` and task delivery:
+
+1. `Harmonizer.context` omitted `operator` from `observed_calculations` and
+   `agent.py` had no relational inquiry port where the core receives an observed
+   `finite_relation_v1` state and proposes the next `relation.query`,
+   `relation.refine`, `relation.extend` or `relation.map` operation.
+2. `Scratchboard` and `documents.py` accepted only dimensioned `quantity.*`
+   operations, and `Memory.completed`/`Memory.status` did not surface retained
+   open relational questions alongside a delivered settled answer.
+
+The repair adds `agent.inquire` (and CLI `inquire`), `Scratchboard.relation`
+(CLI `board-note --open-step`), `documents.relation_note` (CLI `note --open-step`),
+and explicit `completed_question`, `evaluator_identity`, `state_operator`,
+`state_scope`, `uncertainty` and `open_questions` projections in `Memory`. Only a
+`confirmed` `relation.query` with `state == "decided"` (`verdict` in
+`{"yes", "no"}`) can materialize a relational decision note; unreviewed, open
+(`both`) or inconsistent (`conflict`) queries are refused before proposal
+recording. Open `both` queries on the same state retain their `0` and `1`
+witnesses in the rendered note, artifact outcome and task obligation view.
+
+Verification in Python 3.14.7 (`darwin` arm64, `nanoai-tokens` C++20 extension
+and editable `nanoai-research`):
+
+- `test_relations.py`: **19/19 checks pass** (up from 13), covering core
+  relational inquiry, retry on invalid variable proposals, task-relative
+  delivery of `{"eq": ["x", "y"]}` while `"x"` remains `both`, distinct
+  `relation.refine` (`Conditional refinement; the supplied bit is an explicit premise`)
+  versus `relation.extend` (`Conservative extension; projection preserves every previous joint alternative`)
+  continuations, selective reopening on source correction or open-step
+  rejection, separation from empty/truncated generative attempts
+  (`allows_completion: false`) and scoped writing rubrics, and zero-model-call
+  CLI `note`/`resume` recovery.
+- `tools/verify_relational_math.py` (15 checks, 384 refinements) and
+  `tools/verify_pi_refinement.py` (75 grids, 64 brute-force grids, 17 dyadic
+  stages, `n = 10,000,000`) pass unchanged.
+- No new neural rollout or parameter update was run; the three earlier empty
+  natural-thinking BF16 attempts remain failed until an incremental or exact
+  candidate-production path supplies non-empty final bytes on those tasks.
+

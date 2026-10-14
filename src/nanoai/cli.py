@@ -3,7 +3,7 @@ import argparse
 import json
 from pathlib import Path
 
-from .agent import DEFAULT_IDENTITY, calculate, run
+from .agent import DEFAULT_IDENTITY, calculate, inquire, run
 from .core import JsonlCore
 from .memory import Memory
 
@@ -22,7 +22,7 @@ def main():
     task.add_argument("id")
     task.add_argument("goal")
     task.add_argument("--expected-revision", type=int, default=0)
-    task.add_argument("--filename", default="result.md")
+    task.add_argument("--filename", action="append")
     sub.add_parser("status")
     sub.add_parser("recover")
     write = sub.add_parser("write-phase", help="Generate and journal one editable writing phase")
@@ -66,6 +66,7 @@ def main():
     review.add_argument("--reason", required=True)
     note = sub.add_parser("note")
     note.add_argument("step_id")
+    note.add_argument("--open-step", action="append", default=[])
     note.add_argument("--language", choices=("en", "tr"), default="en")
     note.add_argument("--filename")
     note.add_argument("--commit", action="store_true")
@@ -115,6 +116,7 @@ def main():
     board_reshape.add_argument("--reason", required=True)
     board_note = sub.add_parser("board-note")
     board_note.add_argument("step_id")
+    board_note.add_argument("--open-step", action="append", default=[])
     board_note.add_argument("--language", choices=("en", "tr"), default="en")
     board_document = sub.add_parser("board-document")
     board_document.add_argument("node_id")
@@ -173,6 +175,13 @@ def main():
     calculation.add_argument("--core-config", type=Path, required=True)
     calculation.add_argument("--domain", choices=("integer", "quantity"), default="quantity")
     calculation.add_argument("--source", action="append")
+    inquiry = sub.add_parser("inquire")
+    inquiry.add_argument("task_id")
+    inquiry.add_argument("state_step_id")
+    inquiry.add_argument("--core-config", type=Path, required=True)
+    inquiry.add_argument("--observation", action="append", default=[])
+    inquiry.add_argument("--board", action="append", default=[])
+    inquiry.add_argument("--source", action="append")
     worker = sub.add_parser("run")
     worker.add_argument("task_id")
     worker.add_argument("--core-config", type=Path, required=True)
@@ -188,7 +197,7 @@ def main():
     elif args.command == "source":
         output = memory.put_source(args.id, args.file.read_text(), expected_revision=args.expected_revision, note=args.note)
     elif args.command == "task":
-        output = memory.set_task(args.id, args.goal, expected_revision=args.expected_revision, filenames=[args.filename])
+        output = memory.set_task(args.id, args.goal, expected_revision=args.expected_revision, filenames=args.filename or ["result.md"])
     elif args.command == "status":
         output = memory.status()
     elif args.command == "recover":
@@ -256,8 +265,14 @@ def main():
         from .steps import Steps
         output = Steps(memory).review(args.step_id, args.decision, reviewer=args.reviewer, reason=args.reason)
     elif args.command == "note":
-        from .documents import quantity_note
-        proposal = quantity_note(memory, args.step_id, language=args.language, filename=args.filename)
+        from .documents import quantity_note, relation_note
+        step = memory.state["steps"].get(args.step_id)
+        if step and step["operator"] == "relation.query":
+            proposal = relation_note(memory, args.step_id, open_step_ids=args.open_step, language=args.language, filename=args.filename)
+        else:
+            if args.open_step:
+                raise ValueError("Open relational questions apply to relation.query notes")
+            proposal = quantity_note(memory, args.step_id, language=args.language, filename=args.filename)
         receipt = memory.commit(proposal["id"], core_identity=proposal["snapshot"]["core_identity"]) if args.commit else None
         output = {"proposal": proposal, "receipt": receipt,
                   "artifact_path": str(memory.root / receipt["path"]) if receipt else None,
@@ -350,7 +365,13 @@ def main():
                 node = board.latest(args.node_id)
             output = {"node": node, "view": board.describe(node["id"])}
         elif args.command == "board-note":
-            node = board.quantity(args.step_id, language=args.language)
+            step = memory.state["steps"].get(args.step_id)
+            if step and step["operator"] == "relation.query":
+                node = board.relation(args.step_id, open_step_ids=args.open_step, language=args.language)
+            else:
+                if args.open_step:
+                    raise ValueError("Open relational questions apply to relation.query notes")
+                node = board.quantity(args.step_id, language=args.language)
             output = {"node": node, "view": board.describe(node["id"])}
         else:
             proposal = board.propose_document(args.node_id, filename=args.filename)
@@ -360,11 +381,18 @@ def main():
     else:
         config = json.loads(args.core_config.read_text())
         with JsonlCore(config, stderr_path=args.state / "worker.log") as core:
-            output = (calculate(memory, core, args.task_id, domain=args.domain, selected_ids=args.source) if args.command == "calculate"
-                      else run(memory, core, args.task_id, commit=args.commit, observation_ids=args.observation,
-                               scratchboard_ids=args.board, selected_ids=args.source))
+            if args.command == "calculate":
+                output = calculate(memory, core, args.task_id, domain=args.domain, selected_ids=args.source)
+            elif args.command == "inquire":
+                output = inquire(memory, core, args.task_id, state_step_id=args.state_step_id,
+                                 selected_ids=args.source, observation_ids=args.observation,
+                                 scratchboard_ids=args.board)
+            else:
+                output = run(memory, core, args.task_id, commit=args.commit, observation_ids=args.observation,
+                             scratchboard_ids=args.board, selected_ids=args.source)
     print(json.dumps(output, ensure_ascii=False, indent=2))
 
 
 if __name__ == "__main__":
     main()
+

@@ -130,7 +130,11 @@ scope. They are not guaranteed numerical enclosures of literary or semantic
 quality. The completed question, remaining obligations, evaluator and uncertainty
 must remain explicit. Conditional `relation.refine` narrows under a premise;
 `relation.extend` adds a coordinate while preserving prior alternatives. Both can
-serve continuing work, and their contracts remain distinct.
+serve continuing work, and their contracts remain distinct. `agent.inquire`,
+`Scratchboard.relation`, `documents.relation_note` and `Memory.completed` now
+implement this exact-producer path for confirmed `decided` relational queries
+while retaining `both` questions (`open_questions`) and keeping incomplete or
+empty generative outputs non-completing (`allows_completion: false`).
 
 ## Close the loop at its real outcome
 

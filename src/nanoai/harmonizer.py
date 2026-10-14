@@ -147,6 +147,7 @@ class Harmonizer:
                     for row, ref in zip(sources, references)],
                 "allowed_citations": references,
                 "observed_calculations": [{"step_id": key,
+                    "operator": memory.state["steps"][key]["operator"],
                     **deepcopy(memory.state["step_observations"][key]["result"]),
                     "review": deepcopy(memory.state["step_reviews"].get(key))}
                     for key in snapshot.get("observations", {})],

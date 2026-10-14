@@ -95,6 +95,7 @@ class Scratchboard:
         kind = spec.get("kind")
         fields = {"literal": {"kind", "text"}, "source": {"kind", "source", "start", "stop"},
                   "quantity": {"kind", "step_id", "language", "renderer"},
+                  "relation": {"kind", "step_id", "open_step_ids", "language", "renderer"},
                   "artifact": {"kind", "operation_id"}, "concat": {"kind", "nodes"},
                   "repeat": {"kind", "node", "count"}, "slots": {"kind", "count", "constraints", "bindings"},
                   "tensor": {"kind", "blob", "dtype", "shape", "basis"},
@@ -122,6 +123,17 @@ class Scratchboard:
                 raise StaleState("Calculation belongs to another task")
             if self._bases(parent) - {snapshot["core_identity"]}:
                 raise StaleState("Calculation numerical dependency has an incompatible model basis")
+            snapshot.setdefault("observations", {}).update(parent["observations"])
+        elif kind == "relation":
+            from . import documents
+            if spec["renderer"] != file_digest(documents.__file__):
+                raise StaleState("Relation renderer changed")
+            parent, _, _ = documents._relation_components(
+                self.memory, spec["step_id"], spec["open_step_ids"], spec["language"])
+            if any(parent[k] != snapshot[k] for k in ("task_id", "task_revision", "identity")):
+                raise StaleState("Relation decision belongs to another task")
+            if self._bases(parent) - {snapshot["core_identity"]}:
+                raise StaleState("Relation numerical dependency has an incompatible model basis")
             snapshot.setdefault("observations", {}).update(parent["observations"])
         elif kind == "artifact":
             receipt = self.memory.state["receipts"][spec["operation_id"]]
@@ -199,6 +211,15 @@ class Scratchboard:
         with self.memory.locked():
             snapshot, _, _ = documents._quantity_components(self.memory, step_id, language)
             return self._record(snapshot, {"kind": "quantity", "step_id": step_id, "language": language,
+                                          "renderer": file_digest(documents.__file__)})
+
+    def relation(self, step_id, *, open_step_ids=(), language="en"):
+        from . import documents
+        with self.memory.locked():
+            open_ids = list(open_step_ids)
+            snapshot, _, _ = documents._relation_components(self.memory, step_id, open_ids, language)
+            return self._record(snapshot, {"kind": "relation", "step_id": step_id,
+                                          "open_step_ids": open_ids, "language": language,
                                           "renderer": file_digest(documents.__file__)})
 
     def reserve(self, snapshot, count, *, constraints):
@@ -402,6 +423,14 @@ class Scratchboard:
             review = self.memory.state["step_reviews"].get(spec["step_id"])
             if not review or review["decision"] != "confirmed":
                 raise StaleState("Calculation review is unavailable")
+        elif spec["kind"] == "relation":
+            from . import documents
+            if spec["renderer"] != file_digest(documents.__file__):
+                raise StaleState("Relation renderer changed")
+            review = self.memory.state["step_reviews"].get(spec["step_id"])
+            if not review or review["decision"] != "confirmed":
+                raise StaleState("Relation review is unavailable")
+            documents._relation_components(self.memory, spec["step_id"], spec["open_step_ids"], spec["language"])
         elif spec["kind"] == "tensor":
             self._tensor_bytes(spec, node["snapshot"]["core_identity"])
         elif spec["kind"] == "judgment":
@@ -432,6 +461,9 @@ class Scratchboard:
         elif kind == "quantity":
             from .documents import _quantity_components
             size = len(_quantity_components(self.memory, spec["step_id"], spec["language"])[1].encode())
+        elif kind == "relation":
+            from .documents import _relation_components
+            size = len(_relation_components(self.memory, spec["step_id"], spec["open_step_ids"], spec["language"])[1].encode())
         elif kind == "artifact":
             op = self.memory.state["operations"][spec["operation_id"]]
             size = len(self.memory.state["proposals"][op["proposal_id"]]["output"]["content"].encode())
@@ -488,6 +520,9 @@ class Scratchboard:
         elif kind == "quantity":
             from .documents import _quantity_components
             raw = _quantity_components(self.memory, spec["step_id"], spec["language"])[1].encode()
+        elif kind == "relation":
+            from .documents import _relation_components
+            raw = _relation_components(self.memory, spec["step_id"], spec["open_step_ids"], spec["language"])[1].encode()
         elif kind == "artifact":
             receipt = self.memory.state["receipts"][spec["operation_id"]]
             raw = self.memory._artifact_path(receipt["path"]).read_bytes()
@@ -497,7 +532,7 @@ class Scratchboard:
         elif kind == "repeat": raw = self._render(spec["node"], cache) * spec["count"]
         elif kind == "slots": raw = b"".join(self._render(spec["bindings"][str(i)], cache) for i in range(spec["count"]))
         else: raise ValueError("Typed numerical or judgment data needs an explicit text-realization decision")
-        if kind in {"literal", "source", "quantity", "artifact"}:
+        if kind in {"literal", "source", "quantity", "relation", "artifact"}:
             cache[node_id] = raw
         return raw
 
