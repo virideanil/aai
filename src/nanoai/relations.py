@@ -117,7 +117,7 @@ def query_tensor_enclosure(model, expression):
 
 
 def encode_relation_tensor(model, *, mode="bf16_support", open_questions=()):
-    """Encode a non-empty finite relation into exact BF16 words plus packed bit/trit carriers."""
+    """Encode a non-empty finite relation into exact BF16 words or compact packed bit/trit carriers."""
     from .judgments import pack
     validate_model(model)
     if not model["worlds"]:
@@ -135,11 +135,23 @@ def encode_relation_tensor(model, *, mode="bf16_support", open_questions=()):
             flat_support.append(2 if bit else 1)
             if mode == "bf16_support":
                 words.extend((BF16_ONE, BF16_ZERO) if bit == 0 else (BF16_ZERO, BF16_ONE))
-            else:
+            elif mode == "bf16_signed":
                 words.append(BF16_ONE if bit else BF16_NEG_ONE)
-    cols = len(variables) * (2 if mode == "bf16_support" else 1)
-    shape = [len(worlds), cols]
-    raw = struct.pack("<" + "H" * len(words), *words)
+    packed_worlds_trits = pack(flat_trits)
+    packed_worlds_support2 = pack_support2(flat_support)
+    if mode in {"bf16_support", "bf16_signed"}:
+        cols = len(variables) * (2 if mode == "bf16_support" else 1)
+        shape = [len(worlds), cols]
+        raw = struct.pack("<" + "H" * len(words), *words)
+        dtype = "bf16"
+    elif mode == "pack5":
+        raw = packed_worlds_trits
+        shape = [len(raw)]
+        dtype = "u8"
+    else:
+        raw = packed_worlds_support2
+        shape = [len(raw)]
+        dtype = "u8"
     box_codes = []
     for j in range(len(variables)):
         col = {row[j] for row in worlds}
@@ -153,14 +165,15 @@ def encode_relation_tensor(model, *, mode="bf16_support", open_questions=()):
     metadata = {
         "operation": "relation.tensor",
         "mode": mode,
+        "dtype": dtype,
         "variables": variables,
         "world_count": len(worlds),
         "model_scope": model["scope"],
         "box_marginals": dict(zip(variables, box_labels)),
         "packed_box_trits_hex": pack(box_labels).hex(),
         "packed_box_support2_hex": pack_support2(box_codes).hex(),
-        "packed_worlds_trits_hex": pack(flat_trits).hex(),
-        "packed_worlds_support2_hex": pack_support2(flat_support).hex(),
+        "packed_worlds_trits_hex": packed_worlds_trits.hex(),
+        "packed_worlds_support2_hex": packed_worlds_support2.hex(),
         "questions": questions,
         "meaning": "Exact joint relation worlds carried in BF16 and packed ternary/support planes",
     }
@@ -168,8 +181,8 @@ def encode_relation_tensor(model, *, mode="bf16_support", open_questions=()):
 
 
 def decode_relation_tensor(raw, shape=None, metadata=None):
-    """Reconstruct and verify the exact finite_relation_v1 model from its tensor carrier."""
-    from .judgments import unpack
+    """Reconstruct and verify the exact finite_relation_v1 model and all metadata from its tensor carrier."""
+    from .judgments import pack, unpack
     if shape is None and metadata is None and isinstance(raw, tuple) and len(raw) == 3:
         raw, shape, metadata = raw
     if not isinstance(metadata, dict) or metadata.get("operation") != "relation.tensor":
@@ -179,45 +192,115 @@ def decode_relation_tensor(raw, shape=None, metadata=None):
     world_count = metadata.get("world_count")
     if (mode not in {"bf16_support", "bf16_signed", "pack5", "support2"} or not isinstance(variables, list)
             or not 1 <= len(variables) <= MAX_VARIABLES or type(world_count) is not int
-            or not 1 <= world_count <= MAX_WORLDS):
+            or not 1 <= world_count <= MAX_WORLDS or not isinstance(raw, bytes)):
         raise ValueError("Relational tensor metadata extent")
-    cols = len(variables) * (2 if mode == "bf16_support" else 1)
-    if list(shape) != [world_count, cols] or not isinstance(raw, bytes) or len(raw) != world_count * cols * 2:
-        raise ValueError("Relational tensor shape or byte count differs")
-    words = struct.unpack("<" + "H" * (world_count * cols), raw)
+    expected_dtype = "u8" if mode in {"pack5", "support2"} else "bf16"
+    if metadata.get("dtype", expected_dtype) != expected_dtype:
+        raise ValueError("Relational tensor metadata dtype differs from mode")
+    count = world_count * len(variables)
     worlds = []
     flat_trits = []
     flat_support = []
-    for r in range(world_count):
-        row = []
-        offset = r * cols
-        for j in range(len(variables)):
-            if mode == "bf16_support":
-                w0, w1 = words[offset + 2 * j], words[offset + 2 * j + 1]
-                if (w0, w1) == (BF16_ONE, BF16_ZERO):
+    if mode in {"bf16_support", "bf16_signed"}:
+        cols = len(variables) * (2 if mode == "bf16_support" else 1)
+        if list(shape) != [world_count, cols] or len(raw) != world_count * cols * 2:
+            raise ValueError("Relational tensor shape or byte count differs")
+        words = struct.unpack("<" + "H" * (world_count * cols), raw)
+        for r in range(world_count):
+            row = []
+            offset = r * cols
+            for j in range(len(variables)):
+                if mode == "bf16_support":
+                    w0, w1 = words[offset + 2 * j], words[offset + 2 * j + 1]
+                    if (w0, w1) == (BF16_ONE, BF16_ZERO):
+                        bit = 0
+                    elif (w0, w1) == (BF16_ZERO, BF16_ONE):
+                        bit = 1
+                    else:
+                        raise ValueError("Noncanonical BF16 support pair in relational tensor")
+                else:
+                    w = words[offset + j]
+                    if w == BF16_NEG_ONE:
+                        bit = 0
+                    elif w == BF16_ONE:
+                        bit = 1
+                    else:
+                        raise ValueError("Noncanonical BF16 signed trit in relational tensor")
+                row.append(bit)
+                flat_trits.append("yes" if bit else "no")
+                flat_support.append(2 if bit else 1)
+            worlds.append(row)
+    elif mode == "pack5":
+        expected_bytes = (count + 4) // 5
+        if list(shape) != [expected_bytes] or len(raw) != expected_bytes:
+            raise ValueError("Relational pack5 tensor shape or byte count differs")
+        flat_trits = unpack(raw, count)
+        if pack(flat_trits) != raw:
+            raise ValueError("Noncanonical trailing trit padding in pack5 relational tensor")
+        for r in range(world_count):
+            row = []
+            offset = r * len(variables)
+            for j in range(len(variables)):
+                trit = flat_trits[offset + j]
+                if trit == "no":
                     bit = 0
-                elif (w0, w1) == (BF16_ZERO, BF16_ONE):
+                elif trit == "yes":
                     bit = 1
                 else:
-                    raise ValueError("Noncanonical BF16 support pair in relational tensor")
-            else:
-                w = words[offset + j]
-                if w == BF16_NEG_ONE:
+                    raise ValueError("World tensor cannot contain unresolved marginal trit in a concrete world row")
+                row.append(bit)
+                flat_support.append(2 if bit else 1)
+            worlds.append(row)
+    else:
+        expected_bytes = (count + 3) // 4
+        if list(shape) != [expected_bytes] or len(raw) != expected_bytes:
+            raise ValueError("Relational support2 tensor shape or byte count differs")
+        flat_support = unpack_support2(raw, count, labels=False)
+        if pack_support2(flat_support) != raw:
+            raise ValueError("Noncanonical trailing support bits in support2 relational tensor")
+        for r in range(world_count):
+            row = []
+            offset = r * len(variables)
+            for j in range(len(variables)):
+                code = flat_support[offset + j]
+                if code == 1:
                     bit = 0
-                elif w == BF16_ONE:
+                elif code == 2:
                     bit = 1
                 else:
-                    raise ValueError("Noncanonical BF16 signed trit in relational tensor")
-            row.append(bit)
-            flat_trits.append("yes" if bit else "no")
-            flat_support.append(2 if bit else 1)
-        worlds.append(row)
-    count = world_count * len(variables)
-    if (unpack(bytes.fromhex(metadata["packed_worlds_trits_hex"]), count) != flat_trits
+                    raise ValueError("World tensor cannot contain non-atomic support code in a concrete world row")
+                row.append(bit)
+                flat_trits.append("yes" if bit else "no")
+            worlds.append(row)
+    if (not isinstance(metadata.get("packed_worlds_trits_hex"), str)
+            or not isinstance(metadata.get("packed_worlds_support2_hex"), str)
+            or unpack(bytes.fromhex(metadata["packed_worlds_trits_hex"]), count) != flat_trits
             or unpack_support2(bytes.fromhex(metadata["packed_worlds_support2_hex"]), count, labels=False) != flat_support):
-        raise ValueError("Packed ternary/support planes differ from the BF16 relational tensor")
-    return validate_model({"type": RELATION, "variables": list(variables),
-                           "worlds": worlds, "scope": metadata["model_scope"]})
+        raise ValueError("Packed ternary/support planes differ from the decoded relational tensor")
+    model = validate_model({"type": RELATION, "variables": list(variables),
+                            "worlds": worlds, "scope": metadata.get("model_scope")})
+    expected_box_codes = []
+    for j in range(len(variables)):
+        col = {row[j] for row in worlds}
+        expected_box_codes.append(1 if col == {0} else 2 if col == {1} else 3)
+    expected_box_labels = [SUPPORT_TO_LABEL[c] for c in expected_box_codes]
+    expected_box_marginals = dict(zip(variables, expected_box_labels))
+    if (metadata.get("box_marginals") != expected_box_marginals
+            or metadata.get("packed_box_trits_hex") != pack(expected_box_labels).hex()
+            or metadata.get("packed_box_support2_hex") != pack_support2(expected_box_codes).hex()):
+        raise ValueError("Relational tensor box marginals disagree with the decoded worlds")
+    raw_questions = metadata.get("questions", [])
+    if not isinstance(raw_questions, list):
+        raise ValueError("Relational tensor questions metadata must be a list")
+    for q in raw_questions:
+        if not isinstance(q, dict) or set(q) != {"expression", "verdict", "box_verdict", "correlation_loss"}:
+            raise ValueError("Relational tensor question entry is malformed")
+        enc = query_tensor_enclosure(model, q["expression"])
+        if (q["verdict"] != enc["exact_verdict"]
+                or q["box_verdict"] != enc["box_verdict"]
+                or q["correlation_loss"] != enc["correlation_loss"]):
+            raise ValueError("Relational tensor question verdict disagrees with the decoded worlds")
+    return model
 
 
 def expression_variables(expression):
@@ -290,6 +373,17 @@ def validate_arguments(operator, arguments):
             for c in candidates:
                 expression_variables(c)
         return [arguments["step"]]
+    if operator == "relation.revise":
+        if (not isinstance(arguments, dict) or not {"step", "replacement", "reason"} <= set(arguments)
+                or set(arguments) - {"step", "replacement", "reason", "policy"}
+                or not isinstance(arguments["step"], str)):
+            raise ValueError("Relation operation fields differ from the contract")
+        if not isinstance(arguments["replacement"], str) or arguments["replacement"] == arguments["step"]:
+            raise ValueError("Relation revision needs a distinct replacement step")
+        bounded_text(arguments["reason"], "relation revision reason", 2048)
+        if arguments.get("policy", "replace") not in {"replace", "km"}:
+            raise ValueError("Relation revision policy must be 'replace' or 'km'")
+        return [arguments["step"], arguments["replacement"]]
     if (operator not in fields or not isinstance(arguments, dict)
             or set(arguments) != fields[operator] or not isinstance(arguments["step"], str)):
         raise ValueError("Relation operation fields differ from the contract")
@@ -308,12 +402,27 @@ def validate_arguments(operator, arguments):
             raise ValueError("Relation projection needs distinct variable identities")
         for name in variables:
             identifier(name)
-    if operator == "relation.revise":
-        if not isinstance(arguments["replacement"], str) or arguments["replacement"] == arguments["step"]:
-            raise ValueError("Relation revision needs a distinct replacement step")
-        bounded_text(arguments["reason"], "relation revision reason", 2048)
-        return [arguments["step"], arguments["replacement"]]
     return [arguments["step"]]
+
+
+def km_revise_worlds(prior_worlds, incoming_worlds):
+    """Katsuno-Mendelzon minimal-Hamming-distance belief revision over finite worlds (KM1-KM6)."""
+    psi = {tuple(row) for row in prior_worlds}
+    mu = {tuple(row) for row in incoming_worlds}
+    if not mu:
+        return [], None
+    if not psi:
+        return [list(r) for r in sorted(mu)], None
+    overlap = psi & mu
+    if overlap:
+        return [list(r) for r in sorted(overlap)], 0
+    distances = {
+        w: min(sum(int(a != b) for a, b in zip(w, v)) for v in psi)
+        for w in mu
+    }
+    min_d = min(distances.values())
+    selected = [list(w) for w in sorted(mu) if distances[w] == min_d]
+    return selected, min_d
 
 
 def validate_model(model):
@@ -460,22 +569,34 @@ def calculate(operator, arguments, parent, extra_inputs=()):
         replacement["worlds"].sort()
         if replacement["variables"] != model["variables"]:
             raise ValueError("Relation revision requires matching variable identities; extend or project explicitly")
+        policy = arguments.get("policy", "replace")
+        km_worlds, km_min_distance = km_revise_worlds(model["worlds"], replacement["worlds"])
+        chosen_worlds = km_worlds if policy == "km" else replacement["worlds"]
+        revised_model = validate_model({
+            "type": RELATION,
+            "variables": list(replacement["variables"]),
+            "worlds": chosen_worlds,
+            "scope": replacement["scope"],
+        })
         old_set = {tuple(row) for row in model["worlds"]}
-        new_set = {tuple(row) for row in replacement["worlds"]}
+        new_set = {tuple(row) for row in revised_model["worlds"]}
         sources = sorted(set(parent["sources"]) | set(replacement_parent["sources"]))
         return {
-            "value": validate_model(replacement),
+            "value": revised_model,
             "sources": sources,
             "revision": {
                 "previous_step": arguments["step"],
                 "replacement_step": arguments["replacement"],
                 "reason": arguments["reason"],
+                "policy": policy,
                 "retained_worlds": [list(r) for r in sorted(old_set & new_set)],
                 "removed_worlds": [list(r) for r in sorted(old_set - new_set)],
                 "added_worlds": [list(r) for r in sorted(new_set - old_set)],
                 "retained_world_count": len(old_set & new_set),
                 "removed_world_count": len(old_set - new_set),
                 "added_world_count": len(new_set - old_set),
+                "km_minimal_worlds": km_worlds,
+                "km_min_hamming_distance": km_min_distance,
                 "monotone": new_set <= old_set,
                 "reopened_conflict": len(old_set) == 0 and len(new_set) > 0,
             },

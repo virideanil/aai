@@ -524,7 +524,7 @@ class Scratchboard:
         blob = digest_bytes(data).split(":")[1]
         spec = {"kind": "tensor", "blob": blob, "dtype": dtype, "shape": list(shape), "basis": snapshot["core_identity"]}
         self._tensor_shape(spec)
-        if math.prod(spec["shape"]) * {"bf16": 2, "f32": 4}[dtype] != len(data):
+        if math.prod(spec["shape"]) * {"u8": 1, "bf16": 2, "f32": 4}[dtype] != len(data):
             raise ValueError("Tensor shape and byte count differ")
         with self.memory.locked():
             self.memory._validate_snapshot(snapshot)
@@ -547,9 +547,9 @@ class Scratchboard:
     @staticmethod
     def _tensor_shape(spec):
         shape = spec["shape"]
-        if (spec["dtype"] not in {"bf16", "f32"} or not isinstance(shape, list) or not 1 <= len(shape) <= 8
+        if (spec["dtype"] not in {"u8", "bf16", "f32"} or not isinstance(shape, list) or not 1 <= len(shape) <= 8
                 or any(type(x) is not int or not 1 <= x <= MAX_TENSOR_BYTES for x in shape)
-                or math.prod(shape) * {"bf16": 2, "f32": 4}[spec["dtype"]] > MAX_TENSOR_BYTES):
+                or math.prod(shape) * {"u8": 1, "bf16": 2, "f32": 4}[spec["dtype"]] > MAX_TENSOR_BYTES):
             raise ValueError("Tensor dtype or shape extent")
 
     def _tensor_bytes(self, spec, core_identity):
@@ -560,7 +560,7 @@ class Scratchboard:
         if not isinstance(blob, str) or len(blob) != 128 or any(c not in "0123456789abcdef" for c in blob):
             raise ValueError("Tensor blob identity")
         path = self.memory._artifact_path(f"scratchboard/blobs/{blob}.bin")
-        expected = math.prod(spec["shape"]) * {"bf16": 2, "f32": 4}[spec["dtype"]]
+        expected = math.prod(spec["shape"]) * {"u8": 1, "bf16": 2, "f32": 4}[spec["dtype"]]
         if path.stat().st_size != expected:
             raise ValueError("Tensor bytes differ from the declared shape")
         raw = path.read_bytes()
@@ -576,7 +576,7 @@ class Scratchboard:
             return self._tensor_bytes(node["spec"], core_identity)
 
     def relation_tensor(self, step_id, *, open_step_ids=(), mode="bf16_support"):
-        """Carry a relational state and its open questions as an exact BF16 and bit/trit tensor."""
+        """Carry a relational state and its open questions as an exact BF16 or compact U8 bit/trit tensor."""
         from .relations import encode_relation_tensor, validate_model
         open_ids = list(open_step_ids)
         if len(open_ids) > 16 or len(set(open_ids)) != len(open_ids) or step_id in open_ids:
@@ -613,7 +613,7 @@ class Scratchboard:
                 sid: self.memory.state["step_observations"][sid]["digest"] for sid in bound_ids})
             self.memory._validate_snapshot(snapshot)
             raw, shape, meta = encode_relation_tensor(model, mode=mode, open_questions=questions)
-        return self.tensor(snapshot, raw, shape=shape, dtype="bf16",
+        return self.tensor(snapshot, raw, shape=shape, dtype=meta["dtype"],
                            origin={**meta, "step_id": step_id, "open_step_ids": open_ids})
 
     def decode_relation_tensor(self, node_id, *, core_identity):
@@ -625,7 +625,12 @@ class Scratchboard:
                 raise ValueError("Node does not hold tensor data")
             raw = self._tensor_bytes(node["spec"], core_identity)
             origin = deepcopy(node["origin"])
-        model = decode_relation_tensor(raw, node["spec"]["shape"], origin)
+            spec_dtype = node["spec"]["dtype"]
+            spec_shape = list(node["spec"]["shape"])
+        expected_dtype = "u8" if isinstance(origin, dict) and origin.get("mode") in {"pack5", "support2"} else "bf16"
+        if spec_dtype != expected_dtype:
+            raise ValueError("Scratchboard tensor dtype disagrees with relational tensor mode")
+        model = decode_relation_tensor(raw, spec_shape, origin)
         questions = deepcopy(origin["questions"])
         settled = [{"question": q["expression"], "verdict": q["verdict"], "box_verdict": q["box_verdict"],
                     "correlation_loss": q["correlation_loss"]}
@@ -639,6 +644,8 @@ class Scratchboard:
             "variables": list(model["variables"]),
             "worlds": [list(r) for r in model["worlds"]],
             "mode": origin["mode"],
+            "dtype": spec_dtype,
+            "byte_count": len(raw),
             "box_marginals": origin["box_marginals"],
             "questions": questions,
             "settled_questions": settled,

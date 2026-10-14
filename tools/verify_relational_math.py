@@ -164,7 +164,7 @@ def main(output=None):
     import sys
     sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
     from nanoai.relations import (
-        RELATION, decode_relation_tensor, encode_relation_tensor, query_tensor_enclosure,
+        RELATION, decode_relation_tensor, encode_relation_tensor, km_revise_worlds, query_tensor_enclosure,
     )
     expressions = [
         0, 1, "x", "y",
@@ -197,13 +197,73 @@ def main(output=None):
           tensor_roundtrips == 60,
           {"roundtrips": tensor_roundtrips, "modes": ["bf16_support", "bf16_signed", "pack5", "support2"]})
 
+    # Verify compact primary payloads for pack5 and support2 and forged-origin rejection
+    rel_1var = {"type": RELATION, "variables": ["x"], "worlds": [[0], [1]], "scope": "one-var"}
+    b_sup = encode_relation_tensor(rel_1var, mode="bf16_support")
+    b_sig = encode_relation_tensor(rel_1var, mode="bf16_signed")
+    b_p5 = encode_relation_tensor(rel_1var, mode="pack5")
+    b_s2 = encode_relation_tensor(rel_1var, mode="support2")
+    check("pack5 and support2 emit compact U8 primary tensors smaller than BF16",
+          len(b_sup[0]) == 8 and len(b_sig[0]) == 4 and len(b_p5[0]) == 1 and len(b_s2[0]) == 1,
+          {"bf16_support_bytes": len(b_sup[0]), "bf16_signed_bytes": len(b_sig[0]),
+           "pack5_bytes": len(b_p5[0]), "support2_bytes": len(b_s2[0])})
+
+    rel_2var = {"type": RELATION, "variables": ["x", "y"], "worlds": [[0, 0], [1, 1]], "scope": "two-var"}
+    raw_2, shape_2, meta_2 = encode_relation_tensor(rel_2var, mode="bf16_support", open_questions=["x"])
+    forged_rejected = False
+    try:
+        forged_meta = dict(meta_2, box_marginals={"x": "yes", "y": "yes"})
+        decode_relation_tensor(raw_2, shape_2, forged_meta)
+    except ValueError:
+        forged_rejected = True
+    check("decode_relation_tensor rejects forged box_marginals and question metadata",
+          forged_rejected, {"forged_box_marginals_rejected": forged_rejected})
+
+    # Exhaustive verification of Katsuno-Mendelzon postulates KM1-KM6 over all 15x15x15 non-empty world sets
+    nonempty_sets = [
+        [list(w) for i, w in enumerate(worlds) if mask & (1 << i)]
+        for mask in range(1, 16)
+    ]
+    km_triples = 0
+    for psi in nonempty_sets:
+        psi_set = {tuple(w) for w in psi}
+        for mu1 in nonempty_sets:
+            mu1_set = {tuple(w) for w in mu1}
+            rev1_list, _ = km_revise_worlds(psi, mu1)
+            rev1 = {tuple(w) for w in rev1_list}
+            # KM1: psi o mu1 <= mu1
+            assert rev1 <= mu1_set
+            # KM2: if psi & mu1 != empty, psi o mu1 == psi & mu1
+            if psi_set & mu1_set:
+                assert rev1 == (psi_set & mu1_set)
+            # KM3: if mu1 != empty and psi != empty, psi o mu1 != empty
+            assert len(rev1) > 0
+            # KM4: syntax independence on world sets
+            rev1_perm, _ = km_revise_worlds(list(reversed(psi)), list(reversed(mu1)))
+            assert {tuple(w) for w in rev1_perm} == rev1
+            for mu2 in nonempty_sets:
+                mu2_set = {tuple(w) for w in mu2}
+                both_mu = [list(w) for w in sorted(mu1_set & mu2_set)]
+                rev12_list, _ = km_revise_worlds(psi, both_mu)
+                rev12 = {tuple(w) for w in rev12_list}
+                # KM5: (psi o mu1) & mu2 <= psi o (mu1 & mu2)
+                assert (rev1 & mu2_set) <= rev12
+                # KM6: if (psi o mu1) & mu2 != empty, psi o (mu1 & mu2) <= (psi o mu1) & mu2
+                if rev1 & mu2_set:
+                    assert rev12 <= (rev1 & mu2_set)
+                km_triples += 1
+    check("Katsuno-Mendelzon minimal-Hamming revision satisfies postulates KM1-KM6 exhaustively",
+          km_triples == 3375,
+          {"verified_triples": km_triples, "postulates": ["KM1", "KM2", "KM3", "KM4", "KM5", "KM6"]})
+
     result = {"scope": "Finite mathematical reference and counterexamples; no model training, runtime speed, human psychology or universal-world claim.",
               "checks": checks, "passed": len(checks),
               "source_digest": "shake256:" + hashlib.shake_256(Path(__file__).read_bytes()).hexdigest(64)}
     if output is not None:
         output.write_text(json.dumps(result, indent=2)+"\n")
     print(json.dumps({"passed": len(checks), "relational_answers": labels, "refinement_cases": compared,
-                      "enclosure_cases": enclosure_cases, "tensor_roundtrips": tensor_roundtrips}))
+                      "enclosure_cases": enclosure_cases, "tensor_roundtrips": tensor_roundtrips,
+                      "km_triples": km_triples}))
 
 
 if __name__ == "__main__":

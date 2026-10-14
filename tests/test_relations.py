@@ -559,17 +559,46 @@ class RelationConsumers(unittest.TestCase):
         board = Scratchboard(self.memory)
         node_support = board.relation_tensor(q_eq["step_id"], open_step_ids=[q_x["step_id"]], mode="bf16_support")
         node_signed = board.relation_tensor(state["step_id"], mode="bf16_signed")
+        node_pack5 = board.relation_tensor(state["step_id"], mode="pack5")
+        node_support2 = board.relation_tensor(state["step_id"], mode="support2")
+        self.assertEqual(node_support["spec"]["dtype"], "bf16")
+        self.assertEqual(node_signed["spec"]["dtype"], "bf16")
+        self.assertEqual(node_pack5["spec"]["dtype"], "u8")
+        self.assertEqual(node_support2["spec"]["dtype"], "u8")
+        self.assertEqual(node_pack5["spec"]["shape"], [1])
+        self.assertEqual(node_support2["spec"]["shape"], [1])
         roundtripped = board.decode_relation_tensor(node_support["id"], core_identity="test-core")
         self.assertEqual(roundtripped["worlds"], [[0, 0], [1, 1]])
         self.assertEqual(roundtripped["settled_questions"][0]["verdict"], "yes")
         self.assertEqual(roundtripped["open_questions"][0]["question"], "x")
+        self.assertEqual(board.decode_relation_tensor(node_pack5["id"], core_identity="test-core")["byte_count"], 1)
+        self.assertEqual(board.decode_relation_tensor(node_support2["id"], core_identity="test-core")["byte_count"], 1)
 
-        archived = board.archive_tensors([node_support["id"], node_signed["id"]], recipe="relational-tensor-test-v1")
-        self.assertEqual(len(archived["tensors"]), 2)
+        # Forged origin metadata (Codex counterexample) is rejected by decode_relation_tensor
+        raw_s, shape_s, meta_s = encode_relation_tensor(state["result"]["value"], mode="bf16_support", open_questions=["x"])
+        forged_node = board.tensor(
+            self.snapshot(),
+            raw_s,
+            shape=shape_s,
+            dtype="bf16",
+            origin={
+                **meta_s,
+                "box_marginals": {"x": "yes", "y": "yes"},
+                "questions": [{"expression": "x", "verdict": "yes", "box_verdict": "yes", "correlation_loss": False}],
+            },
+        )
+        with self.assertRaisesRegex(ValueError, "box marginals disagree|question verdict disagrees"):
+            board.decode_relation_tensor(forged_node["id"], core_identity="test-core")
+
+        archived = board.archive_tensors(
+            [node_support["id"], node_signed["id"], node_pack5["id"], node_support2["id"]],
+            recipe="relational-tensor-test-v1",
+        )
+        self.assertEqual(len(archived["tensors"]), 4)
         store = TensorStore(self.root / "tensors.sqlite3")
         described = store.resolve(archived["version_id"])
         self.assertEqual(described["recipe"], "relational-tensor-test-v1")
-        self.assertEqual(len(described["tensors"]), 2)
+        self.assertEqual(len(described["tensors"]), 4)
 
     def test_relation_extend_relational_constraints_and_hidden_narrowing_rejection(self):
         state = self.decode()
@@ -623,6 +652,23 @@ class RelationConsumers(unittest.TestCase):
         self.assertEqual(rev_val["worlds"], [[0, 1], [1, 1]])
         self.assertTrue(rev_meta["reopened_conflict"])
         self.assertEqual(rev_meta["added_worlds"], [[0, 1], [1, 1]])
+
+        # Katsuno-Mendelzon minimal-Hamming revision (policy="km") preserves intersection when non-empty
+        km_revised = self.steps.execute(
+            self.steps.propose(
+                snap,
+                "relation.revise",
+                {
+                    "step": state["step_id"],
+                    "replacement": alt_dec["step_id"],
+                    "reason": "Katsuno-Mendelzon minimal-change revision",
+                    "policy": "km",
+                },
+            )["id"]
+        )
+        self.assertEqual(km_revised["result"]["value"]["worlds"], [[1, 1]])
+        self.assertEqual(km_revised["result"]["revision"]["km_min_hamming_distance"], 0)
+        self.assertEqual(km_revised["result"]["revision"]["policy"], "km")
 
         curiosity = self.perform(
             "relation.curiosity",
