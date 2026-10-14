@@ -345,6 +345,96 @@ def _entropy_bits(counts, total):
     return -sum((c / total) * math.log2(c / total) for c in counts.values() if c > 0)
 
 
+def curiosity_table(model, questions, candidates=None):
+    model = validate_model(model)
+    candidates = list(model["variables"]) if candidates is None else list(candidates)
+    available = set(model["variables"])
+    for expr in [*questions, *candidates]:
+        if expression_variables(expr) - available:
+            raise ValueError("Relation curiosity references an unavailable variable")
+    worlds = model["worlds"]
+    if not worlds:
+        raise ValueError("An inconsistent relation admits no curiosity ranking; revise the conflicting premises")
+    assignments = [dict(zip(model["variables"], row)) for row in worlds]
+    total = len(assignments)
+    q_vectors = [tuple(evaluate(q, row) for q in questions) for row in assignments]
+    prior_counts = {}
+    for vec in q_vectors:
+        prior_counts[vec] = prior_counts.get(vec, 0) + 1
+    prior_entropy = _entropy_bits(prior_counts, total)
+    open_questions = []
+    settled_questions = []
+    for j, q in enumerate(questions):
+        vals = sorted({vec[j] for vec in q_vectors})
+        if len(vals) == 2:
+            open_questions.append(deepcopy(q))
+        else:
+            settled_questions.append({"expression": deepcopy(q), "verdict": "yes" if vals == [1] else "no"})
+    open_count = len(open_questions)
+    evaluations = []
+    for idx, candidate in enumerate(candidates):
+        branches = {0: [], 1: []}
+        for row, vec in zip(assignments, q_vectors):
+            branches[evaluate(candidate, row)].append(vec)
+        n0, n1 = len(branches[0]), len(branches[1])
+        counts0, counts1 = {}, {}
+        for vec in branches[0]:
+            counts0[vec] = counts0.get(vec, 0) + 1
+        for vec in branches[1]:
+            counts1[vec] = counts1.get(vec, 0) + 1
+        h0 = _entropy_bits(counts0, n0)
+        h1 = _entropy_bits(counts1, n1)
+        expected_posterior = (n0 * h0 + n1 * h1) / total
+        info_bits = max(0.0, prior_entropy - expected_posterior)
+        decided0 = sum(1 for j in range(len(questions)) if len({v[j] for v in branches[0]}) <= 1) if n0 else len(questions)
+        decided1 = sum(1 for j in range(len(questions)) if len({v[j] for v in branches[1]}) <= 1) if n1 else len(questions)
+        guaranteed = sum(
+            1 for j in range(len(questions))
+            if (not n0 or len({v[j] for v in branches[0]}) == 1)
+            and (not n1 or len({v[j] for v in branches[1]}) == 1)
+        )
+        expected_decided = (n0 * decided0 + n1 * decided1) / total
+        evaluations.append({
+            "index": idx,
+            "expression": deepcopy(candidate),
+            "observation": deepcopy(candidate),
+            "split_counts": {"0": n0, "1": n1},
+            "branch_probabilities": {"0": f"{n0}/{total}", "1": f"{n1}/{total}"},
+            "prior_entropy_bits": prior_entropy,
+            "expected_posterior_entropy_bits": expected_posterior,
+            "information_bits": info_bits,
+            "expected_gain_bits": info_bits,
+            "guaranteed_decided_questions": guaranteed,
+            "expected_decided_questions": expected_decided,
+            "worst_case_worlds": max(n0, n1),
+            "informative": n0 > 0 and n1 > 0,
+        })
+    ranked = sorted(
+        evaluations,
+        key=lambda r: (
+            -r["guaranteed_decided_questions"],
+            -round(r["expected_decided_questions"], 12),
+            -round(r["information_bits"], 12),
+            r["worst_case_worlds"],
+            r["index"],
+        ),
+    )
+    return {
+        "type": "relation_curiosity_v1",
+        "world_count": total,
+        "question_count": len(questions),
+        "open_question_count": open_count,
+        "open_questions": open_questions,
+        "settled_questions": settled_questions,
+        "prior_entropy_bits": prior_entropy,
+        "candidates": ranked,
+        "recommended_index": ranked[0]["index"] if ranked else None,
+        "recommended_expression": deepcopy(ranked[0]["expression"]) if ranked else None,
+        "recommended_observation": deepcopy(ranked[0]) if ranked else None,
+        "model_scope": model["scope"],
+    }
+
+
 def calculate(operator, arguments, parent, extra_inputs=()):
     validate_arguments(operator, arguments)
     if operator == "relation.decode":
@@ -432,91 +522,7 @@ def calculate(operator, arguments, parent, extra_inputs=()):
     if operator == "relation.curiosity":
         questions = arguments["questions"]
         raw_candidates = arguments.get("candidates", arguments.get("observations"))
-        candidates = list(model["variables"]) if raw_candidates is None else raw_candidates
-        available = set(model["variables"])
-        for expr in [*questions, *candidates]:
-            if expression_variables(expr) - available:
-                raise ValueError("Relation curiosity references an unavailable variable")
-        worlds = model["worlds"]
-        if not worlds:
-            raise ValueError("An inconsistent relation admits no curiosity ranking; revise the conflicting premises")
-        assignments = [dict(zip(model["variables"], row)) for row in worlds]
-        total = len(assignments)
-        q_vectors = [tuple(evaluate(q, row) for q in questions) for row in assignments]
-        prior_counts = {}
-        for vec in q_vectors:
-            prior_counts[vec] = prior_counts.get(vec, 0) + 1
-        prior_entropy = _entropy_bits(prior_counts, total)
-        open_questions = []
-        settled_questions = []
-        for j, q in enumerate(questions):
-            vals = sorted({vec[j] for vec in q_vectors})
-            if len(vals) == 2:
-                open_questions.append(deepcopy(q))
-            else:
-                settled_questions.append({"expression": deepcopy(q), "verdict": "yes" if vals == [1] else "no"})
-        open_count = len(open_questions)
-        evaluations = []
-        for idx, candidate in enumerate(candidates):
-            branches = {0: [], 1: []}
-            for row, vec in zip(assignments, q_vectors):
-                branches[evaluate(candidate, row)].append(vec)
-            n0, n1 = len(branches[0]), len(branches[1])
-            counts0, counts1 = {}, {}
-            for vec in branches[0]:
-                counts0[vec] = counts0.get(vec, 0) + 1
-            for vec in branches[1]:
-                counts1[vec] = counts1.get(vec, 0) + 1
-            h0 = _entropy_bits(counts0, n0)
-            h1 = _entropy_bits(counts1, n1)
-            expected_posterior = (n0 * h0 + n1 * h1) / total
-            info_bits = max(0.0, prior_entropy - expected_posterior)
-            decided0 = sum(1 for j in range(len(questions)) if len({v[j] for v in branches[0]}) <= 1) if n0 else len(questions)
-            decided1 = sum(1 for j in range(len(questions)) if len({v[j] for v in branches[1]}) <= 1) if n1 else len(questions)
-            guaranteed = sum(
-                1 for j in range(len(questions))
-                if (not n0 or len({v[j] for v in branches[0]}) == 1)
-                and (not n1 or len({v[j] for v in branches[1]}) == 1)
-            )
-            expected_decided = (n0 * decided0 + n1 * decided1) / total
-            evaluations.append({
-                "index": idx,
-                "expression": deepcopy(candidate),
-                "observation": deepcopy(candidate),
-                "split_counts": {"0": n0, "1": n1},
-                "branch_probabilities": {"0": f"{n0}/{total}", "1": f"{n1}/{total}"},
-                "prior_entropy_bits": prior_entropy,
-                "expected_posterior_entropy_bits": expected_posterior,
-                "information_bits": info_bits,
-                "guaranteed_decided_questions": guaranteed,
-                "expected_decided_questions": expected_decided,
-                "worst_case_worlds": max(n0, n1),
-                "informative": n0 > 0 and n1 > 0,
-            })
-        ranked = sorted(
-            evaluations,
-            key=lambda r: (
-                -r["guaranteed_decided_questions"],
-                -round(r["expected_decided_questions"], 12),
-                -round(r["information_bits"], 12),
-                r["worst_case_worlds"],
-                r["index"],
-            ),
-        )
-        answer = {
-            "type": "relation_curiosity_v1",
-            "world_count": total,
-            "question_count": len(questions),
-            "open_question_count": open_count,
-            "open_questions": open_questions,
-            "settled_questions": settled_questions,
-            "prior_entropy_bits": prior_entropy,
-            "candidates": ranked,
-            "recommended_index": ranked[0]["index"],
-            "recommended_expression": deepcopy(ranked[0]["expression"]),
-            "recommended_observation": deepcopy(ranked[0]),
-            "model_scope": model["scope"],
-        }
+        answer = curiosity_table(model, questions, raw_candidates)
         return {"value": answer, "sources": parent["sources"],
                 "scope": "Exact counting-measure information gain and minimax world split over the declared finite relation"}
 

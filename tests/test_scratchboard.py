@@ -303,6 +303,69 @@ class ScratchboardConsumerTests(unittest.TestCase):
         self.assertEqual(cli("board-document",branch["id"])["proposal"]["output"]["content"], "Candidate A [spec@1]")
         self.assertEqual(cli("board-document",revised["id"],"--commit")["proposal"]["output"]["content"], "Candidate B [spec@1]")
 
+    def test_generator_source_lines_relation_table_and_slot_sequence(self):
+        self.memory.put_source("spec", "Line one\nLine two\nLine three", expected_revision=1)
+        self.memory.put_source(
+            "rel",
+            json.dumps({
+                "type": "finite_relation_v1",
+                "variables": ["a", "b"],
+                "worlds": [[1, 0], [1, 1]],
+                "scope": "Declared finite relation",
+            }),
+        )
+        snap = context(self.memory, "note", "original-test-core", selected_ids=["spec", "rel"])["snapshot"]
+        lines_node = self.board.generator(snap, "source_lines", {"source": "spec", "start_line": 1, "stop_line": 2, "numbered": True})
+        self.assertEqual(lines_node["metrics"]["logical_units"], 2)
+        self.assertEqual(self.board.materialize(lines_node["id"])["bytes"].decode(), "1: Line one\n2: Line two\n")
+
+        steps = Steps(self.memory)
+        read_step = steps.propose(snap, "source.read", {"source": "rel"})
+        steps.execute(read_step["id"])
+        decode_step = steps.propose(snap, "relation.decode", {"step": read_step["id"]})
+        steps.execute(decode_step["id"])
+        steps.review(decode_step["id"], "confirmed", reviewer="test-reviewer", reason="Valid relation model")
+        table_node = self.board.generator(
+            snap,
+            "relation_table",
+            {"step_id": decode_step["id"], "questions": [{"xor": ["a", "b"]}]},
+        )
+        table_text = self.board.materialize(table_node["id"])["bytes"].decode()
+        self.assertIn("| `a` | yes | `01` | `[1]` |", table_text)
+        self.assertIn("| `b` | maybe | `11` | `[0, 1]` |", table_text)
+        self.assertIn("### Open Questions", table_text)
+
+        item_a = self.board.add(snap, {"kind": "literal", "text": "Alpha [spec@2]"})
+        item_b = self.board.add(snap, {"kind": "literal", "text": "Beta [rel@1]"})
+        seq_node = self.board.generator(
+            snap,
+            "slot_sequence",
+            {"items": [item_a["id"], item_b["id"]], "template": "{index}. {item}\n", "start_index": 1},
+        )
+        self.assertEqual(self.board.materialize(seq_node["id"])["bytes"].decode(), "1. Alpha [spec@2]\n2. Beta [rel@1]\n")
+        self.board.revise(item_a["id"], {"kind": "literal", "text": "Alpha-2 [spec@2]"}, reason="Update first item")
+        with self.assertRaises(StaleState):
+            self.board.materialize(seq_node["id"])
+
+    def test_bind_many_atomic_bulk_slot_binding(self):
+        snap = self.snapshot()
+        slots = self.board.reserve(snap, 4, constraints="Four ordered lines")
+        parts = [self.board.add(snap, {"kind": "literal", "text": f"Part {i} [spec@1]\n"}) for i in range(4)]
+        before = self.memory.sequence
+        with self.assertRaises(ValueError):
+            self.board.bind_many(slots["id"], {0: parts[0]["id"], 9: parts[1]["id"]})
+        self.assertEqual(self.memory.sequence, before)
+        half = self.board.bind_many(slots["id"], {0: parts[0]["id"], 2: parts[2]["id"]})
+        self.assertEqual(self.memory.sequence, before + 1)
+        self.assertEqual(self.board.describe(half["id"])["unresolved_slots"], 2)
+        full = self.board.bind_many(half["id"], {1: parts[1]["id"], 3: parts[3]["id"]})
+        self.assertEqual(self.board.describe(full["id"])["unresolved_slots"], 0)
+        self.assertEqual(
+            self.board.materialize(full["id"])["bytes"].decode(),
+            "".join(f"Part {i} [spec@1]\n" for i in range(4)),
+        )
+
 
 if __name__ == "__main__":
     unittest.main()
+

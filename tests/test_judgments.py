@@ -187,6 +187,56 @@ class JudgmentConsumerTests(unittest.TestCase):
         self.assertEqual(payload["request"]["output"], "judgment")
         self.assertEqual(row["prediction"]["spec"]["question"], question)
 
+    def test_combine_judgments_kleene_support2_and_consensus(self):
+        snap = self.snapshot()
+        j_yes1 = self.judgments.predict(snap, "Premise 1", "yes", "Verified")
+        j_yes2 = self.judgments.predict(snap, "Premise 2", "yes", "Verified")
+        j_maybe = self.judgments.predict(snap, "Premise 3", "maybe", "Pending")
+        j_no = self.judgments.predict(snap, "Premise 4", "no", "Refuted")
+
+        k_and = self.judgments.combine([j_yes1["id"], j_maybe["id"]], operator="kleene")
+        self.assertEqual(k_and["spec"]["verdict"], "maybe")
+        self.assertEqual(self.judgments.combine([j_yes1["id"], j_no["id"]], operator="kleene")["spec"]["verdict"], "no")
+        self.assertEqual(self.judgments.combine([j_no["id"], j_maybe["id"]], operator="kleene_or")["spec"]["verdict"], "maybe")
+        self.assertEqual(self.judgments.combine([j_yes1["id"], j_maybe["id"]], operator="kleene_or")["spec"]["verdict"], "yes")
+
+        sup_conflict = self.judgments.combine([j_yes1["id"], j_no["id"]], operator="support2")
+        self.assertEqual(sup_conflict["spec"]["verdict"], "maybe")
+        self.assertEqual(sup_conflict["spec"]["uncertainty"], "conflicting_evidence")
+        self.assertEqual(sup_conflict["origin"]["support_code"], 0b11)
+
+        cons = self.judgments.combine([j_yes1["id"], j_yes2["id"]], operator="consensus")
+        self.assertEqual(cons["spec"]["verdict"], "yes")
+        self.assertEqual(set(cons["snapshot"]["scratchboard"]), {j_yes1["id"], j_yes2["id"]})
+
+    def test_open_agenda_and_risk_coverage_selective_prediction(self):
+        sid = self.target()
+        pending_sid = self.target(pending=True)
+        snap = self.snapshot()
+        p_correct = self.judgments.predict(snap, "Is 23*2 == 46?", "yes", "Exact", predicate=self.predicate(sid, 46))
+        self.judgments.assess(p_correct["id"])
+        p_abstain = self.judgments.predict(snap, "Is 23*2 == 44?", "maybe", "Check first", predicate=self.predicate(sid, 44))
+        self.judgments.assess(p_abstain["id"])
+        p_pending = self.judgments.predict(snap, "Pending check", "maybe", "Await execution", predicate=self.predicate(pending_sid, 46))
+        p_missing = self.judgments.predict(snap, "Unobservable color", "maybe", "No source")
+
+        agenda = self.judgments.open_agenda("total")["items"]
+        self.assertGreaterEqual(len(agenda), 2)
+        self.assertEqual(agenda[0]["id"], p_pending["id"])
+        self.assertEqual(agenda[0]["resolver"]["resolver_kind"], "exact")
+        self.assertEqual(agenda[0]["resolver"]["action"], "execute_step")
+        missing_item = next(item for item in agenda if item["id"] == p_missing["id"])
+        self.assertEqual(missing_item["resolver"]["resolver_kind"], "attributed")
+
+        rc = self.judgments.risk_coverage("total")
+        self.assertEqual(rc["evaluated_count"], 2)
+        self.assertEqual(rc["covered_count"], 1)
+        self.assertEqual(rc["abstained_count"], 1)
+        self.assertEqual(rc["selective_risk"], 0.0)
+        self.assertEqual(rc["selective_accuracy"], 1.0)
+        self.assertGreater(rc["inquiry_benefit"], 0.0)
+
 
 if __name__ == "__main__":
     unittest.main()
+

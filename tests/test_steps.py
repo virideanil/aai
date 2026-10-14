@@ -5,7 +5,7 @@ import unittest
 
 from nanoai.agent import DEFAULT_IDENTITY, calculate, context
 from nanoai.memory import Memory, StaleState
-from nanoai.steps import Steps
+from nanoai.steps import Steps, pack_rank_plane, unpack_rank_plane
 from nanoai.documents import quantity_note
 
 
@@ -145,6 +145,52 @@ class StepConsumerTests(unittest.TestCase):
                 self.assertEqual(json.loads(core.messages[1]["content"])["task"]["goal"], self.memory.state["tasks"]["display"]["goal"])
                 self.assertNotIn('"output": "document"', core.messages[1]["content"])
 
+    def test_rank_plane_2_trit_pack5_roundtrip(self):
+        ranks = [1, 2, 3, 4, 5, 6, 7, 8, 9, 42]
+        packed = pack_rank_plane(ranks)
+        self.assertEqual(len(packed), (2 * len(ranks) + 4) // 5)
+        unpacked = unpack_rank_plane(packed, len(ranks))
+        self.assertEqual(unpacked, [1, 2, 3, 4, 5, 6, 7, 8, 9, 9])
+        with self.assertRaises(ValueError):
+            pack_rank_plane([0])
+        with self.assertRaises(ValueError):
+            pack_rank_plane([True])
+
+    def test_system_one_calibration_band_proposal_and_audit_correction(self):
+        snap = self.snapshot()
+        initial_cal = self.steps.calibration("display")
+        self.assertEqual(initial_cal["operators"]["integer.product"]["band"], "propose")
+
+        first = self.steps.calculate_fields(snap, self.plan)
+        field_steps = list(first["step"]["arguments"]["steps"])
+        self.steps.review(first["step_id"], "confirmed", reviewer="audit-1", reason="Verified product")
+        second = self.steps.propose(snap, "integer.product", {"steps": field_steps})
+        self.steps.execute(second["id"])
+        self.steps.review(second["id"], "confirmed", reviewer="audit-2", reason="Verified second product")
+
+        cal = self.steps.calibration("display")
+        self.assertEqual(cal["operators"]["integer.product"]["band"], "act_now")
+        self.assertEqual(cal["operators"]["integer.product"]["empirical_precision"], 1.0)
+
+        acted = self.steps.band_proposal(snap, "integer.product", {"steps": field_steps})
+        self.assertEqual(acted["band"], "act_now")
+        self.assertTrue(acted["executed"])
+        self.assertEqual(acted["observation"]["result"]["value"], 46)
+
+        unreviewed = self.steps.propose(snap, "integer.product", {"steps": field_steps})
+        corr = self.steps.issue_correction(
+            unreviewed["id"],
+            reviewer="master-reviewer",
+            reason="Should use quantity.product with explicit units",
+            conduct_virtue="epistemic_humility",
+        )
+        self.assertEqual(corr["conduct_virtue"], "epistemic_humility")
+        self.assertEqual(self.memory.state["step_reviews"][unreviewed["id"]]["decision"], "rejected")
+        after_corr = self.steps.calibration("display")
+        self.assertEqual(after_corr["operators"]["integer.product"]["band"], "escalate")
+        self.assertEqual(after_corr["operators"]["integer.product"]["conduct_flags"], 1)
+
 
 if __name__ == "__main__":
     unittest.main()
+

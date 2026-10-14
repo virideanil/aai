@@ -254,6 +254,149 @@ class Steps:
             memory._append({"kind": "step.reviewed", "review": review})
             return deepcopy(review)
 
+    def issue_correction(self, step_id, *, reviewer, reason, replacement=None, conduct_virtue=None):
+        """Record an audit or master correction event and reject the flawed step if unreviewed."""
+        bounded_text(reviewer, "reviewer", 256)
+        bounded_text(reason, "correction reason", 2048)
+        allowed_virtues = {
+            "Gi", "Yu", "Jin", "Rei", "Makoto", "Meiyo", "Chugi",
+            "epistemic_humility", "accuracy", "scope_honesty", "provenance_integrity", "restraint",
+        }
+        if conduct_virtue is not None and conduct_virtue not in allowed_virtues:
+            raise ValueError("Conduct virtue must be an admitted conduct or epistemic virtue")
+        memory = self.memory
+        with memory.locked():
+            step = memory.state["steps"].get(step_id)
+            if step is None:
+                raise ValueError("Correction target step is unavailable")
+            if replacement is not None:
+                other = memory.state["steps"].get(replacement)
+                if replacement == step_id or not other or other["snapshot"]["task_id"] != step["snapshot"]["task_id"]:
+                    raise ValueError("Correction replacement step contract")
+            if step_id not in memory.state["step_reviews"]:
+                review = {"step_id": step_id, "decision": "rejected", "reviewer": reviewer,
+                          "reason": reason, "replacement": replacement,
+                          "scope": "Recorded reviewer decision; grants no external effects"}
+                memory._append({"kind": "step.reviewed", "review": review})
+            body = {"step_id": step_id, "task_id": step["snapshot"]["task_id"],
+                    "operator": step["operator"], "reviewer": reviewer, "reason": reason,
+                    "replacement": replacement, "conduct_virtue": conduct_virtue,
+                    "scope": "Journaled audit correction; informs System One calibration and replay"}
+            correction = {"id": digest_bytes(canonical({**body, "sequence": memory.sequence})), **body}
+            memory._append({"kind": "correction.issued", "correction": correction})
+            return deepcopy(correction)
+
+    def calibration(self, task_id=None, *, min_confirmations=2, threshold=0.8):
+        """Derive per-operator System One action bands from journaled review and correction history."""
+        from .relations import OPERATORS as REL_OPS
+        if type(min_confirmations) is not int or min_confirmations < 1 or not 0.0 < threshold <= 1.0:
+            raise ValueError("Calibration bounds")
+        self.memory.reload()
+        admitted = {"source.read", "json.field", "integer.product", "integer.sum",
+                    "quantity.field", "quantity.product", "quantity.sum"} | set(REL_OPS)
+        stats = {
+            op: {
+                "operator": op, "proposed": 0, "observed": 0, "confirmed": 0,
+                "rejected": 0, "cancelled": 0, "replaced": 0, "corrections": 0,
+                "conduct_flags": 0,
+            }
+            for op in sorted(admitted)
+        }
+        for sid, step in self.memory.state["steps"].items():
+            if task_id is not None and step["snapshot"]["task_id"] != task_id:
+                continue
+            op = step["operator"]
+            row = stats.setdefault(op, {
+                "operator": op, "proposed": 0, "observed": 0, "confirmed": 0,
+                "rejected": 0, "cancelled": 0, "replaced": 0, "corrections": 0,
+                "conduct_flags": 0,
+            })
+            row["proposed"] += 1
+            if sid in self.memory.state["step_observations"]:
+                row["observed"] += 1
+            rev = self.memory.state["step_reviews"].get(sid)
+            if rev:
+                row[rev["decision"]] += 1
+                if rev.get("replacement") is not None:
+                    row["replaced"] += 1
+        for corr in self.memory.state["corrections"].values():
+            if task_id is not None and corr["task_id"] != task_id:
+                continue
+            op = corr["operator"]
+            row = stats.setdefault(op, {
+                "operator": op, "proposed": 0, "observed": 0, "confirmed": 0,
+                "rejected": 0, "cancelled": 0, "replaced": 0, "corrections": 0,
+                "conduct_flags": 0,
+            })
+            row["corrections"] += 1
+            if corr.get("conduct_virtue") is not None:
+                row["conduct_flags"] += 1
+        operators_out = {}
+        for op, row in sorted(stats.items()):
+            decided = row["confirmed"] + row["rejected"]
+            agreement = (row["confirmed"] / decided) if decided > 0 else 0.0
+            replacement_rate = (row["replaced"] / decided) if decided > 0 else 0.0
+            if row["conduct_flags"] > 0:
+                band = "escalate"
+            elif row["confirmed"] >= min_confirmations and agreement >= threshold and row["corrections"] == 0:
+                band = "act_now"
+            else:
+                band = "propose"
+            operators_out[op] = {
+                **row,
+                "agreement_rate": round(agreement, 6),
+                "empirical_precision": round(agreement, 6),
+                "replacement_rate": round(replacement_rate, 6),
+                "band": band,
+            }
+        return {
+            "task_id": task_id,
+            "min_confirmations": min_confirmations,
+            "threshold": threshold,
+            "operators": operators_out,
+            "scope": "Derived by replay from journaled step reviews and corrections",
+        }
+
+    def band_proposal(self, snapshot, operator, arguments, *, conduct_flag=False, min_confirmations=2, threshold=0.8, execute_act_now=True):
+        """Classify a candidate step into act_now, propose or escalate using journaled calibration."""
+        if conduct_flag:
+            return {"operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                    "reason": "Conduct-sensitive step requires explicit escalation"}
+        norm_args = deepcopy(arguments)
+        if operator in {"integer.product", "integer.sum", "quantity.product", "quantity.sum"} and "inputs" in norm_args and "steps" not in norm_args:
+            norm_args = {"steps": list(norm_args["inputs"])}
+        try:
+            self.parents(operator, norm_args)
+            if operator == "source.read" and norm_args["source"] not in snapshot.get("sources", {}):
+                return {"operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                        "reason": "Source lies outside the task's current evidence selection"}
+        except ValueError as error:
+            return {"operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                    "reason": str(error)}
+        cal = self.calibration(snapshot.get("task_id"), min_confirmations=min_confirmations, threshold=threshold)
+        op_stats = cal["operators"].get(operator)
+        band = op_stats["band"] if op_stats else "propose"
+        if band == "escalate":
+            return {
+                "operator": operator, "band": "escalate", "executed": False, "step": None, "observation": None,
+                "agreement_rate": op_stats["agreement_rate"], "confirmed": op_stats["confirmed"],
+                "corrections": op_stats["corrections"], "reason": "Conduct flag present in history",
+            }
+        step = self.propose(snapshot, operator, norm_args)
+        obs = self.execute(step["id"]) if (band == "act_now" and execute_act_now) else None
+        return {
+            "operator": operator,
+            "band": band,
+            "executed": obs is not None,
+            "step": step,
+            "observation": obs,
+            "agreement_rate": op_stats["agreement_rate"] if op_stats else 0.0,
+            "confirmed": op_stats["confirmed"] if op_stats else 0,
+            "corrections": op_stats["corrections"] if op_stats else 0,
+            "reason": ("Empirical master agreement meets threshold with zero corrections"
+                       if band == "act_now" else "Below confirmation threshold or has prior corrections"),
+        }
+
     def status(self):
         self.memory.reload()
         rows = []
@@ -274,7 +417,7 @@ class Steps:
         """Compile a learned typed choice into source reads and a small DAG."""
         if not isinstance(plan, dict) or set(plan) != {"operator", "inputs"}:
             raise ValueError("Calculation plan contract")
-        if not isinstance(plan["operator"], str) or plan["operator"] not in {"integer.product", "integer.sum", "quantity.product", "quantity.sum"}:
+        if not isinstance(plan["operator"], str) or plan["operator"] not in {"integer.product", "integer.sum", "quantity.field", "quantity.product", "quantity.sum"}:
             raise ValueError("Calculation operator")
         items = plan["inputs"]
         if not isinstance(items, list) or not 1 <= len(items) <= 8:
@@ -308,4 +451,37 @@ class Steps:
         step, result = perform(plan["operator"], {"steps": fields})
         observations.append(result)
         return {"plan": deepcopy(plan), "observations": observations,
-                "step_id": step["id"], "result": result["result"]}
+                "step": step, "step_id": step["id"], "result": result["result"]}
+
+
+def pack_rank_plane(ranks):
+    """Encode 9-symbol master rank buckets (1..8, and 9 for >8) as 2 trits per position in pack5 bytes."""
+    ranks = list(ranks)
+    if len(ranks) > 32768 or any(type(r) is not int or r < 1 for r in ranks):
+        raise ValueError("Rank plane requires integer ranks >= 1 (where >=9 is bucketed to 9)")
+    trits = []
+    for r in ranks:
+        code = min(r, 9) - 1
+        trits.append(code % 3)
+        trits.append(code // 3)
+    return bytes(
+        sum(t * (3 ** j) for j, t in enumerate(trits[i:i + 5]))
+        for i in range(0, len(trits), 5)
+    )
+
+
+def unpack_rank_plane(data, count):
+    """Decode pack5 two-trit rank plane bytes back into 9-symbol ranks in 1..9."""
+    trit_count = 2 * count if type(count) is int else -1
+    if (not isinstance(data, bytes) or type(count) is not int or not 0 <= count <= 32768
+            or len(data) != (trit_count + 4) // 5):
+        raise ValueError("Packed rank plane extent")
+    trits = []
+    for i, byte in enumerate(data):
+        width = min(5, trit_count - 5 * i)
+        if byte >= 3 ** width:
+            raise ValueError("Packed rank plane contains an unused code or noncanonical tail")
+        for _ in range(width):
+            trits.append(byte % 3)
+            byte //= 3
+    return [1 + trits[2 * k] + 3 * trits[2 * k + 1] for k in range(count)]

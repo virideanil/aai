@@ -46,6 +46,8 @@ class Scratchboard:
             return [spec["node"]]
         if spec["kind"] == "slots":
             return list(spec["bindings"].values())
+        if spec["kind"] == "generator" and spec.get("operator") == "slot_sequence":
+            return list(spec["arguments"]["items"])
         if spec["kind"] == "judgment" and spec["prediction"] is not None:
             return [spec["prediction"]]
         if spec["kind"] == "import":
@@ -89,6 +91,111 @@ class Scratchboard:
         if self._bases(node["snapshot"], node=node) - {snapshot["core_identity"]}:
             raise StaleState("Scratchboard numerical dependency has an incompatible model basis")
 
+    def _generator_components(self, snapshot, spec, *, cache=None):
+        if spec["renderer"] != self.implementation:
+            raise StaleState("Generator renderer changed")
+        op, args = spec["operator"], spec["arguments"]
+        if not isinstance(args, dict):
+            raise ValueError("Generator arguments must be an object")
+        if op == "source_lines":
+            if (set(args) != {"source", "start_line", "stop_line", "numbered"}
+                    or args["source"] not in snapshot["sources"]
+                    or type(args["start_line"]) is not int or type(args["stop_line"]) is not int
+                    or type(args["numbered"]) is not bool):
+                raise ValueError("Generator source_lines contract")
+            raw_text = self.memory.state["sources"][args["source"]]["text"]
+            lines = raw_text.splitlines()
+            start_line, stop_line = args["start_line"], args["stop_line"]
+            if not lines or not 1 <= start_line <= stop_line <= len(lines):
+                raise ValueError("Generator source_lines range extent")
+            rendered = ("\n".join(
+                f"{line_no}: {lines[line_no - 1]}" if args["numbered"] else lines[line_no - 1]
+                for line_no in range(start_line, stop_line + 1)
+            ) + "\n").encode("utf-8")
+            return {}, stop_line - start_line + 1, rendered
+        if op == "relation_table":
+            import json
+            from .relations import evaluate, expression_variables, query_tensor_enclosure, validate_model
+            allowed_keys = {"step_id", "open_step_ids", "questions"}
+            if (not set(args) <= allowed_keys or "step_id" not in args or not isinstance(args["step_id"], str)
+                    or not isinstance(args.get("open_step_ids", []), list) or len(args.get("open_step_ids", [])) > 16
+                    or len(set(args.get("open_step_ids", []))) != len(args.get("open_step_ids", []))
+                    or not isinstance(args.get("questions", []), list) or len(args.get("questions", [])) > 16):
+                raise ValueError("Generator relation_table contract")
+            step_id = args["step_id"]
+            step = self.memory.state["steps"].get(step_id)
+            obs = self.memory.state["step_observations"].get(step_id)
+            review = self.memory.state["step_reviews"].get(step_id)
+            if not step or not obs or not review or review["decision"] != "confirmed":
+                raise StaleState("Generator relation_table requires a confirmed observed step")
+            if any(step["snapshot"][k] != snapshot[k] for k in ("task_id", "task_revision", "identity")):
+                raise StaleState("Generator relation_table belongs to another task")
+            if self._bases(step["snapshot"]) - {snapshot["core_identity"]}:
+                raise StaleState("Generator relation_table has an incompatible model basis")
+            bound = {step_id: obs["digest"]}
+            if step["operator"] == "relation.query":
+                state_id = step["arguments"]["step"]
+                state_obs = self.memory.state["step_observations"].get(state_id)
+                if not state_obs:
+                    raise StaleState("Generator relation_table parent state is unobserved")
+                bound[state_id] = state_obs["digest"]
+                model = validate_model(deepcopy(state_obs["result"].get("value")))
+            else:
+                model = validate_model(deepcopy(obs["result"].get("value")))
+            sources = sorted(set(obs["result"].get("sources", [])))
+            assignments = [dict(zip(model["variables"], row)) for row in model["worlds"]]
+            header = "| Variable | Verdict | Support2 | Possible |\n|---|---|---|---|\n"
+            rows = []
+            code_map = {(): "00", (1,): "01", (0,): "10", (0, 1): "11"}
+            for var in model["variables"]:
+                poss = sorted({row[var] for row in assignments})
+                verdict = {(0,): "no", (1,): "yes", (0, 1): "maybe", (): "conflict"}[tuple(poss)]
+                bits = code_map[tuple(poss)]
+                rows.append(f"| `{var}` | {verdict} | `{bits}` | `{poss}` |")
+            open_lines = []
+            for oid in args.get("open_step_ids", []):
+                ostep = self.memory.state["steps"].get(oid)
+                oobs = self.memory.state["step_observations"].get(oid)
+                if not ostep or not oobs or ostep["operator"] != "relation.query":
+                    raise ValueError("Generator relation_table open_step_ids must name observed relation.query steps")
+                if any(ostep["snapshot"][k] != snapshot[k] for k in ("task_id", "task_revision", "identity")):
+                    raise StaleState("Generator relation_table open question belongs to another task")
+                bound[oid] = oobs["digest"]
+                ans = oobs["result"].get("value", {})
+                open_lines.append(f"- `{json.dumps(ans.get('question'), sort_keys=True)}`: state={ans.get('state')} verdict={ans.get('verdict')}")
+            for q_expr in args.get("questions", []):
+                if expression_variables(q_expr) - set(model["variables"]):
+                    raise ValueError("Generator relation_table question references an unavailable variable")
+                enc = query_tensor_enclosure(model, q_expr)
+                poss = sorted({evaluate(q_expr, row) for row in assignments})
+                open_lines.append(f"- `{json.dumps(q_expr, sort_keys=True)}`: verdict={enc['exact_verdict']} box={enc['box_verdict']} possible={poss}")
+            cite = " ".join(f"[{s}]" for s in sources)
+            text = header + "\n".join(rows)
+            if open_lines:
+                text += "\n\n### Open Questions\n" + "\n".join(open_lines)
+            if cite:
+                text += f"\n\nSources: {cite}\n"
+            units = max(1, len(model["variables"]) + len(model["worlds"]) + len(open_lines))
+            return bound, units, text.encode("utf-8")
+        if op == "slot_sequence":
+            allowed_keys = {"template", "items", "start_index"}
+            start_index = args.get("start_index", 0)
+            if (not set(args) <= allowed_keys or "template" not in args or "items" not in args
+                    or not isinstance(args["template"], str) or type(start_index) is not int
+                    or not 1 <= len(args["template"].encode()) <= 2048 or "{item}" not in args["template"]
+                    or not isinstance(args["items"], list) or not 1 <= len(args["items"]) <= 128
+                    or any(not isinstance(x, str) for x in args["items"])):
+                raise ValueError("Generator slot_sequence contract")
+            if cache is None:
+                return {}, len(args["items"]), None
+            lines = []
+            for idx, item_id in enumerate(args["items"], start=start_index):
+                item_text = self._render(item_id, cache).decode("utf-8")
+                lines.append(args["template"].replace("{index}", str(idx)).replace("{item}", item_text))
+            sep = "" if args["template"].endswith("\n") else "\n"
+            return {}, len(args["items"]), sep.join(lines).encode("utf-8")
+        raise ValueError("Generator operator is outside the deterministic contract")
+
     def _spec(self, snapshot, spec):
         if not isinstance(spec, dict):
             raise ValueError("Scratchboard specification must be an object")
@@ -96,6 +203,7 @@ class Scratchboard:
         fields = {"literal": {"kind", "text"}, "source": {"kind", "source", "start", "stop"},
                   "quantity": {"kind", "step_id", "language", "renderer"},
                   "relation": {"kind", "step_id", "open_step_ids", "language", "renderer"},
+                  "generator": {"kind", "operator", "arguments", "renderer"},
                   "artifact": {"kind", "operation_id"}, "concat": {"kind", "nodes"},
                   "repeat": {"kind", "node", "count"}, "slots": {"kind", "count", "constraints", "bindings"},
                   "tensor": {"kind", "blob", "dtype", "shape", "basis"},
@@ -135,6 +243,10 @@ class Scratchboard:
             if self._bases(parent) - {snapshot["core_identity"]}:
                 raise StaleState("Relation numerical dependency has an incompatible model basis")
             snapshot.setdefault("observations", {}).update(parent["observations"])
+        elif kind == "generator":
+            bound_obs, _, _ = self._generator_components(snapshot, spec)
+            if bound_obs:
+                snapshot.setdefault("observations", {}).update(bound_obs)
         elif kind == "artifact":
             receipt = self.memory.state["receipts"][spec["operation_id"]]
             self.memory._verify_receipt(receipt)
@@ -222,6 +334,20 @@ class Scratchboard:
                                           "open_step_ids": open_ids, "language": language,
                                           "renderer": file_digest(documents.__file__)})
 
+    def generator(self, snapshot, operator, arguments):
+        """Record a deterministic multi-unit expander without a model invocation."""
+        args = deepcopy(arguments)
+        if operator == "source_lines" and isinstance(args, dict) and "numbered" not in args:
+            args["numbered"] = False
+        if operator == "relation_table" and isinstance(args, dict) and "open_step_ids" not in args:
+            args["open_step_ids"] = []
+        with self.memory.locked():
+            node = self._record(snapshot, {"kind": "generator", "operator": operator,
+                                           "arguments": args, "renderer": self.implementation},
+                                origin={"operation": "generator", "operator": operator})
+            _, units, _ = self._generator_components(node["snapshot"], node["spec"])
+            return {**node, "metrics": {"logical_units": units, "model_calls": 0}}
+
     def reserve(self, snapshot, count, *, constraints):
         return self.add(snapshot, {"kind": "slots", "count": count, "constraints": constraints, "bindings": {}})
 
@@ -235,6 +361,34 @@ class Scratchboard:
                 raise ValueError("A binding is immutable; create a separate candidate range")
             spec["bindings"][str(index)] = target_id
             return self._record(node["snapshot"], spec, origin={"operation": "bind", "parent": node_id, "index": index})
+
+    def bind_many(self, node_id, bindings):
+        """Bind multiple slot indices atomically in a single symbolic decision."""
+        if isinstance(bindings, dict):
+            pairs = list(bindings.items())
+        elif isinstance(bindings, (list, tuple)):
+            pairs = list(bindings)
+        else:
+            raise ValueError("Bulk bindings must be a mapping or sequence of (index, target_id)")
+        if not 1 <= len(pairs) <= MAX_BINDINGS:
+            raise ValueError("Bulk binding extent")
+        with self.memory.locked():
+            node = self._validate(node_id)
+            spec = deepcopy(node["spec"])
+            if spec["kind"] != "slots":
+                raise ValueError("Bulk binding needs a slots node")
+            indices = []
+            for raw_idx, target_id in pairs:
+                idx = int(raw_idx) if isinstance(raw_idx, str) and raw_idx.isascii() and raw_idx.isdecimal() else raw_idx
+                if type(idx) is not int or not 0 <= idx < spec["count"]:
+                    raise ValueError("Binding needs an existing slot index")
+                key = str(idx)
+                if key in spec["bindings"]:
+                    raise ValueError("A binding is immutable; create a separate candidate range")
+                spec["bindings"][key] = target_id
+                indices.append(idx)
+            return self._record(node["snapshot"], spec,
+                                origin={"operation": "bind_many", "parent": node_id, "indices": indices})
 
     def branch(self, node_id, *, reason):
         """Keep an independent candidate with the same current representation."""
@@ -565,6 +719,8 @@ class Scratchboard:
             if not review or review["decision"] != "confirmed":
                 raise StaleState("Relation review is unavailable")
             documents._relation_components(self.memory, spec["step_id"], spec["open_step_ids"], spec["language"])
+        elif spec["kind"] == "generator":
+            self._generator_components(node["snapshot"], spec)
         elif spec["kind"] == "tensor":
             self._tensor_bytes(spec, node["snapshot"]["core_identity"])
         elif spec["kind"] == "judgment":
@@ -598,6 +754,14 @@ class Scratchboard:
         elif kind == "relation":
             from .documents import _relation_components
             size = len(_relation_components(self.memory, spec["step_id"], spec["open_step_ids"], spec["language"])[1].encode())
+        elif kind == "generator":
+            if spec["operator"] == "slot_sequence":
+                if not unresolved and all(c["text_bytes"] is not None for c in children):
+                    _, units, raw = self._generator_components(node["snapshot"], spec, cache={})
+                    size = len(raw)
+            else:
+                _, units, raw = self._generator_components(node["snapshot"], spec)
+                size = len(raw)
         elif kind == "artifact":
             op = self.memory.state["operations"][spec["operation_id"]]
             size = len(self.memory.state["proposals"][op["proposal_id"]]["output"]["content"].encode())
@@ -650,7 +814,8 @@ class Scratchboard:
     def _render(self, node_id, cache):
         if node_id in cache:
             return cache[node_id]
-        spec = self.memory.state["scratchboard"][node_id]["spec"]; kind = spec["kind"]
+        node = self.memory.state["scratchboard"][node_id]
+        spec = node["spec"]; kind = spec["kind"]
         if kind == "literal": raw = spec["text"].encode()
         elif kind == "source": raw = self.memory.state["sources"][spec["source"]]["text"].encode()[spec["start"]:spec["stop"]]
         elif kind == "quantity":
@@ -659,6 +824,8 @@ class Scratchboard:
         elif kind == "relation":
             from .documents import _relation_components
             raw = _relation_components(self.memory, spec["step_id"], spec["open_step_ids"], spec["language"])[1].encode()
+        elif kind == "generator":
+            _, _, raw = self._generator_components(node["snapshot"], spec, cache=cache)
         elif kind == "artifact":
             receipt = self.memory.state["receipts"][spec["operation_id"]]
             raw = self.memory._artifact_path(receipt["path"]).read_bytes()
@@ -668,7 +835,7 @@ class Scratchboard:
         elif kind == "repeat": raw = self._render(spec["node"], cache) * spec["count"]
         elif kind == "slots": raw = b"".join(self._render(spec["bindings"][str(i)], cache) for i in range(spec["count"]))
         else: raise ValueError("Typed numerical or judgment data needs an explicit text-realization decision")
-        if kind in {"literal", "source", "quantity", "relation", "artifact"}:
+        if kind in {"literal", "source", "quantity", "relation", "generator", "artifact"}:
             cache[node_id] = raw
         return raw
 

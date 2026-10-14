@@ -126,6 +126,12 @@ def main():
     board_archive.add_argument("node_ids", nargs="+")
     board_archive.add_argument("--recipe", default="scratchboard-tensor-archive-v1")
     board_archive.add_argument("--parent")
+    board_gen = sub.add_parser("board-generator")
+    board_gen.add_argument("task_id")
+    board_gen.add_argument("operator", choices=("source_lines", "relation_table", "slot_sequence"))
+    board_gen.add_argument("arguments", type=Path)
+    board_gen.add_argument("--core-identity", default="symbolic-host-v1")
+    board_gen.add_argument("--source", action="append", default=[])
     board_document = sub.add_parser("board-document")
     board_document.add_argument("node_id")
     board_document.add_argument("--filename")
@@ -135,6 +141,9 @@ def main():
     dictionary.add_argument("--source", action="append", required=True)
     dictionary.add_argument("--vocabulary", type=Path)
     dictionary.add_argument("--board", action="append", default=[])
+    bundle = sub.add_parser("evidence-bundle")
+    bundle.add_argument("task_id")
+    bundle.add_argument("--source", action="append", required=True)
     catalogue = sub.add_parser("catalogue")
     catalogue.add_argument("task_id")
     catalogue.add_argument("--history", action="store_true")
@@ -167,6 +176,17 @@ def main():
     judgment.add_argument("--uncertainty", choices=MAYBE_CAUSES)
     assessment = sub.add_parser("assess-judgment")
     assessment.add_argument("node_id")
+    combine_j = sub.add_parser("combine-judgments")
+    combine_j.add_argument("node_ids", nargs="+")
+    combine_j.add_argument("--operator", choices=("kleene", "kleene_or", "support2", "consensus"), default="kleene")
+    combine_j.add_argument("--question")
+    combine_j.add_argument("--reason")
+    agenda = sub.add_parser("open-agenda")
+    agenda.add_argument("task_id")
+    risk_cov = sub.add_parser("risk-coverage")
+    risk_cov.add_argument("task_id")
+    step_cal = sub.add_parser("step-calibration")
+    step_cal.add_argument("--task-id")
     experience = sub.add_parser("experiences")
     experience.add_argument("task_id")
     sub.add_parser("learners")
@@ -258,6 +278,9 @@ def main():
     elif args.command == "steps":
         from .steps import Steps
         output = Steps(memory).status()
+    elif args.command == "step-calibration":
+        from .steps import Steps
+        output = Steps(memory).calibration(args.task_id)
     elif args.command == "step":
         from .agent import context
         from .steps import Steps, strict_json
@@ -307,7 +330,12 @@ def main():
         basis = memory.state["scratchboard"][args.board[0]]["snapshot"]["core_identity"] if args.board else "dictionary-inspection"
         snapshot = context(memory, args.task_id, basis, selected_ids=args.source, scratchboard_ids=args.board)["snapshot"]
         output = Harmonizer(memory, vocabulary=vocabulary).view(snapshot)
-    elif args.command in {"judge", "assess-judgment", "experiences", "carry-judgments"}:
+    elif args.command == "evidence-bundle":
+        from .harmonizer import Harmonizer
+        from .agent import context
+        snapshot = context(memory, args.task_id, "evidence-bundle-inspection", selected_ids=args.source)["snapshot"]
+        output = Harmonizer(memory).evidence_bundle(snapshot)
+    elif args.command in {"judge", "assess-judgment", "combine-judgments", "open-agenda", "risk-coverage", "experiences", "carry-judgments"}:
         from .agent import context
         from .judgments import Judgments
         from .steps import strict_json
@@ -327,10 +355,18 @@ def main():
                                                            predicate=predicate, uncertainty=args.uncertainty)}
         elif args.command == "assess-judgment":
             output = {"assessment": judgments.assess(args.node_id)}
+        elif args.command == "combine-judgments":
+            output = judgments.combine(args.node_ids, operator=args.operator, question=args.question, reason=args.reason)
+        elif args.command == "open-agenda":
+            output = judgments.open_agenda(args.task_id)
+        elif args.command == "risk-coverage":
+            output = judgments.risk_coverage(args.task_id)
         elif args.command == "experiences":
             from .harmonizer import Harmonizer
             output = {**Harmonizer(memory).learning_view(args.task_id),
-                      "experiences": judgments.experiences(args.task_id)}
+                      "experiences": judgments.experiences(args.task_id),
+                      "risk_coverage": judgments.risk_coverage(args.task_id),
+                      "open_agenda": judgments.open_agenda(args.task_id)}
         else:
             output = judgments.carry(args.node_ids)
             output["packed_hex"] = output.pop("packed").hex()
@@ -343,6 +379,10 @@ def main():
             snapshot = context(memory, args.task_id, args.core_identity, selected_ids=args.source)["snapshot"]
             node = (board.add(snapshot, strict_json(args.spec.read_text())) if args.command == "board-add"
                     else board.reserve(snapshot, args.count, constraints=args.constraints))
+            output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command == "board-generator":
+            snapshot = context(memory, args.task_id, args.core_identity, selected_ids=args.source)["snapshot"]
+            node = board.generator(snapshot, args.operator, strict_json(args.arguments.read_text()))
             output = {"node": node, "view": board.describe(node["id"])}
         elif args.command == "board-show":
             output = board.slot(args.node_id, args.slot) if args.slot is not None else board.describe(args.node_id)

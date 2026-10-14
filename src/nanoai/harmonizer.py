@@ -193,6 +193,8 @@ class Harmonizer:
                 ("refine", "Check exact text-byte equivalence before adopting a new composition"),
                 ("reshape_tensor", "Keep tensor bytes, element order, dtype and model basis"),
                 ("bind", "Bind an unresolved address in a new sparse candidate range"),
+                ("bind_many", "Bind multiple unresolved addresses atomically in a sparse candidate range"),
+                ("generator", "Expand a source-bound range or relational table deterministically without model calls"),
                 ("import", "Reuse an explicit current origin with its dependencies and a separate relevance judgment"),
                 ("materialize", "Expand resolved compatible content within the declared byte budget")):
                 entries.append({"kind":"graph_rule", "id":"scratchboard."+operation, "contract":invariant,
@@ -216,6 +218,104 @@ class Harmonizer:
         if canonical(packet) != canonical(expected):
             raise StaleState("Dictionary content, review, vocabulary or implementation changed")
         return expected
+
+    def evidence_bundle(self, snapshot):
+        """Progressive evidence view surfacing sources, supersession, conflicts, open resolvers and drilldowns."""
+        from .judgments import Judgments
+        from .steps import Steps
+        memory = self.memory
+        task_id = snapshot["task_id"]
+        agenda = Judgments(memory).open_agenda(task_id)
+        calibration = Steps(memory).calibration(task_id)["operators"]
+        completed_state = memory.completed(task_id)
+        with memory.locked():
+            memory._validate_snapshot(snapshot)
+            task = deepcopy(memory.state["tasks"][task_id])
+            sources = [deepcopy(memory.state["sources"][name]) for name in snapshot["sources"]]
+            quantities = quantity_catalogue(sources)
+            source_summaries = []
+            superseded_revisions = []
+            for src in sources:
+                raw_bytes = src["text"].encode("utf-8")
+                lines = src["text"].splitlines()
+                line_count = max(1, len(lines))
+                history = memory.state["source_history"].get(src["id"], [])
+                prior_revs = [
+                    {"id": h["id"], "revision": h["revision"], "digest": h["digest"], "note": h["note"]}
+                    for h in history if h["revision"] < src["revision"]
+                ]
+                superseded_revisions.extend(prior_revs)
+                preview = src["text"][:256]
+                source_summaries.append({
+                    "id": src["id"],
+                    "source_id": src["id"],
+                    "revision": src["revision"],
+                    "reference": f"{src['id']}@{src['revision']}",
+                    "digest": src["digest"],
+                    "role": src["role"],
+                    "supersedes": src["supersedes"],
+                    "prior_revisions": len(prior_revs),
+                    "prior_revisions_count": len(prior_revs),
+                    "byte_length": len(raw_bytes),
+                    "line_count": line_count,
+                    "preview": preview,
+                    "preview_complete": len(src["text"]) <= 256,
+                    "drilldown": {
+                        "kind": "generator",
+                        "operator": "source_lines",
+                        "arguments": {"source": src["id"], "start_line": 1, "stop_line": line_count, "numbered": True},
+                    },
+                })
+            confirmed_ops = []
+            rejected_ops = []
+            for sid, step in memory.state["steps"].items():
+                if step["snapshot"]["task_id"] != task_id:
+                    continue
+                obs = memory.state["step_observations"].get(sid)
+                rev = memory.state["step_reviews"].get(sid)
+                if rev and rev["decision"] == "confirmed" and obs:
+                    confirmed_ops.append({
+                        "step_id": sid,
+                        "operator": step["operator"],
+                        "sources": deepcopy(obs["result"].get("sources", [])),
+                        "scope": obs["result"].get("scope"),
+                        "reviewer": rev["reviewer"],
+                    })
+                elif rev and rev["decision"] == "rejected":
+                    rejected_ops.append({
+                        "step_id": sid,
+                        "operator": step["operator"],
+                        "reason": rev["reason"],
+                        "replacement": rev.get("replacement"),
+                    })
+            corrections = [
+                deepcopy(c) for c in memory.state["corrections"].values()
+                if c["task_id"] == task_id
+            ]
+            bundle = {
+                "schema": "nanoai.evidence-bundle.v1",
+                "task": task,
+                "snapshot": deepcopy(snapshot),
+                "sources": source_summaries,
+                "superseded_revisions": superseded_revisions,
+                "quantities": Harmonizer.quantity_menu({"quantity_catalogue": quantities}),
+                "confirmed_operations": confirmed_ops,
+                "rejected_operations": rejected_ops,
+                "corrections": corrections,
+                "open_agenda": agenda["items"],
+                "open_agenda_summary": agenda,
+                "obligations": {
+                    "completed": sorted(completed_state["artifacts"].keys()),
+                    "remaining": completed_state["remaining"],
+                },
+                "operator_calibration": calibration,
+                "drilldowns": {
+                    "available_generators": ["source_lines", "relation_table", "slot_sequence"],
+                },
+                "model_calls": 0,
+            }
+            bundle["identity"] = digest_bytes(canonical(bundle))
+            return bundle
 
     def learning_view(self, task_id):
         """Inspect attributed outcomes without adding evaluator targets to prompts.

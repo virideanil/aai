@@ -119,6 +119,28 @@ class HarmonizerTests(unittest.TestCase):
         self.assertNotIn("Selected lessons", core.messages[0]["content"])
         self.assertNotIn("fiction", core.messages[0]["content"].casefold())
 
+    def test_progressive_evidence_bundle_includes_supersedes_corrections_and_open_agenda(self):
+        from nanoai.judgments import Judgments
+        self.memory.put_source("survey", '{"length":{"value":20,"unit":"cm"},"count":{"value":3,"unit":"count"}}', expected_revision=1)
+        snap = context(self.memory, "report", "test-core", selected_ids=["survey", "opinion"])["snapshot"]
+        steps = Steps(self.memory)
+        calc = steps.calculate_fields(snap, {"operator": "quantity.product", "inputs": [
+            {"source": "survey", "path": ["length"]}, {"source": "survey", "path": ["count"]}]})
+        steps.review(calc["step_id"], "confirmed", reviewer="test-reviewer", reason="Confirmed product")
+        bad = steps.propose(snap, "source.read", {"source": "opinion"})
+        steps.issue_correction(bad["id"], reviewer="master-audit", reason="Opinion is non-numeric", conduct_virtue="epistemic_humility")
+        Judgments(self.memory).predict(snap, "Is the survey complete?", "maybe", "Needs external verification")
+        bound = self.memory.attach_observations(snap, [calc["step_id"]])
+        bundle = Harmonizer(self.memory).evidence_bundle(bound)
+        self.assertEqual(bundle["schema"], "nanoai.evidence-bundle.v1")
+        survey_row = next(s for s in bundle["sources"] if s["source_id"] == "survey")
+        self.assertEqual(survey_row["prior_revisions"], 1)
+        self.assertEqual(len(bundle["confirmed_operations"]), 1)
+        self.assertEqual(len(bundle["corrections"]), 1)
+        self.assertEqual(len(bundle["open_agenda"]), 1)
+        self.assertIn("source_lines", bundle["drilldowns"]["available_generators"])
+
 
 if __name__ == "__main__":
     unittest.main()
+

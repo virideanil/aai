@@ -105,6 +105,7 @@ class Memory:
         self.state = {"identity": None, "sources": {}, "source_history": {}, "tasks": {},
                       "proposals": {}, "rejections": [], "operations": {}, "receipts": {}, "source_epoch": 0,
                       "steps": {}, "step_observations": {}, "step_reviews": {}, "step_cache": {},
+                      "corrections": {},
                       "scratchboard": {}, "scratchboard_revisions": {},
                       "experiences": {}, "experience_proposals": {}, "experience_assessments": {},
                       "learners": {}, "active_learner": None,
@@ -149,6 +150,11 @@ class Memory:
             self.state["step_cache"][observation["cache_key"]] = observation["step_id"]
         elif kind == "step.reviewed":
             self.state["step_reviews"][e["review"]["step_id"]] = e["review"]
+        elif kind == "correction.issued":
+            correction = e["correction"]
+            if correction["id"] in self.state["corrections"]:
+                raise ValueError("Correction records are immutable")
+            self.state["corrections"][correction["id"]] = correction
         elif kind == "scratchboard.recorded":
             node = e["node"]
             if node["id"] in self.state["scratchboard"]:
