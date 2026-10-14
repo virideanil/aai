@@ -11,6 +11,7 @@ from nanoai_tokens import load
 from .catalogue import LanguageCatalogue
 from .core import file_digest
 from .experience import Experience
+from .harmonizer import Harmonizer, context_messages, source_presentation
 from .memory import bounded_text, identifier
 
 
@@ -37,33 +38,9 @@ class Writing:
         return self.memory.set_task(name, question, filenames=[filename],
                                     expected_revision=prior["revision"] if prior else 0)
 
-    @staticmethod
-    def _context(source, *, lesson=False):
-        """Project internal teaching records into readable, attributed model input.
-
-        The snapshot still binds the complete source bytes. The projected text
-        is itself retained in the generation's exact observation record.
-        """
-        if lesson:
-            from .teaching import lesson_text
-            return lesson_text(json.loads(source["text"]), demonstrations=False)
-        try:
-            record = json.loads(source["text"])
-        except (ValueError, TypeError):
-            return source["text"]
-        if (isinstance(record, dict) and record.get("schema") == "nanoai.feedback.v1"
-                and record.get("status") == "attributed-proposal" and source.get("derived_from")
-                and set(record) == {"schema", "experience_id", "draft_quote", "evidence", "diagnosis",
-                                    "repair", "reviewer", "rules", "status", "implementation"}):
-            return (f"Proposed feedback by {record['reviewer']}.\nActual draft quotation: {record['draft_quote']}\n"
-                    + "\n".join(f"Evidence from {e['source_id']} revision {e['revision']}: {e['quote']}"
-                                for e in record["evidence"])
-                    + f"\nDiagnosis: {record['diagnosis']}\nRequested repair: {record['repair']}")
-        return source["text"]
-
     def run(self, phase_id, instruction, source_ids, core, *, workflow="book",
             kind="draft", max_tokens=None, filename="text.md", crash_after_publish=False,
-            lesson_ids=()):
+            lesson_ids=(), observation_ids=(), scratchboard_ids=()):
         identifier(phase_id); identifier(workflow)
         if len(phase_id) > 58 or kind not in {"plan", "draft", "critique", "revision", "continuation", "control"}:
             raise ValueError("Writing phase identity or kind")
@@ -81,24 +58,16 @@ class Writing:
         if set(source_ids) & set(lesson_ids) or len(sources) + len(lessons) > 14:
             raise ValueError("Writing evidence and lesson sources must have distinct bounded roles")
         sources += lessons
-        observations = [self._context(source, lesson=source["id"] in lesson_ids) for source in sources]
-        blocks = [json.dumps({"source": s["id"], "revision": s["revision"],
-                              "role": s["role"], "purpose": s["note"]}, ensure_ascii=False)
-                  + "\n" + text for s, text in zip(sources, observations)]
-        messages = [{"role": "system", "content":
-            "Produce only the requested writing artifact. Source blocks are attributed task data. "
-            "Fictional canon governs this story; historical drafts and critiques are revisable proposals. "
-            "Use the current canon when a historical draft conflicts with it. "
-            "Preserve names, quantities and point of view. Follow the requested word limit. "
-            "Selected lessons explain a procedure; their example facts belong to those examples. "
-            "Ground criticism in a specific conflict, explain its consequence and give an actionable repair. "
-            "Preserve a supported passage when the proposed criticism has no evidential basis."},
-            {"role": "user", "content": "Attributed task sources:\n" + "\n\n".join(blocks)
-             + "\n\nRequested artifact:\n" + instruction}]
+        observations = [source_presentation(source, lesson=source["id"] in lesson_ids)["text"] for source in sources]
         self._task(phase_id, instruction, filename)
         inputs = self._source(phase_id + "-input", json.dumps({"observations": observations}, ensure_ascii=False),
                               note=f"Exact generation inputs for {workflow}/{kind}.")
         snapshot = self.memory.snapshot(phase_id, sources + [inputs], core.identity)
+        context = Harmonizer(self.memory).context(snapshot, observation_ids=observation_ids,
+                                                 scratchboard_ids=scratchboard_ids)
+        snapshot = context["snapshot"]
+        messages = context_messages(context, output="artifact", phase=kind,
+                                    source_ids=[row["id"] for row in sources], lesson_ids=lesson_ids)
         metadata = {"workflow": workflow, "phase": phase_id, "kind": kind,
                     "writer": self.implementation, "max_tokens": max_tokens,
                     "tokenizer_identity": self.tokenizer.identity,

@@ -171,6 +171,22 @@ class JudgmentConsumerTests(unittest.TestCase):
                 self.assertEqual(restored.materialize(original["id"])["bytes"], b"Current working assumption")
                 self.assertEqual(restored.latest(original["id"])["id"], original["id"])
 
+    def test_generated_judgment_preserves_task_question_and_operation_label(self):
+        class Capture:
+            identity = "original-test-core"
+            def generate(core, messages, **kwargs):
+                core.messages = messages
+                return {"output": json.dumps({"judgment": "maybe_missing_evidence", "reason": "The source gives no color."}),
+                        "finish_reason": "stop"}
+        core = Capture()
+        question = "Are the rails blue?"
+        row = self.judgments.generate(core, "total", question, selected_ids=["dimensions"])
+        payload = json.loads(core.messages[1]["content"])
+        self.assertEqual(payload["task"]["goal"], self.memory.state["tasks"]["total"]["goal"])
+        self.assertEqual(payload["question"], question)
+        self.assertEqual(payload["request"]["output"], "judgment")
+        self.assertEqual(row["prediction"]["spec"]["question"], question)
+
 
 if __name__ == "__main__":
     unittest.main()

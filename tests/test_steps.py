@@ -3,7 +3,7 @@ from pathlib import Path
 import tempfile
 import unittest
 
-from nanoai.agent import DEFAULT_IDENTITY, context
+from nanoai.agent import DEFAULT_IDENTITY, calculate, context
 from nanoai.memory import Memory, StaleState
 from nanoai.steps import Steps
 from nanoai.documents import quantity_note
@@ -125,6 +125,25 @@ class StepConsumerTests(unittest.TestCase):
             self.memory.put_source("spec", json.dumps({"size": value}), expected_revision=revision)
             with self.assertRaisesRegex(ValueError, "quantity field"):
                 self.steps.calculate_fields(self.snapshot(), plan)
+
+    def test_calculation_ports_keep_the_actual_task_in_the_model_input(self):
+        class Capture:
+            identity = "test-core"
+            def generate(core, messages, **kwargs):
+                core.messages = messages
+                payload = json.loads(messages[1]["content"])
+                output = ({"operator": "multiply", "fields": [row["ref"] for row in payload["quantities"]]}
+                          if "quantities" in payload else self.plan)
+                return {"output": json.dumps(output), "finish_reason": "stop"}
+        for domain in ("integer", "quantity"):
+            with self.subTest(domain=domain):
+                if domain == "quantity":
+                    self.memory.put_source("spec", '{"rail":{"length":{"value":23,"unit":"cm"},"count":{"value":2,"unit":"count"}}}', expected_revision=1)
+                core = Capture()
+                result = calculate(self.memory, core, "display", selected_ids=["spec"], domain=domain)
+                self.assertEqual(result["result"]["value"], 46)
+                self.assertEqual(json.loads(core.messages[1]["content"])["task"]["goal"], self.memory.state["tasks"]["display"]["goal"])
+                self.assertNotIn('"output": "document"', core.messages[1]["content"])
 
 
 if __name__ == "__main__":

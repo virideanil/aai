@@ -122,10 +122,26 @@ The experience view keeps judgment-derived and action-derived records separate. 
 `write-phase` takes a UTF-8 instruction file, current source IDs and a native core
 configuration. It records the actual prompt, sampled IDs, policy, generated
 artifact and source dependencies. It also observes the generated text in the
-language catalogue. Repeating a completed phase reuses the observed effect.
+language catalogue. It reads continuing identity and explicitly selected working
+state through the same `Harmonizer.context` used by general authoring.
+Both use `context_messages` for the same versioned task envelope; authored
+teaching inputs use that presentation contract as well. Output requirements and
+rules for selected lessons, criticism and working state remain explicit.
+`--observation STEP_ID` selects an observed calculation, including its review;
+`--board NODE_ID` selects a current working unit. These selections must belong to
+the same writing task revision and use a compatible numerical basis. When
+preparing work before `write-phase`, initialize that task with the exact
+instruction and output filename used by the phase. Reuse across phases follows
+explicit `board-import` or the current generated-source contract.
+
+Repeating a completed phase with the same current inputs verifies and reuses the
+observed artifact before worker startup. A relevant source or working-unit
+correction requires fresh generation, and the prior artifact remains available.
 `assemble` joins selected current generated sources into an editable local
 manuscript. The [writing contract](agentic-writing.md) distinguishes execution,
 brief compliance, causal coherence, literary judgment and parameter learning.
+Numerical model state is currently rebuilt for a new phase. Exact artifact
+recovery and shared prompts do not establish continuous latent-state execution.
 
 `lesson-install` accepts an authored lesson with a principle, scope, reason,
 worked example, contrast and next check. `teaching-feedback` binds attributed
@@ -140,7 +156,10 @@ rubric passes. This process alone performs no parameter updates.
 guided, adapted and recovered native consumers under the same protocol.
 `tools/evaluate_teaching.py --stage train --collection PATH` trains from the checked
 collection plus authored demonstrations and replay, with validation used for
-selection. `tools/export_native_adapter.py` preserves the selected BF16 adapter
+selection. Collected corrections use the exact messages stored with the observed
+attempt. Their target must match the qualified curriculum, and they remain
+restricted to training/replay. The current recipe retains its declared token
+extent; larger contexts require a separately qualified training schedule. `tools/export_native_adapter.py` preserves the selected BF16 adapter
 coefficients in the qualified native layout. Tensor versions, parent links and
 learning events are queryable in the explicitly selected SQLite catalogue.
 Each script lists its required frozen inputs with `--help`; failed or incomplete

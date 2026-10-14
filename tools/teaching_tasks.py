@@ -3,6 +3,7 @@
 This rubric measures the declared short repair contract. It does not infer
 literary merit or certify arbitrary reasoning from a quoted source.
 """
+from copy import deepcopy
 import json
 from decimal import Decimal
 from pathlib import Path
@@ -47,10 +48,32 @@ def quantity_answer(text, expected, unit):
 
 
 def messages(row, *, guidance=None):
-    content = row["question"] + "\n" + "\n".join(row["observations"])
+    from nanoai.agent import DEFAULT_IDENTITY
+    from nanoai.harmonizer import context_messages
+    sources = [{"id": f"observation-{index + 1}", "role": "supplied-observation", "text": text}
+               for index, text in enumerate(row["observations"])]
     if guidance and row["kind"] == "review":
-        content = guidance + "\n\nNew task:\n" + content
-    return [{"role": "user", "content": content}]
+        # This is already rendered teaching text, with explicitly separate
+        # worked examples. It has no journal revision or acquired authority.
+        sources.append({"id": "teaching-guidance", "role": "supplied-procedure", "text": guidance})
+    prepared = {"identity": DEFAULT_IDENTITY, "task": {"goal": row["question"]},
+                "current_source_records": sources}
+    return context_messages(prepared, output="answer")
+
+
+def training_input(row, pair=None):
+    """Keep an observed correction attached to its actual decision prompt."""
+    if row["split"] not in {"train", "replay", "validation"}:
+        raise ValueError("Confirmation and control cases stay outside training inputs")
+    if pair is not None:
+        if row["split"] not in {"train", "replay"}:
+            raise ValueError("Observed corrections require a teaching or replay split")
+        if pair["target"] != row["target"]:
+            raise ValueError("Observed correction target differs from the qualified data")
+        prompt = deepcopy(pair["messages"])
+    else:
+        prompt = messages(row)
+    return {"messages": prompt, "target": row["target"], "reasoning": row["teaching_reason"]}
 
 
 def guidance(lessons, train):

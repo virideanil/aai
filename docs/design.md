@@ -1,6 +1,6 @@
 # Computation, memory and continuing agency
 
-Status: implementation contract, 13 October 2026. The parent research package retains the consolidated architecture in `NANOAI-ARCHITECTURE.md`; this repository carries its implementation contract. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
+Status: implementation contract, 14 October 2026. The parent research package retains the consolidated architecture in `NANOAI-ARCHITECTURE.md`; this repository carries its implementation contract. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
 
 ## Purpose
 
@@ -50,6 +50,21 @@ An output becomes a durable local artifact through a create-only prepared operat
 
 The selected learned destination is one jointly trained byte/patch core with recurrent workspace, nested BF16 capacity and action heads. Source-selection experiments and the existing core/retrieval consumer remain controls. Each trained selector or workspace must improve complete generated tasks through correction and distraction at matched cost. The exact dictionary is a source/rule view of the journal; it supplies context and observed outcomes without claiming semantic learning.
 
+`Harmonizer.context` is the shared serving projection for general authoring and
+writing. It binds continuing identity, current task/source versions, selected
+observed calculations and their reviews, and selected working units. Each unit
+keeps its complete, partial or unresolved status. `context_messages` supplies one
+versioned model-facing envelope for authoring, writing and authored teaching.
+Callers select sources, phase and output format. Lesson, criticism and working
+state rules follow the selected data; factual writing receives no fictional
+canon instructions. Exact source hashes remain in the journal. Cross-task reuse
+and tensor basis retain their explicit contracts.
+Writing compares the actual messages, dependency snapshot and producing versions
+with retained experience before requesting generation. Its public command starts
+the pinned worker only when a new call is needed. Reuse still verifies the actual
+artifact; a relevant correction or corrupt artifact cannot become a successful
+cached answer.
+
 ## Continuing identity and education
 
 The identity record holds the continuing name, lineage, commitments and development history. Learned dispositions and expressive habits require education and observed behavior. Preserve Gi, Yu, Jin, Rei, Makoto, Meiyo and Chugi, together with honesty, loyalty, wisdom through experience and care for wellbeing and agency.
@@ -74,7 +89,7 @@ The laptop evaluation and existing original-BF16 target retain separate model id
 
 The native client starts a dedicated process group and closes it on timeout, cancellation, protocol error or worker exit, including descendants whose parent exits first. Cleanup preserves the primary failure and records each failed operating-system operation. An unavailable process inventory is recorded as unknown; a later cleanup attempt can confirm shutdown while retaining the earlier diagnostic. The worker uses a private Unix socket. Runtime profiles explicitly control mapped/streamed source access, BF16 admission and optional exact cold-file restoration. Every resource guard observes its configured process group; RSS, physical footprint and host swap remain separately reported.
 
-The core's future learning record includes complete context, candidate/model identity, original outputs, task family, versioned sources, independent verdicts and actual effects. Data splits hold out source/task families; repeated turns stay together. Teacher agreement is a prediction metric. General language, creation and conduct require diverse replay and representative evaluation beyond the present quantity tasks.
+The core's future learning record includes complete context, candidate/model identity, original outputs, task family, versioned sources, independent verdicts and actual effects. Data splits hold out source/task families; repeated turns stay together. Checked collected examples use their actual recorded messages when forming training inputs; rebuilding those messages from an authored row would discard selected context. The corrected preparation preserves exact prompts and continues to exclude confirmation/control inputs. Teacher agreement is a prediction metric. General language, creation and conduct require diverse replay and representative evaluation beyond the present quantity tasks.
 
 `scratchboard.py` adds first-class immutable working units and explicit branch, revision, refinement, binding and tensor-view operations. These use the same journal as `Steps` and artifact recovery. `Harmonizer` projects their typed state into the dictionary, and selected units enter the actual model context with their identities bound into the resulting proposal. Complete small previews, partial prefixes and unresolved ranges remain distinguishable. Source correction and adopted node revision invalidate dependent calculations, model proposals and artifact obligations through that shared path.
 
@@ -107,6 +122,23 @@ Historical experiences and current-source training have distinct eligibility. A 
 `export_hybrid_state` and `restore_hybrid_state` carry all 18 recurrent matrices and convolution buffers plus six attention key/value pairs, native position and a source/model/runtime compatibility contract. The supported checkpoint boundary is before a known next input. Arbitrary interruption during an unfinished token decision requires additional pending-output state and is outside this port's contract.
 
 `tools/evaluate_recurrent_credit.py` connects a checked failed experience to a corrected generated answer, isolates the earlier native recurrent write as the only gradient path, performs an actual BF16 update, publishes source-bound text and reproduces later logits in a fresh process. The source snapshot is revalidated before state reuse. This is a causal-credit integration check; the selected full-loss probe slightly worsened and the candidate was retained as an experiment.
+
+The current writing command still rebuilds numerical context for each generation.
+The original model template removes earlier assistant reasoning when another
+user turn is added, so a complete earlier cache is not necessarily a prefix of
+the next phase's prompt. A continuing task-segment port must declare its
+serialization and check actual token-prefix compatibility. A source correction
+invalidates all checkpoints that consumed that revision, including an earlier
+planning state when applicable. Identical-prefix replay compares output parity
+and prefill cost; a different phase context needs a separate task-quality
+comparison. The existing short, thinking-off state experiment does not qualify
+the complete thinking-on writing workflow.
+
+A reasoning-free canonical history requires a cache computed from that history.
+Restoring an unaffected prefix and replaying the canonical suffix is one candidate
+method. Removing reasoning text from the journal view does not undo its effect on
+the served recurrent and attention state. Include canonical replay in the cost
+comparison and verify the rebuilt state against a fresh identical-prefix run.
 
 ## Frozen language and perception ports
 

@@ -176,7 +176,7 @@ def main():
                 dictionary = Harmonizer(memory).view(prepared["snapshot"])
                 unit = next(row for row in dictionary["entries"] if row["kind"] == "working_unit")
                 check("same_working_unit_reaches_dictionary_and_model_context",
-                      json.loads(prepared["messages"][1]["content"])["working_units"] == [unit]
+                      json.loads(prepared["messages"][1]["content"])["working_units"] == [{key: value for key, value in unit.items() if key != "digest"}]
                       and unit["preview_complete"] and panel["review_code"] in unit["preview"])
                 generated = run(memory, core, sid, selected_ids=[sid], scratchboard_ids=[composed["id"]], max_tokens=192)
                 generated_proposal = generated["proposal"]

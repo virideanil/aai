@@ -85,7 +85,8 @@ def main():
         result["carriers"] = {**carried,"packed_hex":carried["packed"].hex()};del result["carriers"]["packed"]
         prepared = context(memory,"assessment",core.identity,selected_ids=["measures"],scratchboard_ids=[n["id"] for n in assessments])
         units = [r for r in Harmonizer(memory).view(prepared["snapshot"])["entries"] if r["kind"]=="working_unit"]
-        check("same_typed_outcomes_reach_dictionary_and_context",json.loads(prepared["messages"][1]["content"])["working_units"]==units)
+        check("same_typed_outcomes_reach_dictionary_and_context",json.loads(prepared["messages"][1]["content"])["working_units"]==[
+            {key: value for key, value in unit.items() if key != "digest"} for unit in units])
         # A generated document exercises the consumer of the judgment records.
         receipt = None
         try:

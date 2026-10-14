@@ -21,6 +21,31 @@ text enters the source catalogue with its own role and byte barcodes. A source
 change invalidates affected derived work. A fresh process reconstructs current
 work from the same journal and reads completed artifacts before generating again.
 Recovery never repeats a confirmed publication merely to restore a status flag.
+The public writing command performs this check before starting a model worker.
+
+Authoring and writing share one selected working-context projection. Continuing
+identity, current observed calculations and explicitly selected scratchboard units
+enter the actual writing prompt with their scope, review and dependencies. Partial
+previews remain partial, and unresolved ranges supply no invented text. A selected
+revision or correction invalidates dependent output; an unrelated unit leaves it
+reusable. Frozen teaching comparisons keep their original prompts and require a
+new protocol before adopting changed inputs.
+
+Authoring, writing and authored teaching also use the same versioned input
+envelope. Phase-specific output requirements and selected lessons or criticism
+activate their relevant rules. Generated-experience checks read the envelope's
+task and source fields so literal quotes and newlines retain their exact meaning.
+Evaluator answers and task-split labels stay outside the model input.
+
+This shared record and input path does not yet carry numerical model state from
+one writing phase into the next. The current native worker rebuilds that state.
+The native model's ordinary chat template removes previous reasoning at a new
+user turn, which prevents blindly appending a phase to the old cache. A continuing
+state consumer needs a qualified task-segment format, compatible full-state
+checkpoints, source-correction replay and fresh-process verification.
+If a phase boundary adopts reasoning-free canonical history, its numerical state
+must be computed from that canonical sequence. Include the replay cost; the
+post-generation cache still reflects every reasoning token it processed.
 
 The bounded first trial uses an original story brief and prescribed plan, draft,
 critique, revision and continuation phases. A Turkish correction changes an
@@ -43,7 +68,7 @@ and unresolved judgments. A generated line is observed behavior. Its existence
 does not make it correct or eligible as a training target. Independent checked
 corrections can provide supervision; approved examples retain their source and
 scope. Candidate weights, factual memory, working state and editable manuscripts
-have different update rules. The tokenizer remains frozen within a run.
+have different update rules. The tokenizer remains frozen within a run. When an explicitly declared training/replay experience supplies a correction, preparation uses its recorded prompt. Ordinary writing stays outside weight updates until its split, corrective target and evaluation have been qualified.
 
 The next learned candidate must beat its parent on unseen complete tasks while
 retaining general language, source use, conduct and recovery. The existing

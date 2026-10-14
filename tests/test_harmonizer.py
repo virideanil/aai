@@ -8,6 +8,7 @@ from nanoai.harmonizer import Harmonizer
 from nanoai.memory import Memory, StaleState
 from nanoai.steps import Steps
 from nanoai.scratchboard import Scratchboard
+from nanoai.writing import Writing
 
 
 class HarmonizerTests(unittest.TestCase):
@@ -67,7 +68,8 @@ class HarmonizerTests(unittest.TestCase):
         packet = Harmonizer(self.memory).view(prepared["snapshot"])
         entry = next(row for row in packet["entries"] if row["kind"] == "working_unit")
         payload = json.loads(prepared["messages"][1]["content"])
-        self.assertEqual(payload["working_units"], [entry])
+        self.assertEqual(payload["working_units"], [{k: v for k, v in entry.items() if k != "digest"}])
+        self.assertEqual(prepared["snapshot"]["scratchboard"][unit["id"]], unit["digest"])
         self.assertTrue(entry["preview_complete"])
         self.assertIn("PERA-73", entry["preview"])
         self.assertTrue(any(r["kind"] == "graph_rule" and r["id"] == "scratchboard.import" for r in packet["entries"]))
@@ -95,6 +97,27 @@ class HarmonizerTests(unittest.TestCase):
         tensor = board.tensor(self.snapshot,b"\x00\x00",shape=[1])
         with self.assertRaises(StaleState):
             context(self.memory, "report", "another-core", selected_ids=["survey", "opinion"], scratchboard_ids=[tensor["id"]])
+
+    def test_authoring_and_writing_use_the_same_current_evidence_envelope(self):
+        class Capture:
+            identity = "test-core"
+            def generate(self, messages, **kwargs):
+                self.messages = copy.deepcopy(messages)
+                return {"output": "The total length is 51 cm.", "token_ids": [1], "finish_reason": "stop"}
+        core = Capture()
+        Writing(self.memory).run("report", self.memory.state["tasks"]["report"]["goal"],
+                                 ["survey", "opinion"], core)
+        written = json.loads(core.messages[1]["content"])
+        authored = context(self.memory, "report", core.identity, selected_ids=["survey", "opinion"])
+        payload = json.loads(authored["messages"][1]["content"])
+        for key in ("schema", "identity", "task", "current_source_records", "allowed_citations"):
+            self.assertEqual(written[key], payload[key])
+        self.assertEqual(written["schema"], "nanoai.task-context.v1")
+        self.assertEqual([row["text"] for row in written["current_source_records"]],
+                         [self.memory.state["sources"][name]["text"] for name in ("survey", "opinion")])
+        self.assertNotIn("Ground criticism", core.messages[0]["content"])
+        self.assertNotIn("Selected lessons", core.messages[0]["content"])
+        self.assertNotIn("fiction", core.messages[0]["content"].casefold())
 
 
 if __name__ == "__main__":

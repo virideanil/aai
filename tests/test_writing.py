@@ -1,3 +1,5 @@
+from copy import deepcopy
+import json
 from pathlib import Path
 import subprocess
 import sys
@@ -7,6 +9,8 @@ import unittest
 from nanoai.agent import DEFAULT_IDENTITY
 from nanoai.catalogue import LanguageCatalogue
 from nanoai.memory import Memory, StaleState
+from nanoai.scratchboard import Scratchboard
+from nanoai.steps import Steps
 from nanoai.writing import Writing
 
 
@@ -18,6 +22,7 @@ class FixedCore:
 
     def generate(self, messages, *, max_tokens, trace):
         self.calls += 1
+        self.messages = deepcopy(messages)
         return {"output": self.text, "token_ids": [1, 2, 3], "finish_reason": "stop",
                 "tokens": 3, "prompt_tokens": 20}
 
@@ -89,6 +94,78 @@ Writing(Memory(sys.argv[1])).run('opening','Write one sentence.',['canon'],Core(
         self.assertEqual(resumed["model_calls"], 0)
         self.assertEqual((path.stat().st_ino, path.stat().st_mtime_ns), (before.st_ino, before.st_mtime_ns))
         self.assertEqual(fresh.recover(), [])
+
+    def working_basis(self, core):
+        timing = self.memory.put_source('timing', '{"period":{"value":17,"unit":"s"},"count":{"value":3,"unit":"count"}}')
+        self.memory.set_task('opening', 'Write one sentence.', filenames=['text.md'])
+        return self.memory.snapshot('opening', [self.memory.state['sources']['canon'], timing], core.identity)
+
+    def test_selected_work_is_used_recovered_and_replaced_with_its_dependencies(self):
+        core = FixedCore()
+        snapshot = self.working_basis(core)
+        board = Scratchboard(self.memory)
+        unit = board.add(snapshot, {'kind': 'literal', 'text': 'Working reference TURNA-73.'})
+        calculation = Steps(self.memory).calculate_fields(snapshot, {'operator': 'quantity.product', 'inputs': [
+            {'source': 'timing', 'path': ['period']}, {'source': 'timing', 'path': ['count']}]})
+        Steps(self.memory).review(calculation['step_id'], 'confirmed', reviewer='test', reason='Three complete periods.')
+        options = {'observation_ids': [calculation['step_id']], 'scratchboard_ids': [unit['id']]}
+        first = self.owner.run('opening', 'Write one sentence.', ['canon', 'timing'], core, **options)
+        work = json.loads(core.messages[1]['content'])
+        self.assertEqual(work['identity'], DEFAULT_IDENTITY)
+        self.assertEqual(work['working_units'][0]['preview'], 'Working reference TURNA-73.')
+        self.assertEqual(work['observed_calculations'][0]['value'], 51)
+        self.assertEqual(work['observed_calculations'][0]['review']['decision'], 'confirmed')
+        board.add(snapshot, {'kind': 'literal', 'text': 'Unselected independent work.'})
+        again = Writing(Memory(self.root)).run('opening', 'Write one sentence.', ['canon', 'timing'], core, **options)
+        self.assertEqual(core.calls, 1)
+        self.assertEqual(again['receipt'], first['receipt'])
+        replacement = board.revise(unit['id'], {'kind': 'literal', 'text': 'Working reference TURNA-74.'}, reason='Corrected code.')
+        with self.assertRaises(StaleState):
+            self.owner.run('opening', 'Write one sentence.', ['canon', 'timing'], core, **options)
+        self.assertEqual(core.calls, 1)
+        options['scratchboard_ids'] = [replacement['id']]
+        revised = self.owner.run('opening', 'Write one sentence.', ['canon', 'timing'], core, **options)
+        self.assertEqual(core.calls, 2)
+        self.assertIn('TURNA-74', core.messages[1]['content'])
+        self.assertNotEqual(revised['experience_id'], first['experience_id'])
+        self.assertTrue(Path(first['artifact_path']).is_file())
+
+    def test_rejected_operation_and_foreign_task_work_reject_before_generation(self):
+        core = FixedCore()
+        snapshot = self.working_basis(core)
+        calculation = Steps(self.memory).calculate_fields(snapshot, {'operator': 'quantity.product', 'inputs': [
+            {'source': 'timing', 'path': ['period']}, {'source': 'timing', 'path': ['count']}]})
+        Steps(self.memory).review(calculation['step_id'], 'rejected', reviewer='test', reason='Task requires an exception.')
+        with self.assertRaises(StaleState):
+            self.owner.run('opening', 'Write one sentence.', ['canon', 'timing'], core, observation_ids=[calculation['step_id']])
+        self.memory.set_task('other', 'A different task.')
+        foreign = self.memory.snapshot('other', [self.memory.state['sources']['canon']], core.identity)
+        unit = Scratchboard(self.memory).add(foreign, {'kind': 'literal', 'text': 'Belongs elsewhere.'})
+        with self.assertRaises(StaleState):
+            self.owner.run('opening', 'Write one sentence.', ['canon'], core, scratchboard_ids=[unit['id']])
+        self.assertEqual(core.calls, 0)
+
+    def test_writing_preserves_partial_work_and_rejects_correction_during_generation(self):
+        core = FixedCore()
+        snapshot = self.working_basis(core)
+        board = Scratchboard(self.memory)
+        slots = board.reserve(snapshot, 10000000, constraints='Unresolved future content.')
+        literal = board.add(snapshot, {'kind': 'literal', 'text': 'Ş' * 1500})
+        original_generate = core.generate
+        def change_during_generation(*args, **kwargs):
+            result = original_generate(*args, **kwargs)
+            board.revise(literal['id'], {'kind': 'literal', 'text': 'Changed during generation.'}, reason='Concurrent correction.')
+            return result
+        core.generate = change_during_generation
+        with self.assertRaises(StaleState):
+            self.owner.run('opening', 'Write one sentence.', ['canon', 'timing'], core, scratchboard_ids=[slots['id'], literal['id']])
+        work = json.loads(core.messages[1]['content'])
+        self.assertEqual(work['working_units'][0]['unresolved_slots'], 10000000)
+        self.assertFalse(work['working_units'][0]['preview_complete'])
+        self.assertFalse(work['working_units'][1]['representation_complete'])
+        self.assertFalse(work['working_units'][1]['preview_complete'])
+        self.assertEqual(core.calls, 1)
+        self.assertEqual(self.memory.state['receipts'], {})
 
 
 if __name__ == "__main__":

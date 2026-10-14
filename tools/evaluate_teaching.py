@@ -14,7 +14,7 @@ import time
 import traceback
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
-from teaching_tasks import assess, guidance, messages, qualify
+from teaching_tasks import assess, guidance, messages, qualify, training_input
 
 
 def run(args, result, record):
@@ -116,8 +116,7 @@ def run(args, result, record):
                 attempt = publish(row, "collection")
                 collected[case_id] = teaching.training_pair(attempt["experience_id"])
         chunked_backward(model)
-        examples = {r["id"]: encode(tokenizer, messages(r), collected.get(r["id"], {}).get("target", r["target"]),
-                                   reasoning=r["teaching_reason"])
+        examples = {r["id"]: encode(tokenizer, **training_input(r, collected.get(r["id"])))
                     for r in [*train, *replay, *validation]}
         prefixes = {name: cache_prefix(model, example, source_basis=source_basis) for name, example in examples.items()}
         record("prefixes", count=len(prefixes), maximum_tokens=max(len(x["input_ids"]) for x in examples.values()))

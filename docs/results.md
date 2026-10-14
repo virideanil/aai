@@ -4,9 +4,14 @@ Observed 13–14 October 2026 on an Apple M5 Mac with 16 GiB RAM. This report co
 
 The tokenizer-finalization checkpoint passed 130 tests with every selected native
 dependency and zero skips. The subsequent SQLite, writing, teaching and thinking
-integration passed 177 tests; the explicit-backend revision passes 178. Its
-isolated installed consumer reproduced the documented examples, fresh catalogue
-views and actual ten-tensor BF16 inventory without a checkout import or SJQL path.
+integration passed 177 tests; the explicit-backend revision passed 178, and the
+shared-context and lazy-start revision passed 186. The shared presentation and
+exact recorded-input revision passed 189. The retained revision, including two
+independently reproduced operation-label repairs, passes 191 with zero skips.
+The refreshed isolated installed consumer reproduces the documented examples,
+fresh catalogue views and actual ten-tensor BF16 inventory without a checkout
+import or SJQL path. A 194-test direct-request candidate failed its native
+retention gate and was restored to the shared-envelope implementation.
 The measurements below retain both successful mechanisms and failed learning
 and generation outcomes.
 
@@ -379,7 +384,7 @@ nanosecond response remain unestablished. New learning and writing comparisons
 require a qualified execution path, then a complete representative task with
 measured correctness and cost.
 
-The final source suite passed 178 tests with zero skips in 25.846 seconds.
+The backend-revision source suite passed 178 tests with zero skips in 25.846 seconds.
 This qualifies the tested runtime contracts, storage, exact representations and
 recovery paths. It supplies no missing model-quality or GPU-output evidence.
 
@@ -387,3 +392,80 @@ Receipts: `../../audit/performance-correction-20261014/stopped-collection.json`,
 `execution-decision.json`, `full-tests.json`, `metal-features*.json` and the native
 logs. The interrupted learning protocol's 18 implementation files are preserved
 in `../../audit/applicable-teaching-20261013/learning-02/source-snapshot`.
+
+
+## Shared context, recorded learning inputs and deferred startup
+
+The installed baseline exposed two serving disconnections. General authoring
+received continuing identity, selected calculations and working units while
+writing omitted them. Repeating an already recorded writing command constructed
+the native worker before checking retained work. A separate learning-boundary
+probe found that teaching exported an experience's actual messages but then
+rebuilt its training prompt from the authored case.
+
+The existing Harmonizer now supplies selected eligible context and one versioned
+model-facing envelope to authoring, writing and authored teaching. Phase and
+output requirements remain explicit. Rules for lessons, criticism and working
+state follow the selected data; exact dependency hashes stay in the journal.
+Recorded generation validation reads the envelope's named task and source fields,
+so literal quotes and newlines survive JSON transport. Checked training examples
+use their actual recorded messages and target; independent confirmation stays
+outside training and selection.
+
+The complete retained source suite passes 191 tests with zero skips. The refreshed
+isolated package matches all 32 runtime modules and reproduces the documentation,
+SQLite history and native tensor inventory.
+Its public writing command starts a protocol worker for the first request, starts
+none for an identical repeat, and starts one after a working-reference correction.
+The old artifact remains intact. The repeat took 0.0982 seconds in this observation.
+These deterministic-worker checks establish input, dependency, effect and reuse
+behavior; they do not assess neural writing quality.
+
+Three actual original-BF16 sampled requests carried the continuing identity,
+calculation and working reference. Each exhausted the 4,096-token context while
+reasoning, returned an empty final answer and failed all four task checks.
+
+| Presentation | Prompt / generated tokens | Complete attempt | Fresh recovery of failed attempt |
+|---|---|---|---|
+| Earlier phase-specific presentation | 854 / 3,242 | 1,831.90 seconds | 0.1357 seconds |
+| Shared task envelope v1 | 830 / 3,266 | 1,863.41 seconds | 0.1478 seconds |
+| Direct final-user request v2 | 831 / 3,265 | 1,850.64 seconds | 0.1478 seconds |
+
+Each diagnostic artifact contains source attribution only. Recovery starts no
+worker and preserves the failed attempt. It does not complete the task. The
+direct-request candidate failed its frozen native gate, so its exact source and
+194-test result are archived and the shared envelope is retained. Separately
+reproduced calculation and judgment requests had incorrectly named their output
+as a document. Those labels are repaired and exercised at both actual consumers.
+
+Peak sampled RSS was 613,449,728 / 605,044,736 / 636,174,336 bytes in the same
+order; physical footprint was 623,103,264 / 623,185,184 / 643,616,032 bytes.
+Positive system-wide swap growth was 251,521,926 / 149,946,368 / 239,924,674 bytes;
+this measure does not attribute all growth to these processes. Every child and
+native group was reaped without cleanup errors. All used natural thinking with
+no generation deadline or reasoning quota and the existing resource guards.
+The runs were individual observations under changing host conditions; earlier
+source-test overlap also prevents a controlled speedup claim. A final full-file
+check matched the original 3,897,387,968-byte model, server and 14 libraries.
+
+The original tokenizer also shows why continuous writing needs a declared task
+segment protocol: its normal next-user-turn template removes previous assistant
+reasoning. Blind continuation of the earlier numerical cache would use a
+different effective input. Identical-prefix output parity and prefill cost,
+relevant-source invalidation, and changed-context task quality remain distinct
+checks. The existing complete hybrid-state recovery qualifies its recorded short,
+thinking-off experiment; thinking-on phase integration remains unqualified.
+
+All 19 authored training, replay and validation examples fit the unchanged
+512-token input-and-target recipe after the envelope repair, with a maximum of
+507 tokens. This check used the original tokenizer without loading the model or
+updating parameters. The complete authored JSON was read before split filtering;
+the separate independently authored confirmation source remained unopened.
+
+Receipts: `../../audit/harmonization-20261014/DECISION.md`,
+`retained-v1/full-tests.json`, `installed-consumer-retained.json`,
+`installed-writing-retained/result.json`, `retained-v1/operation-labels.json`,
+`native-observed/summary.json`, `native-shared/summary.json`,
+`native-direct/summary.json`, `direct-request-candidate/restoration.json`,
+`retained-v1/native-source-integrity.json`, `template-continuation.json` and
+`shared-training-extent.json`.

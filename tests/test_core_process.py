@@ -61,15 +61,48 @@ class CoreProcessTests(unittest.TestCase):
             self.core.close()
         self.temporary.cleanup()
 
-    def start(self, mode, duration=.4):
+    def start(self, mode, duration=.4, *, lazy=False):
         self.core = JsonlCore({
             'precision_profile': PRECISION_PROFILE,
             'manifest': str(self.manifest),
             'source_files': [str(self.worker)],
             'command': [sys.executable, str(self.worker), mode, str(self.root / 'descendant.pid')],
             'request_seconds': duration,
-        }, stderr_path=self.root / 'worker.log')
+        }, stderr_path=self.root / 'worker.log', lazy=lazy)
         return self.core
+
+    def test_unused_lazy_core_closes_without_starting_worker(self):
+        core = self.start('delayed', lazy=True)
+        self.assertIsNone(core.child)
+        self.assertIsNone(core.load)
+        core.close()
+        receipt = json.loads((self.root / 'worker.resources.json').read_text())
+        self.assertFalse(receipt['worker_started'])
+        self.assertIsNone(receipt['swap_before_bytes'])
+        self.assertTrue(receipt['process_group_stopped'])
+        self.assertEqual((self.root / 'worker.events.jsonl').read_text(), '')
+        with self.assertRaisesRegex(RuntimeError, 'closed'):
+            core.generate([])
+
+    def test_lazy_first_request_initializes_once_and_rechecks_source_before_start(self):
+        core = self.start('delayed', None, lazy=True)
+        self.assertEqual(core.generate([])['output'], 'observed')
+        self.assertEqual(core.generate([])['output'], 'observed')
+        requests = [json.loads(line)['request']['command']
+                    for line in (self.root / 'worker.events.jsonl').read_text().splitlines()
+                    if json.loads(line)['event'] == 'request']
+        self.assertEqual(requests, ['init', 'load', 'generate', 'generate'])
+        core.close()
+        for target, error in ((self.manifest, 'manifest'), (self.worker, 'source')):
+            with self.subTest(target=target.name):
+                core = self.start('delayed', None, lazy=True)
+                target.write_text(target.read_text() + '\n')
+                with self.assertRaisesRegex(ValueError, error + ' changed'):
+                    core.generate([])
+                self.assertIsNone(core.child)
+                receipt = json.loads((self.root / 'worker.resources.json').read_text())
+                self.assertFalse(receipt['worker_started'])
+                self.assertTrue(core.closed)
 
     def test_parent_exit_still_cleans_its_live_descendant(self):
         core = self.start('orphan')

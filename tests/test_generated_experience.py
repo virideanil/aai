@@ -112,6 +112,21 @@ class GeneratedExperienceTests(unittest.TestCase):
             self.record(observations=["An invented source"])
         self.assertEqual(self.memory.sequence, before)
 
+    def test_context_checks_named_source_fields_and_rejects_hidden_or_outdated_inputs(self):
+        payload = {"schema": "nanoai.task-context.v1", "task": {"goal": self.question},
+                   "current_source_records": [{"text": self.observations[0]}]}
+        def message(value):
+            return {"role": "user", "content": json.dumps(value)}
+        row = self.record(messages=[message(payload)])
+        self.assertEqual(row["observations"], self.observations)
+        before = self.memory.sequence
+        for wrong in ({**payload, "task": {"goal": "A different request", "quote": self.question}},
+                      {**payload, "current_source_records": [], "hidden": self.observations},
+                      {**payload, "current_source_records": [{"text": "An unrelated observation"}], "hidden": self.observations}):
+            with self.assertRaises(ValueError):
+                self.record(messages=[message(payload), message(wrong)])
+        self.assertEqual(self.memory.sequence, before)
+
     def test_incorrect_corrective_target_and_changed_artifact_are_rejected(self):
         row = self.record()
         receipt = self.owner.execute(row["id"])

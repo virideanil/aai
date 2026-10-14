@@ -87,9 +87,11 @@ def live_group_members(group: int) -> list[int]:
 
 
 class JsonlCore:
-    def __init__(self, config: dict, *, stderr_path: str | Path):
+    def __init__(self, config: dict, *, stderr_path: str | Path, lazy=False):
         if config.get("precision_profile") != PRECISION_PROFILE:
             raise ValueError("The resident core requires the original BF16 precision profile")
+        if type(lazy) is not bool:
+            raise ValueError("Lazy worker startup must be Boolean")
         self.config = dict(config)
         self.sequence = 0
         self.pending = b""
@@ -103,16 +105,28 @@ class JsonlCore:
         self.trace = self.stderr_path.with_suffix(".events.jsonl").open("a", encoding="utf-8")
         self.samples = []
         self.next_sample = 0.0
-        self.swap_before = swap_bytes()
+        self.swap_before = None
         self.manifest_identity = file_digest(config["manifest"])
         self.worker_identities = {str(Path(p).resolve()): file_digest(p) for p in config.get("source_files", [])}
         self.identity = digest_bytes(json.dumps({"manifest": self.manifest_identity, "worker": self.worker_identities}, sort_keys=True).encode())
+        self.load = None
+        if not lazy:
+            self._start()
+
+    def _start(self):
+        """Start only when an actual request needs the pinned worker."""
+        if self.closed:
+            raise RuntimeError("Model worker is closed")
+        if self.child is not None:
+            return
         try:
-            self.child = subprocess.Popen(config["command"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+            self.check_sources()
+            self.swap_before = swap_bytes()
+            self.child = subprocess.Popen(self.config["command"], stdin=subprocess.PIPE, stdout=subprocess.PIPE,
                                           stderr=self.log, start_new_session=True, bufsize=0)
             self.selector.register(self.child.stdout, selectors.EVENT_READ)
             self.call("init")
-            self.load = self.call("load", path=config["manifest"], expected=self.manifest_identity)
+            self.load = self.call("load", path=self.config["manifest"], expected=self.manifest_identity)
         except BaseException as error:
             self.close(primary_error=error)
             raise
@@ -158,6 +172,8 @@ class JsonlCore:
         return line
 
     def call(self, command: str, **fields):
+        if self.child is None and not self.closed:
+            self._start()
         if self.child is None or self.child.poll() is not None:
             raise RuntimeError("Model worker is closed")
         self.check_sources()
@@ -263,6 +279,7 @@ class JsonlCore:
         for name, stream in (("selector", self.selector), ("log", self.log), ("trace", self.trace)):
             attempt(f"close_{name}", stream.close)
         receipt = {
+            "worker_started": self.child is not None,
             "swap_before_bytes": self.swap_before, "samples": self.samples,
             "child_reaped": child_reaped,
             "exit_code": self.child.returncode if self.child else None,

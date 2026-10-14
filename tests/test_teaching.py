@@ -5,14 +5,14 @@ import tempfile
 import sys
 import unittest
 
-from nanoai.agent import DEFAULT_IDENTITY
+from nanoai.agent import DEFAULT_IDENTITY, context
 from nanoai.experience import Experience
 from nanoai.memory import Memory, StaleState
 from nanoai.teaching import Teaching, validate_lesson
 from nanoai.writing import Writing
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1] / 'tools'))
-from teaching_tasks import assess, evaluation_rows, quantity_answer
+from teaching_tasks import assess, evaluation_rows, messages, quantity_answer, training_input
 from nanoai.core import file_digest
 
 
@@ -60,7 +60,10 @@ class TeachingTests(unittest.TestCase):
         self.assertIn(self.lesson["principle"], self.core.messages[-1]["content"])
         experience = self.memory.state["experiences"][result["experience_id"]]
         self.assertEqual(experience["snapshot"]["sources"][self.source["id"]]["digest"], self.source["digest"])
-        self.assertIn(experience["observations"][-1], self.core.messages[-1]["content"])
+        payload = json.loads(self.core.messages[-1]["content"])
+        self.assertEqual(experience["observations"][-1], payload["current_source_records"][-1]["text"])
+        self.assertEqual(payload["current_source_records"][-1]["kind"], "lesson")
+        self.assertIn("Selected lessons", self.core.messages[0]["content"])
         self.assertEqual(self.owner.install(self.lesson), self.source)
         fresh = Writing(Memory(self.temp.name))
         again = fresh.run("draft", "Write one sentence.", ["canon"], self.core, lesson_ids=[self.source["id"]])
@@ -77,6 +80,11 @@ class TeachingTests(unittest.TestCase):
         fresh = Teaching(Memory(self.temp.name))
         self.assertTrue(fresh.memory.source_current(feedback))
         self.assertEqual(self.feedback(result), feedback)
+        prepared = context(fresh.memory, "draft", self.core.identity, selected_ids=["canon", feedback["id"]])
+        presented = json.loads(prepared["messages"][1]["content"])["current_source_records"][-1]
+        self.assertEqual(presented["kind"], "proposed-feedback")
+        self.assertIn("Actual draft quotation: The brass key vanished", presented["text"])
+        self.assertIn("Ground criticism", prepared["messages"][0]["content"])
         self.memory.put_source("canon", "Ada did not leave a key.", expected_revision=1)
         self.assertFalse(self.memory.source_current(feedback))
         with self.assertRaises(StaleState):
@@ -148,14 +156,29 @@ class TeachingTests(unittest.TestCase):
         snapshot = self.memory.snapshot("sum", [source], "fixture")
         for split in ("train", "confirmation"):
             row = owner.record_generation(snapshot, question="Return the sum.", observations=["2 + 3"],
-                messages=[{"role": "user", "content": "Return the sum.\n2 + 3"}],
+                messages=[{"role": "system", "content": "Continuing identity and selected working reference TURNA-73."},
+                          {"role": "user", "content": "Return the sum.\n2 + 3"}],
                 generation={"text": "6", "token_ids": [6], "finish_reason": "stop", "policy": "greedy-token-v1"},
                 representation_identity="fixture", source_id="input", metadata={"split": split})
             owner.execute(row["id"])
             owner.assess_generation(row["id"], rubric={"scope": "Exact integer sum", "criteria": {}, "training_target": "5"},
                 evaluator_identity="integer-addition-v1", evaluate=lambda text, _: {"sum": text.strip() == str(2 + 3)})
             if split == "train":
-                self.assertEqual(self.owner.training_pair(row["id"])["target"], "5")
+                pair = Teaching(Memory(self.temp.name)).training_pair(row["id"])
+                self.assertEqual(pair["target"], "5")
+                example = {"split": "train", "question": "Return the sum.", "observations": ["2 + 3"],
+                           "target": "5", "teaching_reason": "Two and three sum to five."}
+                prepared = training_input(example, pair)
+                self.assertEqual(prepared["messages"], row["messages"])
+                self.assertIn("TURNA-73", prepared["messages"][0]["content"])
+                self.assertNotEqual(prepared["messages"], training_input(example)["messages"])
+                prepared["messages"][0]["content"] = "Caller-local edit"
+                self.assertEqual(pair["messages"], row["messages"])
+                with self.assertRaisesRegex(ValueError, "target differs"):
+                    training_input(example, {**pair, "target": "6"})
+                for held_split in ("validation", "confirmation", "control"):
+                    with self.assertRaises(ValueError):
+                        training_input({**example, "split": held_split}, pair)
                 train_id = row["id"]
             else:
                 with self.assertRaises(ValueError):
@@ -175,6 +198,24 @@ class TeachingTests(unittest.TestCase):
         broken["contrast"].pop("feedback")
         with self.assertRaises(ValueError):
             validate_lesson(broken)
+
+    def test_authored_teaching_uses_the_shared_envelope_without_evaluation_answers(self):
+        row = {"id": "private-case-name", "kind": "review", "split": "train",
+               "question": "Review this draft.", "observations": ['SOURCE: A brass key.\nLiteral "quotation".', 'DRAFT: A key.'],
+               "target": "PRIVATE-ANSWER-27", "teaching_reason": "PRIVATE-EXPLANATION-84"}
+        prepared = messages(row)
+        payload = json.loads(prepared[1]["content"])
+        self.assertEqual(payload["schema"], "nanoai.task-context.v1")
+        self.assertEqual(payload["identity"], DEFAULT_IDENTITY)
+        self.assertEqual(payload["task"]["goal"], row["question"])
+        self.assertEqual([source["text"] for source in payload["current_source_records"]], row["observations"])
+        self.assertEqual(payload["allowed_citations"], [])
+        self.assertEqual(messages({**row, "id": "independent", "split": "confirmation"}), prepared)
+        for hidden in (row["id"], row["target"], row["teaching_reason"]):
+            self.assertNotIn(hidden, json.dumps(prepared))
+        guided = messages(row, guidance="Use evidence. Separate worked examples: A red door.")
+        self.assertIn("Selected lessons", guided[0]["content"])
+        self.assertEqual(json.loads(guided[1]["content"])["current_source_records"][-1]["kind"], "lesson")
 
     def test_independent_cases_require_frozen_identity_and_remain_confirmation(self):
         corpus = json.loads((Path(__file__).parents[1] / 'evals/teaching/tasks-v2.json').read_text())

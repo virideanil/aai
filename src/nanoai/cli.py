@@ -32,6 +32,8 @@ def main():
     write.add_argument("--kind", choices=("plan", "draft", "critique", "revision", "continuation", "control"), default="draft")
     write.add_argument("--source", action="append", required=True)
     write.add_argument("--lesson", action="append", default=[], help="A current lesson source installed in this journal")
+    write.add_argument("--observation", action="append", default=[], help="A current observed operation in this writing task")
+    write.add_argument("--board", action="append", default=[], help="A current working unit in this writing task")
     write.add_argument("--core-config", type=Path, required=True)
     write.add_argument("--max-tokens", type=int, default=None,
                        help="Optional total generation limit; default uses natural completion with thinking enabled")
@@ -195,10 +197,10 @@ def main():
         from .writing import Writing
         memory.recover()
         config = json.loads(args.core_config.read_text())
-        with JsonlCore(config, stderr_path=args.state / "writing-worker.log") as core:
+        with JsonlCore(config, stderr_path=args.state / "writing-worker.log", lazy=True) as core:
             output = Writing(memory).run(args.phase_id, args.instruction.read_text(), args.source, core,
                 workflow=args.workflow, kind=args.kind, max_tokens=args.max_tokens, filename=args.filename,
-                lesson_ids=args.lesson)
+                lesson_ids=args.lesson, observation_ids=args.observation, scratchboard_ids=args.board)
     elif args.command == "assemble":
         from .writing import Writing
         output = Writing(memory).assemble(args.workflow, args.source, args.title)

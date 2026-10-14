@@ -232,6 +232,7 @@ class Judgments:
                 "arguments": deepcopy(step["arguments"]), "expected": predicate["expected"]}
         payload = json.loads(prepared["messages"][1]["content"])
         payload.update(question=question, operation=operation)
+        payload["request"] = {"output": "judgment"}
         messages = [{"role": "system", "content": (
             "Give a provisional judgment about the question using the supplied source data and operation inputs. "
             "Return judgment and a brief one-sentence reason. yes means the supplied evidence supports the proposition exactly; "

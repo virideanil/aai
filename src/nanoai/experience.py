@@ -161,8 +161,31 @@ class Experience:
             if set(message) != {"role", "content"} or message["role"] not in {"system", "user", "assistant"}:
                 raise ValueError("Generation message contract")
             bounded_text(message["content"], "generation input", 16384)
-        input_text = "\n".join(message["content"] for message in messages)
-        if question not in input_text or any(text not in input_text for text in observations):
+        from .steps import strict_json
+        contexts = []
+        for message in messages:
+            if message["role"] == "user":
+                try:
+                    payload = strict_json(message["content"])
+                except (ValueError, TypeError):
+                    continue
+                if isinstance(payload, dict) and payload.get("schema") == "nanoai.task-context.v1":
+                    contexts.append(payload)
+        if contexts:
+            # JSON escapes are transport, not changes to the observed source.
+            # Check the named fields in the current envelope, in source order.
+            payload = contexts[-1]
+            task, sources = payload.get("task"), payload.get("current_source_records")
+            present = (isinstance(task, dict) and task.get("goal") == question
+                       and isinstance(sources, list)
+                       and all(isinstance(row, dict) and isinstance(row.get("text"), str) for row in sources))
+            if present:
+                values = iter(row["text"] for row in sources)
+                present = all(text in values for text in observations)
+        else:
+            input_text = "\n".join(message["content"] for message in messages)
+            present = question in input_text and all(text in input_text for text in observations)
+        if not present:
             raise ValueError("Recorded question or observation is absent from the generation input")
         from .sampling import observed_policy
         if "policy" in generation:

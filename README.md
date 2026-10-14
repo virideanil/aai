@@ -82,6 +82,10 @@ flowchart LR
 A visible yes/no/both judgment projects a richer set of linked alternatives.
 Identity and relations remain available when a question is open. A source
 correction invalidates affected work while retaining the original evidence.
+General authoring, writing and authored teaching use one task-input envelope;
+the journal supplies selected current context to serving consumers.
+Repeating completed writing verifies the actual artifact before worker startup;
+selected source or working-state changes require a new generation.
 Exact operations enforce their stated contracts; learned interpretation and
 choice remain fallible. Evaluation therefore measures errors, consequences,
 correction and retention across complete tasks.
