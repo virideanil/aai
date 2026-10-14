@@ -99,6 +99,14 @@ observes its consequence and carries the changed state into subsequent work.
 Identify the earliest missing or incorrect transition at a real consumer and
 propose the smallest consequential repair with a discriminating check.
 
+One concrete candidate from Fable's subsequent review is
+[task-relative completion](wiring.md#completion-belongs-to-the-current-question):
+deliver a checked answer while retaining other open questions. The current
+non-streaming worker still needs actual final bytes before assessment. Qualify
+the candidate-production and delivery path before claiming this rule fixes the
+empty-final failures. Keep scoped writing checks separate from certified
+numerical enclosures, and preserve the different refinement/extension contracts.
+
 The next expensive native experiment must change a consequential execution or
 core mechanism. It must finish an accurate unfamiliar task under original
 precision, natural thinking and host resource guards, then handle correction and
