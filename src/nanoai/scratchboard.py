@@ -575,6 +575,57 @@ class Scratchboard:
                 raise ValueError("Node does not hold tensor data")
             return self._tensor_bytes(node["spec"], core_identity)
 
+    def _verify_relation_tensor_lineage(self, snapshot, origin, model):
+        """Verify that origin step_id and open_step_ids exist, are active/unrejected, match current sources/snapshot, and bind every question expression to the carried relation state."""
+        from .relations import validate_model
+        if not isinstance(origin, dict) or origin.get("operation") != "relation.tensor":
+            raise ValueError("Relation tensor requires relational origin metadata")
+        step_id = origin.get("step_id")
+        if not isinstance(step_id, str) or not step_id:
+            raise ValueError("Relation tensor requires an observed relational step_id")
+        open_ids = origin.get("open_step_ids", [])
+        if (not isinstance(open_ids, list) or len(open_ids) > 16
+                or len(set(open_ids)) != len(open_ids) or step_id in open_ids
+                or any(not isinstance(oid, str) or not oid for oid in open_ids)):
+            raise ValueError("Open relational question step selection")
+
+        def _check_active_step(sid):
+            s = self.memory.state["steps"].get(sid)
+            o = self.memory.state["step_observations"].get(sid)
+            if not s or not o:
+                raise ValueError("Relation tensor step_id does not exist or is unobserved")
+            rev = self.memory.state["step_reviews"].get(sid)
+            if rev and rev["decision"] in {"rejected", "cancelled"}:
+                raise StaleState("Relation tensor lineage references a rejected or cancelled step")
+            self.memory._validate_snapshot(s["snapshot"])
+            if any(s["snapshot"].get(k) != snapshot.get(k)
+                   for k in ("task_id", "task_revision", "identity", "core_identity", "sources")):
+                raise StaleState("Relation tensor step belongs to another task, basis or source revision")
+            return s, o
+
+        step, obs = _check_active_step(step_id)
+        if step["operator"] == "relation.query":
+            state_id = step["arguments"]["step"]
+            _, state_obs = _check_active_step(state_id)
+            expected_model = validate_model(deepcopy(state_obs["result"].get("value")))
+            expected_questions = [deepcopy(step["arguments"]["expression"])]
+        else:
+            state_id = step_id
+            expected_model = validate_model(deepcopy(obs["result"].get("value")))
+            expected_questions = []
+        for oid in open_ids:
+            open_step, _ = _check_active_step(oid)
+            if open_step["operator"] != "relation.query":
+                raise ValueError("Open question carrier requires observed relation.query steps")
+            if open_step["arguments"].get("step") != state_id:
+                raise ValueError("Open question step belongs to a different relational state")
+            expected_questions.append(deepcopy(open_step["arguments"]["expression"]))
+        if model != expected_model:
+            raise ValueError("Decoded relation tensor model disagrees with observed step state")
+        actual_questions = [q["expression"] for q in origin.get("questions", [])]
+        if actual_questions != expected_questions:
+            raise ValueError("Relation tensor questions are not bound to observed relation.query steps")
+
     def relation_tensor(self, step_id, *, open_step_ids=(), mode="bf16_support"):
         """Carry a relational state and its open questions as an exact BF16 or compact U8 bit/trit tensor."""
         from .relations import encode_relation_tensor, validate_model
@@ -586,15 +637,22 @@ class Scratchboard:
             obs = self.memory.state["step_observations"].get(step_id)
             if not step or not obs:
                 raise ValueError("Relation tensor requires an observed relational step")
+            rev = self.memory.state["step_reviews"].get(step_id)
+            if rev and rev["decision"] in {"rejected", "cancelled"}:
+                raise StaleState("Relation tensor step was rejected or cancelled")
             if step["operator"] == "relation.query":
                 state_id = step["arguments"]["step"]
                 state_obs = self.memory.state["step_observations"].get(state_id)
                 if not state_obs:
                     raise ValueError("Relation query parent state is unobserved")
+                state_rev = self.memory.state["step_reviews"].get(state_id)
+                if state_rev and state_rev["decision"] in {"rejected", "cancelled"}:
+                    raise StaleState("Relation query parent state was rejected or cancelled")
                 model = validate_model(deepcopy(state_obs["result"].get("value")))
                 questions = [deepcopy(step["arguments"]["expression"])]
                 bound_ids = [state_id, step_id]
             else:
+                state_id = step_id
                 model = validate_model(deepcopy(obs["result"].get("value")))
                 questions = []
                 bound_ids = [step_id]
@@ -603,8 +661,13 @@ class Scratchboard:
                 open_obs = self.memory.state["step_observations"].get(oid)
                 if not open_step or not open_obs or open_step["operator"] != "relation.query":
                     raise ValueError("Open question carrier requires observed relation.query steps")
+                open_rev = self.memory.state["step_reviews"].get(oid)
+                if open_rev and open_rev["decision"] in {"rejected", "cancelled"}:
+                    raise StaleState("Open question step was rejected or cancelled")
+                if open_step["arguments"].get("step") != state_id:
+                    raise ValueError("Open question step belongs to a different relational state")
                 if any(open_step["snapshot"][k] != step["snapshot"][k]
-                       for k in ("task_id", "task_revision", "identity", "core_identity")):
+                       for k in ("task_id", "task_revision", "identity", "core_identity", "sources")):
                     raise StaleState("Open question step belongs to another task or basis")
                 questions.append(deepcopy(open_step["arguments"]["expression"]))
                 bound_ids.append(oid)
@@ -616,21 +679,28 @@ class Scratchboard:
         return self.tensor(snapshot, raw, shape=shape, dtype=meta["dtype"],
                            origin={**meta, "step_id": step_id, "open_step_ids": open_ids})
 
-    def decode_relation_tensor(self, node_id, *, core_identity):
-        """Reconstruct and verify the finite relation model from a scratchboard tensor node."""
+    def decode_relation_tensor(self, node_id, *, core_identity=None):
+        """Reconstruct and verify the finite relation model and step lineage from a scratchboard tensor node."""
         from .relations import decode_relation_tensor
         with self.memory.locked():
             node = self._validate(node_id)
             if node["spec"]["kind"] != "tensor":
                 raise ValueError("Node does not hold tensor data")
-            raw = self._tensor_bytes(node["spec"], core_identity)
+            basis = node["spec"]["basis"] if core_identity is None else core_identity
+            raw = self._tensor_bytes(node["spec"], basis)
             origin = deepcopy(node["origin"])
             spec_dtype = node["spec"]["dtype"]
             spec_shape = list(node["spec"]["shape"])
-        expected_dtype = "u8" if isinstance(origin, dict) and origin.get("mode") in {"pack5", "support2"} else "bf16"
-        if spec_dtype != expected_dtype:
-            raise ValueError("Scratchboard tensor dtype disagrees with relational tensor mode")
-        model = decode_relation_tensor(raw, spec_shape, origin)
+            snapshot = deepcopy(node["snapshot"])
+            expected_dtype = (
+                "u8"
+                if isinstance(origin, dict) and origin.get("mode") in {"pack5", "support2", "bit_plane", "indicator_2n"}
+                else "bf16"
+            )
+            if spec_dtype != expected_dtype:
+                raise ValueError("Scratchboard tensor dtype disagrees with relational tensor mode")
+            model = decode_relation_tensor(raw, spec_shape, origin)
+            self._verify_relation_tensor_lineage(snapshot, origin, model)
         questions = deepcopy(origin["questions"])
         settled = [{"question": q["expression"], "verdict": q["verdict"], "box_verdict": q["box_verdict"],
                     "correlation_loss": q["correlation_loss"]}
@@ -652,13 +722,14 @@ class Scratchboard:
             "open_questions": open_q,
             "packed_box_trits_hex": origin["packed_box_trits_hex"],
             "packed_box_support2_hex": origin["packed_box_support2_hex"],
-            "step_id": origin.get("step_id"),
-            "open_step_ids": origin.get("open_step_ids", []),
+            "step_id": origin["step_id"],
+            "open_step_ids": list(origin.get("open_step_ids", [])),
         }
 
     def archive_tensors(self, node_ids, *, recipe="scratchboard-tensor-archive-v1", parent=None):
-        """Package validated scratchboard tensors into safetensors and register in SQLite TensorStore."""
+        """Package validated scratchboard tensors into self-describing safetensors and register in SQLite TensorStore."""
         import json
+        from .relations import decode_relation_tensor
         from .tensor_store import TensorStore, pack_safetensors
         node_ids = list(node_ids)
         if not 1 <= len(node_ids) <= 64 or len(set(node_ids)) != len(node_ids):
@@ -674,15 +745,36 @@ class Scratchboard:
                 snapshot.setdefault("scratchboard", {})[n["id"]] = n["digest"]
             self.memory._validate_snapshot(snapshot)
             tensors = {}
+            node_origins = {}
             for i, n in enumerate(nodes):
                 raw = self._tensor_bytes(n["spec"], snapshot["core_identity"])
+                origin = deepcopy(n.get("origin"))
+                if isinstance(origin, dict) and origin.get("operation") == "relation.tensor":
+                    expected_dtype = "u8" if origin.get("mode") in {"pack5", "support2", "bit_plane", "indicator_2n"} else "bf16"
+                    if n["spec"]["dtype"] != expected_dtype:
+                        raise ValueError("Scratchboard tensor dtype disagrees with relational tensor mode")
+                    model = decode_relation_tensor(raw, n["spec"]["shape"], origin)
+                    self._verify_relation_tensor_lineage(snapshot, origin, model)
                 name = f"t{i:02d}_{n['id'].replace('-', '')[:12]}"
                 tensors[name] = {"dtype": n["spec"]["dtype"].upper(),
                                  "shape": list(n["spec"]["shape"]), "data": raw}
+                if isinstance(origin, dict):
+                    canonical_origin_bytes = json.dumps(origin, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                    node_origins[name] = {
+                        **origin,
+                        "node_id": n["id"],
+                        "origin_digest": digest_bytes(canonical_origin_bytes),
+                    }
+                else:
+                    node_origins[name] = {"node_id": n["id"], "origin": origin}
+            origins_json = json.dumps(node_origins, sort_keys=True, separators=(",", ":"))
             container = pack_safetensors(tensors, metadata={
+                "schema": "nanoai.scratchboard-tensor-archive.v1",
                 "task_id": str(snapshot["task_id"]),
                 "core_identity": str(snapshot["core_identity"]),
                 "node_ids": json.dumps(node_ids),
+                "node_origins": origins_json,
+                "node_origins_digest": digest_bytes(origins_json.encode("utf-8")),
             })
             artifact_id = digest_bytes(container)
             hex_id = artifact_id.split(":")[1]
@@ -715,6 +807,108 @@ class Scratchboard:
             finally:
                 if temporary is not None:
                     temporary.unlink(missing_ok=True)
+
+    @staticmethod
+    def decode_archive_file(archive_path, *, query=None):
+        """Self-describing archive decoder: reconstruct and optionally query relational tensors from a .safetensors file alone without the journal."""
+        import json
+        from .relations import decode_relation_tensor, query_tensor_enclosure
+        from .tensor_store import unpack_safetensors
+        unpacked = unpack_safetensors(archive_path)
+        meta = unpacked["metadata"]
+        origins_raw = meta.get("node_origins", "{}")
+        if "node_origins_digest" in meta:
+            if digest_bytes(origins_raw.encode("utf-8")) != meta["node_origins_digest"]:
+                raise ValueError("Safetensors node_origins_digest mismatch")
+        origins_map = json.loads(origins_raw)
+        if not isinstance(origins_map, dict):
+            raise ValueError("Safetensors node_origins metadata must be a JSON object")
+        tensors_by_key = {}
+        decoded_list = []
+        for name, t_spec in sorted(unpacked["tensors"].items()):
+            entry = origins_map.get(name, {})
+            if not isinstance(entry, dict):
+                raise ValueError("Safetensors tensor origin entry must be an object")
+            node_id = entry.get("node_id")
+            origin = entry if entry.get("operation") == "relation.tensor" else entry.get("origin")
+            dtype_lower = t_spec["dtype"].lower()
+            item = {
+                "tensor_name": name,
+                "node_id": node_id,
+                "dtype": t_spec["dtype"],
+                "shape": list(t_spec["shape"]),
+                "byte_count": len(t_spec["data"]),
+            }
+            if isinstance(origin, dict) and origin.get("operation") == "relation.tensor":
+                if "origin_digest" in origin:
+                    clean_origin = {k: v for k, v in origin.items() if k not in {"node_id", "origin_digest"}}
+                    canonical = json.dumps(clean_origin, sort_keys=True, separators=(",", ":")).encode("utf-8")
+                    if digest_bytes(canonical) != origin["origin_digest"]:
+                        raise ValueError("Safetensors relational origin_digest mismatch")
+                expected_dtype = "u8" if origin.get("mode") in {"pack5", "support2", "bit_plane", "indicator_2n"} else "bf16"
+                if dtype_lower != expected_dtype:
+                    raise ValueError("Archived tensor dtype disagrees with relational tensor mode")
+                model = decode_relation_tensor(t_spec["data"], t_spec["shape"], origin)
+                questions = deepcopy(origin["questions"])
+                rel_info = {
+                    "model": model,
+                    "variables": list(model["variables"]),
+                    "worlds": [list(r) for r in model["worlds"]],
+                    "mode": origin["mode"],
+                    "box_marginals": origin["box_marginals"],
+                    "questions": questions,
+                    "settled_questions": [
+                        {"question": q["expression"], "verdict": q["verdict"], "box_verdict": q["box_verdict"],
+                         "correlation_loss": q["correlation_loss"]}
+                        for q in questions if q["verdict"] in ("yes", "no")
+                    ],
+                    "open_questions": [
+                        {"question": q["expression"], "verdict": q["verdict"], "box_verdict": q["box_verdict"],
+                         "correlation_loss": q["correlation_loss"]}
+                        for q in questions if q["verdict"] == "maybe"
+                    ],
+                }
+                if query is not None:
+                    q_res = {**query_tensor_enclosure(model, query)}
+                    q_res.setdefault("verdict", q_res.get("exact_verdict"))
+                    rel_info["query_result"] = q_res
+                    item["query"] = q_res
+                item["relation"] = rel_info
+            decoded_list.append(item)
+            tensors_by_key[node_id or name] = item
+        return {
+            "metadata": meta,
+            "tensor_count": len(decoded_list),
+            "tensors": tensors_by_key,
+            "tensor_list": decoded_list,
+        }
+
+    def decode_archived_tensors(self, version_id, *, core_identity=None, query=None):
+        """Verify and decode relational tensors (including compact U8 and BF16) from a TensorStore archive."""
+        from .tensor_store import TensorStore
+        store = TensorStore(self.memory.root / "tensors.sqlite3")
+        resolved = store.resolve(version_id)
+        decoded = self.decode_archive_file(resolved["path"], query=query)
+        meta = decoded["metadata"]
+        core_id = str(meta.get("core_identity") or "") if core_identity is None else str(core_identity)
+        if core_id:
+            expected_basis = (core_id if core_id.startswith("shake256:") and len(core_id) == 136
+                              else digest_bytes(core_id.encode()))
+            if resolved["basis"] != expected_basis:
+                raise StaleState("Archived tensor basis differs from requested core_identity")
+        if core_identity is not None and meta.get("core_identity") and meta["core_identity"] != str(core_identity):
+            raise StaleState("Safetensors container core_identity differs")
+        return {
+            "version_id": resolved.get("id", version_id),
+            "artifact": resolved["artifact"],
+            "recipe": resolved["recipe"],
+            "basis": resolved["basis"],
+            "path": resolved["path"],
+            "tensor_count": decoded["tensor_count"],
+            "tensors": decoded["tensors"],
+            "tensor_list": decoded["tensor_list"],
+        }
+
 
     def _validate(self, node_id, *, _depth=0, _checked=None):
         if _depth > 16:

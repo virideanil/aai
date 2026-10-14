@@ -39,6 +39,24 @@ def context(memory: Memory, task_id: str, core_identity: str, *, source_count=4,
             "schema": schema, "snapshot": snapshot, "source_ids": [r["id"] for r in sources]}
 
 
+def extract_final_and_thinking(text: str):
+    """Separate optional <think>...</think> traces from final visible content and reject empty final bodies."""
+    import re
+    if not isinstance(text, str):
+        raise ProposalError("Generated content must be a string")
+    open_count = text.count("<think>")
+    close_count = text.count("</think>")
+    if open_count != close_count:
+        raise ProposalError("The generation ended inside an unclosed <think> reasoning block before producing a final document body")
+    thinking_parts = [m.group(1).strip() for m in re.finditer(r"<think>(.*?)</think>", text, flags=re.DOTALL)]
+    cleaned = re.sub(r"<think>.*?</think>", "", text, flags=re.DOTALL)
+    if open_count > 0:
+        cleaned = cleaned.lstrip()
+    if not cleaned.strip():
+        raise ProposalError("The generation produced an empty final document body; return non-empty final document content")
+    return cleaned, "\n\n".join(p for p in thinking_parts if p)
+
+
 def run(memory, core, task_id, *, commit=False, source_count=4, selected_ids=None, observation_ids=(), scratchboard_ids=(), max_tokens=None, max_attempts=2):
     if type(max_attempts) is not int or not 1 <= max_attempts <= 3:
         raise ValueError("Proposal attempts must be bounded from one to three")
@@ -56,6 +74,10 @@ def run(memory, core, task_id, *, commit=False, source_count=4, selected_ids=Non
             output = json.loads(result["output"])
             if not isinstance(output, dict) or set(output) != {"filename", "content"} or not isinstance(output["content"], str):
                 raise ProposalError("Return exactly filename and document content")
+            final_content, thinking_trace = extract_final_and_thinking(output["content"])
+            output["content"] = final_content
+            if thinking_trace:
+                metrics["thinking_chars"] = len(thinking_trace)
             # The written references have one authoritative representation.
             # Revision validation still rejects every unavailable reference.
             output["citations"] = sorted(document_references(output["content"]))
@@ -171,8 +193,24 @@ def calculate(memory, core, task_id, *, selected_ids=None, max_tokens=None, doma
                 "scope": "Learned operation selection plus exact source-bound execution"}
 
 
-def inquire(memory, core, task_id, *, state_step_id, selected_ids=None, observation_ids=(), scratchboard_ids=(), max_tokens=None, max_attempts=2, carry_tensor=False):
-    """Let the core receive a represented relational state and propose the next operation."""
+def inquire(
+    memory,
+    core,
+    task_id,
+    *,
+    state_step_id,
+    selected_ids=None,
+    observation_ids=(),
+    scratchboard_ids=(),
+    max_tokens=None,
+    max_attempts=2,
+    carry_tensor=False,
+    calibrated=False,
+    judgment_node_id=None,
+    min_confirmations=2,
+    threshold=0.8,
+):
+    """Let the core receive a represented relational state and propose (or calibrated-execute) the next operation."""
     from copy import deepcopy
     from .relations import validate_model
     from .steps import Steps, strict_json
@@ -219,11 +257,17 @@ def inquire(memory, core, task_id, *, state_step_id, selected_ids=None, observat
         "variables": {"type": "array", "items": {"type": "string"}},
         "replacement": {"type": "string"},
         "reason": {"type": "string"},
+        "policy": {"type": "string", "enum": ["replace", "km"]},
         "questions": {"type": "array"},
         "candidates": {"type": ["array", "null"]},
-        "observations": {"type": ["array", "null"]}},
+        "observations": {"type": ["array", "null"]},
+        "verdict": {"type": "string", "enum": ["yes", "maybe", "no"]},
+        "usefulness": {"type": "number"},
+        "confidence": {"type": "number"},
+        "uncertainty": {"type": ["string", "null"]}},
         "required": ["operator"], "additionalProperties": False}
     steps = Steps(memory)
+    signal_keys = {"verdict", "usefulness", "confidence", "uncertainty"}
     original_messages, attempts = messages, []
     for attempt in range(max_attempts):
         generated = core.generate(messages, max_tokens=max_tokens, schema=schema)
@@ -235,14 +279,48 @@ def inquire(memory, core, task_id, *, state_step_id, selected_ids=None, observat
             if not isinstance(plan, dict) or plan.get("operator") not in operators:
                 raise ProposalError("Use an operation from the relational inquiry contract")
             operator = plan["operator"]
-            arguments = {"step": state_step_id, **{k: v for k, v in plan.items() if k != "operator"}}
+            arguments = {"step": state_step_id, **{k: v for k, v in plan.items() if k != "operator" and k not in signal_keys}}
             steps.parents(operator, arguments)
-            step = steps.propose(prepared["snapshot"], operator, arguments)
-            try:
-                observation = steps.execute(step["id"])
-            except ValueError as error:
-                steps.review(step["id"], "rejected", reviewer="pure-operator-contract-v1", reason=str(error))
-                raise
+            plan_core_signal = None
+            if signal_keys & set(plan):
+                plan_core_signal = {
+                    "source": "core_generation_plan",
+                    "core_identity": core.identity,
+                    "verdict": plan.get("verdict"),
+                    "usefulness": plan.get("usefulness", plan.get("confidence")),
+                    "uncertainty": plan.get("uncertainty"),
+                    "assessed": False,
+                }
+
+            if calibrated:
+                banded = steps.band_proposal(
+                    prepared["snapshot"],
+                    operator,
+                    arguments,
+                    core_signal=plan_core_signal,
+                    judgment_node_id=judgment_node_id,
+                    min_confirmations=min_confirmations,
+                    threshold=threshold,
+                    execute_act_now=False,
+                )
+                step = banded["step"]
+                observation = None
+                if banded["band"] == "act_now" and step is not None:
+                    try:
+                        observation = steps.execute(step["id"])
+                        banded["executed"] = True
+                        banded["observation"] = observation
+                    except ValueError as error:
+                        steps.review(step["id"], "rejected", reviewer="pure-operator-contract-v1", reason=str(error))
+                        raise
+            else:
+                banded = None
+                step = steps.propose(prepared["snapshot"], operator, arguments)
+                try:
+                    observation = steps.execute(step["id"])
+                except ValueError as error:
+                    steps.review(step["id"], "rejected", reviewer="pure-operator-contract-v1", reason=str(error))
+                    raise
         except StaleState as error:
             memory.record_rejection(prepared["snapshot"], generated["output"], str(error))
             raise
@@ -253,16 +331,34 @@ def inquire(memory, core, task_id, *, state_step_id, selected_ids=None, observat
             messages = original_messages + [{"role": "assistant", "content": generated["output"]},
                 {"role": "user", "content": "The relational operation could not execute: " + str(error) + ". Revise the operation against the same relational state and task."}]
             continue
-        next_state_step_id = state_step_id if operator in {"relation.query", "relation.curiosity"} else step["id"]
-        updated_snapshot = memory.attach_observations(prepared["snapshot"], [step["id"]])
-        out = {"plan": deepcopy(plan), "step": step, "step_id": step["id"],
-               "observation": observation, "result": observation["result"],
-               "state_step_id": state_step_id, "next_state_step_id": next_state_step_id,
-               "generated": generated, "attempts": attempts,
-               "total_generation_ms": sum(row.get("elapsed_ms", 0) for row in attempts),
-               "snapshot": updated_snapshot,
-               "scope": "Learned relational operation selection plus exact joint-state execution"}
-        if carry_tensor:
+        if observation is not None and step is not None:
+            next_state_step_id = state_step_id if operator in {"relation.query", "relation.curiosity"} else step["id"]
+            updated_snapshot = memory.attach_observations(prepared["snapshot"], [step["id"]])
+        else:
+            next_state_step_id = state_step_id
+            updated_snapshot = prepared["snapshot"]
+        out = {
+            "plan": deepcopy(plan),
+            "step": step,
+            "step_id": step["id"] if step is not None else None,
+            "band": banded["band"] if banded is not None else "act_now",
+            "executed": observation is not None,
+            "calibration": banded,
+            "observation": observation,
+            "result": observation["result"] if observation is not None else None,
+            "state_step_id": state_step_id,
+            "next_state_step_id": next_state_step_id,
+            "generated": generated,
+            "attempts": attempts,
+            "total_generation_ms": sum(row.get("elapsed_ms", 0) for row in attempts),
+            "snapshot": updated_snapshot,
+            "scope": (
+                "Learned relational operation selection routed through 4-part hybrid calibration"
+                if calibrated
+                else "Learned relational operation selection plus exact joint-state execution"
+            ),
+        }
+        if carry_tensor and observation is not None and step is not None:
             from .scratchboard import Scratchboard
             target_step = step["id"] if operator != "relation.curiosity" else state_step_id
             tensor_node = Scratchboard(memory).relation_tensor(target_step)

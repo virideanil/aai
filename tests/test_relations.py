@@ -528,7 +528,8 @@ class RelationConsumers(unittest.TestCase):
     def test_support2_lattice_enclosure_and_bf16_relation_tensor_roundtrip(self):
         from nanoai.relations import (
             SUPPORT_BOTH, SUPPORT_CONFLICT, SUPPORT_NO, SUPPORT_YES,
-            decode_relation_tensor, encode_relation_tensor, evaluate_support2,
+            benchmark_relation_carriers, decode_relation_tensor, encode_relation_tensor,
+            evaluate_support2, indicator_dalal_revise, indicator_query_verdict,
             pack_support2, query_tensor_enclosure, unpack_support2,
         )
         from nanoai.scratchboard import Scratchboard
@@ -549,24 +550,56 @@ class RelationConsumers(unittest.TestCase):
         self.assertTrue(enclosure["enclosure_holds"])
         self.assertEqual(enclosure["exact_code"] & enclosure["box_code"], enclosure["exact_code"])
 
-        for mode in ("bf16_support", "bf16_signed", "pack5", "support2"):
+        for mode in ("bf16_support", "bf16_signed", "pack5", "support2", "bit_plane", "indicator_2n", "auto_compact"):
             tensor = encode_relation_tensor(state["result"]["value"], mode=mode)
             decoded = decode_relation_tensor(tensor)
             self.assertEqual(decoded["variables"], ["x", "y"])
             self.assertEqual(decoded["worlds"], [[0, 0], [1, 1]])
             self.assertEqual(tensor[2]["box_marginals"], {"x": "maybe", "y": "maybe"})
 
+        # P3b: missing dtype in relational tensor metadata is rejected
+        raw_p5, shape_p5, meta_p5 = encode_relation_tensor(state["result"]["value"], mode="pack5")
+        meta_no_dtype = dict(meta_p5)
+        meta_no_dtype.pop("dtype", None)
+        with self.assertRaisesRegex(ValueError, "dtype is missing or differs"):
+            decode_relation_tensor((raw_p5, shape_p5, meta_no_dtype))
+
+        # P5: binary indicator_2n query & Dalal revision + benchmark carriers
+        from nanoai.relations import pack_indicator_2n, unpack_indicator_2n
+        raw_ind, _, _ = encode_relation_tensor(state["result"]["value"], mode="indicator_2n")
+        self.assertEqual(indicator_query_verdict(raw_ind, ["x", "y"], {"eq": ["x", "y"]}), "yes")
+        inc_model = {"type": RELATION, "variables": ["x", "y"], "worlds": [[1, 0]], "scope": "Incoming"}
+        inc_ind = pack_indicator_2n(["x", "y"], [[1, 0]])
+        rev_ind, rev_d = indicator_dalal_revise(raw_ind, inc_ind, ["x", "y"])
+        self.assertEqual(unpack_indicator_2n(rev_ind, ["x", "y"]), [[1, 0]])
+        self.assertEqual(rev_d, 1)
+        bench = benchmark_relation_carriers(
+            state["result"]["value"],
+            expression={"eq": ["x", "y"]},
+            incoming_model=inc_model,
+        )
+        self.assertTrue(bench["query_parity"])
+        self.assertTrue(bench["revision_parity"])
+        self.assertEqual(bench["bytes"]["bit_plane"], 1)
+        self.assertEqual(bench["bytes"]["indicator_2n"], 1)
+
         board = Scratchboard(self.memory)
         node_support = board.relation_tensor(q_eq["step_id"], open_step_ids=[q_x["step_id"]], mode="bf16_support")
         node_signed = board.relation_tensor(state["step_id"], mode="bf16_signed")
         node_pack5 = board.relation_tensor(state["step_id"], mode="pack5")
         node_support2 = board.relation_tensor(state["step_id"], mode="support2")
+        node_bit = board.relation_tensor(state["step_id"], mode="bit_plane")
+        node_ind = board.relation_tensor(state["step_id"], mode="indicator_2n")
         self.assertEqual(node_support["spec"]["dtype"], "bf16")
         self.assertEqual(node_signed["spec"]["dtype"], "bf16")
         self.assertEqual(node_pack5["spec"]["dtype"], "u8")
         self.assertEqual(node_support2["spec"]["dtype"], "u8")
+        self.assertEqual(node_bit["spec"]["dtype"], "u8")
+        self.assertEqual(node_ind["spec"]["dtype"], "u8")
         self.assertEqual(node_pack5["spec"]["shape"], [1])
         self.assertEqual(node_support2["spec"]["shape"], [1])
+        self.assertEqual(node_bit["spec"]["shape"], [1])
+        self.assertEqual(node_ind["spec"]["shape"], [1])
         roundtripped = board.decode_relation_tensor(node_support["id"], core_identity="test-core")
         self.assertEqual(roundtripped["worlds"], [[0, 0], [1, 1]])
         self.assertEqual(roundtripped["settled_questions"][0]["verdict"], "yes")
@@ -574,7 +607,7 @@ class RelationConsumers(unittest.TestCase):
         self.assertEqual(board.decode_relation_tensor(node_pack5["id"], core_identity="test-core")["byte_count"], 1)
         self.assertEqual(board.decode_relation_tensor(node_support2["id"], core_identity="test-core")["byte_count"], 1)
 
-        # Forged origin metadata (Codex counterexample) is rejected by decode_relation_tensor
+        # 1. Forged origin metadata or forged lineage is rejected by decode_relation_tensor and archive_tensors (P1 & P2)
         raw_s, shape_s, meta_s = encode_relation_tensor(state["result"]["value"], mode="bf16_support", open_questions=["x"])
         forged_node = board.tensor(
             self.snapshot(),
@@ -583,22 +616,73 @@ class RelationConsumers(unittest.TestCase):
             dtype="bf16",
             origin={
                 **meta_s,
+                "operation": "relation.tensor",
+                "step_id": "step-nonexistent-999",
+                "open_step_ids": ["step-open-fake-1"],
                 "box_marginals": {"x": "yes", "y": "yes"},
                 "questions": [{"expression": "x", "verdict": "yes", "box_verdict": "yes", "correlation_loss": False}],
             },
         )
-        with self.assertRaisesRegex(ValueError, "box marginals disagree|question verdict disagrees"):
+        with self.assertRaisesRegex(ValueError, "box marginals disagree|question verdict disagrees|observed"):
             board.decode_relation_tensor(forged_node["id"], core_identity="test-core")
+        with self.assertRaisesRegex(ValueError, "box marginals disagree|question verdict disagrees|observed"):
+            board.archive_tensors([forged_node["id"]], recipe="forged-archive-v1")
 
+        # 2. Tampered box_marginals in stored origin metadata is rejected by decode_relation_tensor and archive_tensors
+        valid_custom = board.tensor(
+            self.snapshot(),
+            raw_s,
+            shape=shape_s,
+            dtype="bf16",
+            origin={
+                **meta_s,
+                "operation": "relation.tensor",
+                "step_id": state["step_id"],
+                "open_step_ids": [q_x["step_id"]],
+                "box_marginals": {"x": "yes", "y": "yes"},
+            },
+        )
+        with self.assertRaisesRegex(ValueError, "box marginals disagree"):
+            board.decode_relation_tensor(valid_custom["id"], core_identity="test-core")
+        with self.assertRaisesRegex(ValueError, "box marginals disagree"):
+            board.archive_tensors([valid_custom["id"]], recipe="tampered-archive-v1")
+
+        # 3. Archive and decode round-trip across BF16 and U8, plus archive-only decode & query without journal (P4)
         archived = board.archive_tensors(
-            [node_support["id"], node_signed["id"], node_pack5["id"], node_support2["id"]],
+            [node_support["id"], node_signed["id"], node_pack5["id"], node_support2["id"], node_bit["id"], node_ind["id"]],
             recipe="relational-tensor-test-v1",
         )
-        self.assertEqual(len(archived["tensors"]), 4)
+        self.assertEqual(len(archived["tensors"]), 6)
         store = TensorStore(self.root / "tensors.sqlite3")
         described = store.resolve(archived["version_id"])
         self.assertEqual(described["recipe"], "relational-tensor-test-v1")
-        self.assertEqual(len(described["tensors"]), 4)
+        self.assertEqual(len(described["tensors"]), 6)
+
+        decoded_archive = board.decode_archived_tensors(
+            archived["version_id"],
+            core_identity="test-core",
+            query={"eq": ["x", "y"]},
+        )
+        self.assertEqual(decoded_archive["version_id"], archived["version_id"])
+        self.assertEqual(len(decoded_archive["tensors"]), 6)
+        for nid, mode_name, expected_dtype in (
+            (node_support["id"], "bf16_support", "BF16"),
+            (node_signed["id"], "bf16_signed", "BF16"),
+            (node_pack5["id"], "pack5", "U8"),
+            (node_support2["id"], "support2", "U8"),
+            (node_bit["id"], "bit_plane", "U8"),
+            (node_ind["id"], "indicator_2n", "U8"),
+        ):
+            entry = decoded_archive["tensors"][nid]
+            self.assertEqual(entry["dtype"], expected_dtype)
+            self.assertEqual(entry["relation"]["mode"], mode_name)
+            self.assertEqual(entry["relation"]["worlds"], [[0, 0], [1, 1]])
+            self.assertEqual(entry["query"]["verdict"], "yes")
+
+        # Archive-only decode directly from .safetensors file without journal
+        standalone = Scratchboard.decode_archive_file(archived["archive_path"], query={"eq": ["x", "y"]})
+        self.assertEqual(len(standalone["tensors"]), 6)
+        self.assertEqual(standalone["tensors"][node_pack5["id"]]["query"]["verdict"], "yes")
 
     def test_relation_extend_relational_constraints_and_hidden_narrowing_rejection(self):
         state = self.decode()
@@ -669,6 +753,10 @@ class RelationConsumers(unittest.TestCase):
         self.assertEqual(km_revised["result"]["value"]["worlds"], [[1, 1]])
         self.assertEqual(km_revised["result"]["revision"]["km_min_hamming_distance"], 0)
         self.assertEqual(km_revised["result"]["revision"]["policy"], "km")
+        self.assertEqual(
+            km_revised["result"]["revision"]["km_assumptions"]["theorem_reference"],
+            "Katsuno & Mendelzon (1991) Theorem 3.3 + Dalal (1988) uniform Hamming distance",
+        )
 
         curiosity = self.perform(
             "relation.curiosity",
@@ -717,17 +805,44 @@ class RelationConsumers(unittest.TestCase):
         self.assertEqual(tensor_out["view"]["dtype"], "BF16")
         self.assertEqual(tensor_out["view"]["shape"], [2, 4])
 
+        u8_run = subprocess.run(
+            [sys.executable, "-m", "nanoai.cli", "--state", str(self.root),
+             "board-relation-tensor", state["step_id"], "--mode", "pack5"],
+            check=True, capture_output=True, text=True,
+        )
+        u8_node_id = json.loads(u8_run.stdout)["node"]["id"]
+
+        decode_node_run = subprocess.run(
+            [sys.executable, "-m", "nanoai.cli", "--state", str(self.root),
+             "board-decode-relation-tensor", u8_node_id],
+            check=True, capture_output=True, text=True,
+        )
+        decoded_u8 = json.loads(decode_node_run.stdout)
+        self.assertEqual(decoded_u8["mode"], "pack5")
+        self.assertEqual(decoded_u8["worlds"], [[0, 0], [1, 1]])
+
         archive_run = subprocess.run(
             [sys.executable, "-m", "nanoai.cli", "--state", str(self.root),
-             "board-archive-tensors", node_id, "--recipe", "cli-tensor-archive-v1"],
+             "board-archive-tensors", node_id, u8_node_id, "--recipe", "cli-tensor-archive-v1"],
             check=True, capture_output=True, text=True,
         )
         archive_out = json.loads(archive_run.stdout)
         self.assertEqual(archive_out["recipe"], "cli-tensor-archive-v1")
         self.assertTrue(Path(archive_out["archive_path"]).is_file())
 
+        decode_archive_run = subprocess.run(
+            [sys.executable, "-m", "nanoai.cli", "--state", str(self.root),
+             "board-decode-archive", archive_out["version_id"]],
+            check=True, capture_output=True, text=True,
+        )
+        decoded_archive = json.loads(decode_archive_run.stdout)
+        self.assertEqual(decoded_archive["tensors"][node_id]["dtype"], "BF16")
+        self.assertEqual(decoded_archive["tensors"][u8_node_id]["dtype"], "U8")
+        self.assertEqual(decoded_archive["tensors"][u8_node_id]["relation"]["worlds"], [[0, 0], [1, 1]])
+
 
 if __name__ == "__main__":
     unittest.main()
+
 
 

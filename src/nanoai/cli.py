@@ -121,11 +121,23 @@ def main():
     board_relation_tensor = sub.add_parser("board-relation-tensor")
     board_relation_tensor.add_argument("step_id")
     board_relation_tensor.add_argument("--open-step", action="append", default=[])
-    board_relation_tensor.add_argument("--mode", choices=("bf16_support", "bf16_signed", "pack5", "support2"), default="bf16_support")
+    board_relation_tensor.add_argument(
+        "--mode",
+        choices=("bf16_support", "bf16_signed", "pack5", "support2", "bit_plane", "indicator_2n", "auto_compact"),
+        default="bf16_support",
+    )
+
+    board_decode_rt = sub.add_parser("board-decode-relation-tensor")
+    board_decode_rt.add_argument("node_id")
+    board_decode_rt.add_argument("--core-identity", default=None)
     board_archive = sub.add_parser("board-archive-tensors")
     board_archive.add_argument("node_ids", nargs="+")
     board_archive.add_argument("--recipe", default="scratchboard-tensor-archive-v1")
     board_archive.add_argument("--parent")
+    board_decode_arch = sub.add_parser("board-decode-archive")
+    board_decode_arch.add_argument("version_id")
+    board_decode_arch.add_argument("--core-identity", default=None)
+
     board_gen = sub.add_parser("board-generator")
     board_gen.add_argument("task_id")
     board_gen.add_argument("operator", choices=("source_lines", "relation_table", "slot_sequence", "visual_report"))
@@ -214,6 +226,7 @@ def main():
     inquiry.add_argument("--board", action="append", default=[])
     inquiry.add_argument("--source", action="append")
     inquiry.add_argument("--carry-tensor", action="store_true")
+    inquiry.add_argument("--calibrated", action="store_true")
     worker = sub.add_parser("run")
     worker.add_argument("task_id")
     worker.add_argument("--core-config", type=Path, required=True)
@@ -428,8 +441,12 @@ def main():
         elif args.command == "board-relation-tensor":
             node = board.relation_tensor(args.step_id, open_step_ids=args.open_step, mode=args.mode)
             output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command == "board-decode-relation-tensor":
+            output = board.decode_relation_tensor(args.node_id, core_identity=args.core_identity)
         elif args.command == "board-archive-tensors":
             output = board.archive_tensors(args.node_ids, recipe=args.recipe, parent=args.parent)
+        elif args.command == "board-decode-archive":
+            output = board.decode_archived_tensors(args.version_id, core_identity=args.core_identity)
         elif args.command == "board-audit-visual":
             output = board.audit_visual(args.node_id)
         else:
@@ -449,7 +466,8 @@ def main():
             elif args.command == "inquire":
                 output = inquire(memory, core, args.task_id, state_step_id=args.state_step_id,
                                  selected_ids=args.source, observation_ids=args.observation,
-                                 scratchboard_ids=args.board, carry_tensor=args.carry_tensor)
+                                 scratchboard_ids=args.board, carry_tensor=args.carry_tensor,
+                                 calibrated=getattr(args, "calibrated", False))
             else:
                 output = run(memory, core, args.task_id, commit=args.commit, observation_ids=args.observation,
                              scratchboard_ids=args.board, selected_ids=args.source)

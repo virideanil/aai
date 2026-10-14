@@ -139,6 +139,67 @@ def pack_safetensors(tensors, *, metadata=None):
     return struct.pack("<Q", len(raw_header)) + raw_header + bytes(payload)
 
 
+def unpack_safetensors(source):
+    """Validate and unpack a safetensors container from bytes or path into metadata and named tensor payloads."""
+    raw = Path(source).read_bytes() if isinstance(source, (str, Path)) else bytes(source)
+    extent = len(raw)
+    if extent < 10:
+        raise ValueError("Safetensors container is incomplete")
+    length = struct.unpack("<Q", raw[:8])[0]
+    if not 2 <= length <= min(16 << 20, extent - 8):
+        raise ValueError("Safetensors header extent is invalid")
+
+    def unique(pairs):
+        result = {}
+        for key, value in pairs:
+            if key in result:
+                raise ValueError("Duplicate safetensors header key")
+            result[key] = value
+        return result
+
+    header = json.loads(raw[8:8 + length], object_pairs_hook=unique)
+    if not isinstance(header, dict):
+        raise ValueError("Safetensors header must be an object")
+    metadata = {}
+    tensors = {}
+    ordered = []
+    for name, row in header.items():
+        if name == "__metadata__":
+            if not isinstance(row, dict) or any(not isinstance(v, str) for v in row.values()):
+                raise ValueError("Safetensors metadata differs")
+            metadata = dict(row)
+            continue
+        if (not name or not isinstance(row, dict) or set(row) != {"dtype", "shape", "data_offsets"}
+                or row["dtype"] not in DTYPE_BYTES or not isinstance(row["shape"], list)
+                or not 1 <= len(row["shape"]) <= 16
+                or any(type(d) is not int or not 1 <= d <= 2**40 for d in row["shape"])):
+            raise ValueError("Safetensors tensor contract differs")
+        offsets = row["data_offsets"]
+        if (not isinstance(offsets, list) or len(offsets) != 2
+                or any(type(d) is not int for d in offsets)
+                or not 0 <= offsets[0] <= offsets[1] <= extent - length - 8):
+            raise ValueError("Safetensors tensor offsets differ")
+        expected = math.prod(row["shape"]) * DTYPE_BYTES[row["dtype"]]
+        if offsets[1] - offsets[0] != expected:
+            raise ValueError("Safetensors tensor byte count differs")
+        start = 8 + length + offsets[0]
+        stop = 8 + length + offsets[1]
+        ordered.append((start, stop))
+        tensors[name] = {
+            "dtype": row["dtype"],
+            "shape": list(row["shape"]),
+            "data": raw[start:stop],
+        }
+    cursor = 8 + length
+    for start, stop in sorted(ordered):
+        if start != cursor:
+            raise ValueError("Safetensors tensor extents overlap or leave a gap")
+        cursor = stop
+    if not tensors or cursor != extent:
+        raise ValueError("Safetensors payload is incomplete")
+    return {"metadata": metadata, "tensors": tensors}
+
+
 SCHEMA = (
     "CREATE TABLE artifacts (id TEXT PRIMARY KEY, format TEXT NOT NULL, byte_count INTEGER NOT NULL CHECK(byte_count>0), "
     "inventory_id TEXT NOT NULL, tensor_count INTEGER NOT NULL CHECK(tensor_count>0)) STRICT",

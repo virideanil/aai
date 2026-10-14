@@ -61,6 +61,10 @@ AGENTIC_CONTROLS = (
     "visual_start", "visual_end",
 )
 
+OPERATOR_VOCABULARY_VERSION = "nanoai.admitted-operators.v1"
+
+# Append-only operator slot vocabulary synchronized with nanoai.steps.ADMITTED_OPERATORS_V1.
+# Never insert or reorder existing entries; new operators may only be appended under a new version.
 ADMITTED_OPERATORS = (
     "source.read",
     "json.field",
@@ -102,8 +106,10 @@ MODE_CODES = {
 _ASCII_DELIMITERS = frozenset(b"{}[]():,;.\"'`+-*/=<>!&|^~%#\\@\n\r\t ")
 
 
-def agentic_contract(tokenizer: MasterTokenizer):
-    """Return the deterministic control-row and operator-row contract for agentic turns."""
+def agentic_contract(tokenizer: MasterTokenizer, *, operators=None):
+    """Return the deterministic control-row and append-only operator-row contract with SHAKE256 identity."""
+    import hashlib
+    import json
     base = model_contract(tokenizer)
     size = base["literal_rows"]
     cursor = size + 3
@@ -111,12 +117,30 @@ def agentic_contract(tokenizer: MasterTokenizer):
     for name in AGENTIC_CONTROLS:
         control_ids[name] = cursor
         cursor += 1
+    op_tuple = tuple(ADMITTED_OPERATORS if operators is None else operators)
+    if len(op_tuple) < len(ADMITTED_OPERATORS) or op_tuple[:len(ADMITTED_OPERATORS)] != ADMITTED_OPERATORS:
+        raise ValueError("Agentic operator vocabulary is append-only; prefix must match ADMITTED_OPERATORS v1")
+    if len(set(op_tuple)) != len(op_tuple):
+        raise ValueError("Agentic operator vocabulary contains duplicate operators")
     operator_ids = {}
-    for op in ADMITTED_OPERATORS:
+    for op in op_tuple:
         operator_ids[op] = cursor
         cursor += 1
+    identity_payload = json.dumps({
+        "schema": "nanoai.master-agentic-input.v1",
+        "operator_vocabulary_version": OPERATOR_VOCABULARY_VERSION,
+        "tokenizer_identity": tokenizer.identity,
+        "vocabulary_identity": tokenizer.vocabulary_identity,
+        "literal_rows": size,
+        "control_ids": control_ids,
+        "operator_ids": operator_ids,
+        "mode_codes": MODE_CODES,
+    }, sort_keys=True, separators=(",", ":")).encode("utf-8")
+    contract_identity = "shake256:" + hashlib.shake_256(identity_payload).hexdigest(64)
     return {
         "schema": "nanoai.master-agentic-input.v1",
+        "operator_vocabulary_version": OPERATOR_VOCABULARY_VERSION,
+        "contract_identity": contract_identity,
         "tokenizer_identity": tokenizer.identity,
         "vocabulary_identity": tokenizer.vocabulary_identity,
         "literal_rows": size,
@@ -133,6 +157,7 @@ def agentic_contract(tokenizer: MasterTokenizer):
             "with no literal byte surface; literal bytes cannot spoof control or tool tokens"
         ),
     }
+
 
 
 def structural_boundaries(raw: bytes, mode: str = "code") -> set[int]:
@@ -399,6 +424,114 @@ def agentic_causal_batch(tokenizer: MasterTokenizer, turns, *, max_tokens: int =
     }
 
 
+def audit_agentic_causal_masking(tokenizer: MasterTokenizer, batch) -> dict:
+    """Directly verify that tool_obs targets are excluded from loss while remaining active in causal history for downstream supervised tokens."""
+    if not isinstance(batch, dict) or batch.get("contract") != agentic_contract(tokenizer):
+        raise ValueError("Agentic model input contract mismatch")
+    contract = batch["contract"]
+    ignore_id = contract["label_ignore"]
+    obs_mode = MODE_CODES["tool_obs"]
+    mask_obs = bool(batch.get("loss_mask_observations", True))
+    turns = batch.get("turns")
+    input_ids = batch.get("input_ids")
+    labels = batch.get("labels")
+    attention_mask = batch.get("attention_mask")
+    mode_ids = batch.get("mode_ids")
+    loss_mask = batch.get("loss_mask")
+    if not (
+        isinstance(turns, list)
+        and isinstance(input_ids, list)
+        and isinstance(labels, list)
+        and isinstance(attention_mask, list)
+        and isinstance(mode_ids, list)
+        and isinstance(loss_mask, list)
+        and len(turns) == len(input_ids) == len(labels) == len(attention_mask) == len(mode_ids) == len(loss_mask)
+    ):
+        raise ValueError("Agentic batch arrays must have matching row counts")
+
+    masked_obs_targets = 0
+    active_obs_history = 0
+    conditioned_supervised_targets = 0
+    row_reports = []
+
+    for row_idx, (turn, inp, lbl, attn, mrow, lrow) in enumerate(
+        zip(turns, input_ids, labels, attention_mask, mode_ids, loss_mask)
+    ):
+        path = list(turn.get("token_ids", ()))
+        t_modes = list(turn.get("mode_ids", ()))
+        if len(path) != len(t_modes):
+            raise ValueError(f"Row {row_idx} turn token_ids and mode_ids length mismatch")
+        if not (len(inp) == len(lbl) == len(attn) == len(mrow) == len(lrow)):
+            raise ValueError(f"Row {row_idx} batch width mismatch")
+        if inp[0] != contract["bos_id"] or attn[0] != 1:
+            raise ValueError(f"Row {row_idx} missing active BOS prefix")
+
+        obs_input_positions = []
+        row_masked_obs = 0
+        row_conditioned_supervised = 0
+
+        for t, (tok, mode_code) in enumerate(zip(path, t_modes)):
+            input_pos = t + 1
+            if inp[input_pos] != tok:
+                raise ValueError(f"Row {row_idx} input_ids[{input_pos}] does not match turn token at {t}")
+            if mrow[input_pos] != mode_code:
+                raise ValueError(f"Row {row_idx} mode_ids[{input_pos}] does not match turn mode at {t}")
+            if attn[input_pos] != 1:
+                raise ValueError(f"Row {row_idx} active token at input_ids[{input_pos}] has attention_mask != 1")
+
+            if mode_code == obs_mode:
+                obs_input_positions.append(input_pos)
+                active_obs_history += 1
+                if mask_obs:
+                    if lbl[t] != ignore_id or lrow[t] != 0:
+                        raise ValueError(
+                            f"Row {row_idx} target position {t} is tool_obs but leaked into supervision "
+                            f"(label={lbl[t]}, loss_mask={lrow[t]})"
+                        )
+                    masked_obs_targets += 1
+                    row_masked_obs += 1
+            else:
+                if lbl[t] != tok or lrow[t] != 1:
+                    raise ValueError(
+                        f"Row {row_idx} non-observation target position {t} is not supervised "
+                        f"(label={lbl[t]}, expected={tok}, loss_mask={lrow[t]})"
+                    )
+                if obs_input_positions:
+                    # Target t is predicted from causal prefix inp[:t+1], which includes every prior tool_obs input_pos <= t
+                    prefix_obs = [pos for pos in obs_input_positions if pos <= t]
+                    if prefix_obs:
+                        if any(attn[pos] != 1 or inp[pos] != path[pos - 1] for pos in prefix_obs):
+                            raise ValueError(
+                                f"Row {row_idx} supervised target at {t} lost tool_obs history in causal prefix"
+                            )
+                        conditioned_supervised_targets += 1
+                        row_conditioned_supervised += 1
+
+        # EOS target at index len(path) is predicted from the full sequence inp[:len(path)+1]
+        eos_t = len(path)
+        if lbl[eos_t] != contract["eos_id"] or lrow[eos_t] != 1:
+            raise ValueError(f"Row {row_idx} EOS target at {eos_t} must remain supervised")
+        if obs_input_positions:
+            conditioned_supervised_targets += 1
+            row_conditioned_supervised += 1
+
+        row_reports.append({
+            "row": row_idx,
+            "masked_observation_targets": row_masked_obs,
+            "active_observation_history_tokens": len(obs_input_positions),
+            "conditioned_supervised_targets": row_conditioned_supervised,
+        })
+
+    return {
+        "loss_mask_observations": mask_obs,
+        "row_count": len(turns),
+        "masked_observation_target_count": masked_obs_targets,
+        "active_observation_history_count": active_obs_history,
+        "conditioned_supervised_target_count": conditioned_supervised_targets,
+        "rows": row_reports,
+    }
+
+
 def validate_agentic_batch(tokenizer: MasterTokenizer, batch):
     """Validate an agentic causal batch and return the decoded structured turns."""
     if not isinstance(batch, dict) or batch.get("contract") != agentic_contract(tokenizer):
@@ -406,6 +539,7 @@ def validate_agentic_batch(tokenizer: MasterTokenizer, batch):
     turns = batch.get("turns")
     if not isinstance(turns, list) or not 1 <= len(turns) <= 256:
         raise ValueError("Agentic turn record extent")
+    audit_agentic_causal_masking(tokenizer, batch)
     decoded = [decode_agentic_turn(tokenizer, t) for t in turns]
     rebuilt = agentic_causal_batch(
         tokenizer,

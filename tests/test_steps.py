@@ -164,15 +164,25 @@ class StepConsumerTests(unittest.TestCase):
         first = self.steps.calculate_fields(snap, self.plan)
         field_steps = list(first["step"]["arguments"]["steps"])
         self.steps.review(first["step_id"], "confirmed", reviewer="audit-1", reason="Verified product")
-        second = self.steps.propose(snap, "integer.product", {"steps": field_steps})
+        second = self.steps.propose(snap, "integer.product", {"steps": [field_steps[0]]})
         self.steps.execute(second["id"])
         self.steps.review(second["id"], "confirmed", reviewer="audit-2", reason="Verified second product")
 
-        cal = self.steps.calibration("display")
+        # Default policy="bracket": 2 confirmations have lower_5pct ~ 0.368 < 0.8 -> band="propose"
+        cal_default = self.steps.calibration("display")
+        self.assertEqual(cal_default["policy"], "bracket")
+        self.assertEqual(cal_default["operators"]["integer.product"]["band"], "propose")
+        self.assertTrue(cal_default["operators"]["integer.product"]["configured_rule_fires"])
+        self.assertFalse(cal_default["operators"]["integer.product"]["statistical_competence_established"])
+
+        # Deliberate opt-in policy="configured_rule": fires act_now at 2 confirmations
+        cal = self.steps.calibration("display", policy="configured_rule")
         self.assertEqual(cal["operators"]["integer.product"]["band"], "act_now")
         self.assertEqual(cal["operators"]["integer.product"]["empirical_precision"], 1.0)
 
-        acted = self.steps.band_proposal(snap, "integer.product", {"steps": field_steps})
+        acted = self.steps.band_proposal(
+            snap, "integer.product", {"steps": field_steps}, policy="configured_rule"
+        )
         self.assertEqual(acted["band"], "act_now")
         self.assertTrue(acted["executed"])
         self.assertEqual(acted["observation"]["result"]["value"], 46)
@@ -196,7 +206,7 @@ class StepConsumerTests(unittest.TestCase):
         first = self.steps.calculate_fields(snap, self.plan)
         field_steps = list(first["step"]["arguments"]["steps"])
         self.steps.review(first["step_id"], "confirmed", reviewer="audit-1", reason="Verified product")
-        second = self.steps.propose(snap, "integer.product", {"steps": field_steps})
+        second = self.steps.propose(snap, "integer.product", {"steps": [field_steps[0]]})
         self.steps.execute(second["id"])
         self.steps.review(second["id"], "confirmed", reviewer="audit-2", reason="Verified second product")
 
@@ -270,6 +280,12 @@ class StepConsumerTests(unittest.TestCase):
         )
 
         # 3. Verify decision_support_audit answers "Does this hybrid make well-supported decisions in practice?"
+        #    and distinguishes caller-supplied core_signal from assessed_judgment / core_generated_plan.
+        self.assertTrue(uncertain_act["signals"]["learned_core"]["caller_supplied"])
+        self.assertEqual(uncertain_act["signals"]["learned_core"]["provenance"], "caller_supplied_estimate")
+        self.assertFalse(with_core["signals"]["learned_core"]["caller_supplied"])
+        self.assertEqual(with_core["signals"]["learned_core"]["provenance"], "provisional_judgment")
+
         self.steps.review(with_core["step"]["id"], "confirmed", reviewer="audit-3", reason="Valid transfer")
         support = self.steps.decision_support_audit()
         self.assertEqual(support["question"], "Does this hybrid make well-supported decisions in practice?")
@@ -277,9 +293,212 @@ class StepConsumerTests(unittest.TestCase):
         self.assertEqual(support["well_supported_rate"], 1.0)
         self.assertEqual(support["unfamiliar_task_decisions"], 3)
         self.assertEqual(support["unfamiliar_task_precision"], 1.0)
+        self.assertGreaterEqual(support["core_generated_or_assessed_decisions"], 1)
+        self.assertGreaterEqual(support["caller_supplied_signal_decisions"], 1)
+        self.assertIn("evidence_boundary", support)
+
+    def test_calibrated_inquire_producer_path_and_empty_final_guard(self):
+        from nanoai.agent import ProposalError, inquire, run
+        from nanoai.relations import RELATION
+
+        # C1: Empty core_signal={} never fabricates endorsement ('maybe', usefulness=None, supplied=False)
+        snap0 = self.snapshot()
+        empty_sig = self.steps._resolve_core_signal(snap0, core_signal={})
+        self.assertFalse(empty_sig["supplied"])
+        self.assertEqual(empty_sig["verdict"], "maybe")
+        self.assertIsNone(empty_sig["usefulness"])
+
+        partial_sig = self.steps._resolve_core_signal(snap0, core_signal={"uncertainty": "none"})
+        self.assertTrue(partial_sig["supplied"])
+        self.assertEqual(partial_sig["verdict"], "maybe")
+        self.assertIsNone(partial_sig["usefulness"])
+
+        # C2: Verify Beta(3, 1) 5%-95% credible bracket and policy='bracket'
+        self.assertAlmostEqual(self.steps.beta_quantile(3, 1, 0.05), 0.05 ** (1.0 / 3.0), places=6)
+        self.assertAlmostEqual(self.steps.beta_quantile(3, 1, 0.95), 0.95 ** (1.0 / 3.0), places=6)
+
+        # Set up relational source and 2 confirmed relation.query steps on task "display"
+        rel_model = {"type": RELATION, "variables": ["x", "y"], "worlds": [[0, 0], [1, 1]], "scope": "Rail switch"}
+        self.memory.put_source("rel_src", json.dumps(rel_model))
+        snap = context(self.memory, "display", "test-core", selected_ids=["spec", "rel_src"])["snapshot"]
+        r_step = self.steps.execute(self.steps.propose(snap, "source.read", {"source": "rel_src"})["id"])
+        d_step = self.steps.execute(self.steps.propose(snap, "relation.decode", {"step": r_step["step_id"]})["id"])
+        q1 = self.steps.execute(self.steps.propose(snap, "relation.query", {"step": d_step["step_id"], "expression": {"eq": ["x", "y"]}})["id"])
+        self.steps.review(q1["step_id"], "confirmed", reviewer="audit-1", reason="Confirmed eq query")
+        q2 = self.steps.execute(self.steps.propose(snap, "relation.query", {"step": d_step["step_id"], "expression": "x"})["id"])
+        self.steps.review(q2["step_id"], "confirmed", reviewer="audit-2", reason="Confirmed x query")
+
+        cal_rule = self.steps.band_proposal(
+            snap, "relation.query", {"step": d_step["step_id"], "expression": "y"}, execute_act_now=False
+        )
+        self.assertEqual(cal_rule["signals"]["review_history"]["bracket_trit"], "both")
+        self.assertTrue(cal_rule["signals"]["review_history"]["configured_rule_fires"])
+        self.assertFalse(cal_rule["signals"]["review_history"]["statistical_competence_established"])
+
+        cal_bracket = self.steps.band_proposal(
+            snap,
+            "relation.query",
+            {"step": d_step["step_id"], "expression": "y"},
+            policy="bracket",
+            execute_act_now=False,
+        )
+        self.assertEqual(cal_bracket["band"], "propose")
+        self.assertEqual(cal_bracket["signals"]["calibration"]["policy"], "bracket")
+
+        class SequenceCore:
+            identity = "test-core"
+            def __init__(self, responses):
+                self.responses = list(responses)
+            def generate(self, messages, max_tokens=None, schema=None):
+                item = self.responses.pop(0)
+                if isinstance(item, dict) and "output" in item:
+                    return item
+                return {"output": json.dumps(item), "elapsed_ms": 1, "tokens": 6, "finish_reason": "stop"}
+
+        # 1. Familiar task ("display"), core-generated plan with uncertainty ("maybe") -> calibrated=True holds in "propose"
+        uncertain_inq = inquire(
+            self.memory,
+            SequenceCore([{"operator": "relation.query", "expression": "y", "verdict": "maybe", "confidence": 0.4, "uncertainty": "ambiguous_branch"}]),
+            "display",
+            selected_ids=["spec", "rel_src"],
+            state_step_id=d_step["step_id"],
+            calibrated=True,
+        )
+        self.assertEqual(uncertain_inq["band"], "propose")
+        self.assertFalse(uncertain_inq["executed"])
+        self.assertIsNone(uncertain_inq["result"])
+        self.assertEqual(uncertain_inq["calibration"]["signals"]["learned_core"]["provenance"], "core_generated_plan")
+        self.assertFalse(uncertain_inq["calibration"]["signals"]["learned_core"]["caller_supplied"])
+
+        # 2. Unfamiliar task ("novel_rail"), core-generated plan with high confidence ("yes", 0.93) -> cross-task transfer + core endorsement fires act_now
+        self.memory.set_task("novel_rail", "Inspect novel rail switch.", filenames=["novel.md"])
+        novel_snap = context(self.memory, "novel_rail", "test-core", selected_ids=["spec", "rel_src"])["snapshot"]
+        nr_step = self.steps.execute(self.steps.propose(novel_snap, "source.read", {"source": "rel_src"})["id"])
+        nd_step = self.steps.execute(self.steps.propose(novel_snap, "relation.decode", {"step": nr_step["step_id"]})["id"])
+
+        endorsed_inq = inquire(
+            self.memory,
+            SequenceCore([{"operator": "relation.query", "expression": {"eq": ["x", "y"]}, "verdict": "yes", "confidence": 0.93, "uncertainty": "none"}]),
+            "novel_rail",
+            selected_ids=["spec", "rel_src"],
+            state_step_id=nd_step["step_id"],
+            calibrated=True,
+        )
+        self.assertEqual(endorsed_inq["band"], "act_now")
+        self.assertTrue(endorsed_inq["executed"])
+        self.assertEqual(endorsed_inq["result"]["value"]["verdict"], "yes")
+        self.assertEqual(
+            endorsed_inq["calibration"]["signals"]["calibration"]["trigger"],
+            "cross_task_history_plus_core_endorsement",
+        )
+        self.assertEqual(endorsed_inq["calibration"]["signals"]["learned_core"]["provenance"], "core_generated_plan")
+
+        # 3. Post-correction: issuing a conduct correction on relation.query demotes subsequent calibrated inquire to escalate
+        self.steps.issue_correction(
+            endorsed_inq["step_id"],
+            reviewer="safety-auditor",
+            reason="Novel rail switch requires manual sign-off before querying",
+            conduct_virtue="epistemic_humility",
+        )
+        after_corr_inq = inquire(
+            self.memory,
+            SequenceCore([{"operator": "relation.query", "expression": "x", "verdict": "yes", "confidence": 0.95}]),
+            "novel_rail",
+            selected_ids=["spec", "rel_src"],
+            state_step_id=nd_step["step_id"],
+            calibrated=True,
+        )
+        self.assertEqual(after_corr_inq["band"], "escalate")
+        self.assertFalse(after_corr_inq["executed"])
+        self.assertIsNone(after_corr_inq["result"])
+
+        # 4. Empty-final generation guard in agent.run rejects <think>-only output and retries to completion
+        run_core = SequenceCore([
+            {"filename": "display.md", "content": "<think>Only thinking, no final body</think>   "},
+            {"filename": "display.md", "content": "<think>Verified spec@1</think>Two rails total 46 cm [spec@1]."},
+        ])
+        run_out = run(self.memory, run_core, "display", selected_ids=["spec"], max_attempts=2)
+        self.assertEqual(run_out["proposal"]["output"]["content"], "Two rails total 46 cm [spec@1].")
+        self.assertEqual(run_out["proposal"]["metrics"]["thinking_chars"], len("Verified spec@1"))
+        self.assertEqual(len(run_out["proposal"]["metrics"]["attempts"]), 2)
+        self.assertTrue(any("empty final document content" in r["reason"] for r in self.memory.state["rejections"]))
+
+    def test_exact_rational_bracket_and_four_admission_conditions(self):
+        from fractions import Fraction
+        from nanoai.steps import band_bracket, mass_at_or_below
+
+        t, a = Fraction(4, 5), Fraction(1, 20)
+        for c in (0, 2, 12, 13, 1000):
+            self.assertEqual(mass_at_or_below(c, 0, t), t ** (c + 1))
+        self.assertEqual([band_bracket(c, 0, t, a) for c in (2, 12, 13)], ["both", "both", "yes"])
+        self.assertEqual(band_bracket(8, 2, t, a), "both")
+        self.assertEqual(band_bracket(1, 9, t, a), "no")
+        self.assertEqual(band_bracket(1000, 1000, t, a), "no")
+        self.assertEqual(band_bracket(1000, 150, t, a), "yes")
+        for c, r in ((0, 0), (3, 5), (40, 7), (1000, 1000)):
+            self.assertEqual(
+                mass_at_or_below(c, r, Fraction(1, 3)) + mass_at_or_below(r, c, Fraction(2, 3)),
+                Fraction(1, 1),
+            )
+        # Equality convention mass <= alpha: exact boundary hits 'yes' and 'no'
+        self.assertEqual(band_bracket(3, 0, threshold=t, alpha=t ** 4), "yes")
+        self.assertEqual(band_bracket(0, 3, threshold=Fraction(1, 5), alpha=t ** 4), "no")
+        # 14/0 against 0.819 (819/1000): (819/1000)^15 > 1/20 -> stays 'both' ('propose'), not rounded to 0.819
+        self.assertEqual(band_bracket(14, 0, threshold=0.819, alpha=0.05), "both")
+
+        # Verify all 4 admission conditions (a)-(d) and persisted decision_record
+        snap = self.snapshot()
+        first = self.steps.calculate_fields(snap, self.plan)
+        field_steps = list(first["step"]["arguments"]["steps"])
+        self.steps.review(first["step_id"], "confirmed", reviewer="audit-1", reason="First distinct step")
+
+        # Condition (b): repeating identical step signature does not inflate confirmed
+        dup = self.steps.propose(snap, "integer.product", {"steps": field_steps})
+        self.steps.execute(dup["id"])
+        self.steps.review(dup["id"], "confirmed", reviewer="audit-2", reason="Duplicate step signature")
+
+        # Condition (c): self-review by the same core that proposed the step is excluded
+        self_rev = self.steps.propose(snap, "integer.product", {"steps": [field_steps[0]]})
+        self.steps.execute(self_rev["id"])
+        self.steps.review(self_rev["id"], "confirmed", reviewer="test-core", reason="Self review")
+
+        # Condition (a): review under a different core version is excluded when active core changes
+        snap_old_core = context(self.memory, "display", "old-core-v0", selected_ids=["spec"])["snapshot"]
+        old_core_step = self.steps.propose(snap_old_core, "integer.product", {"steps": [field_steps[1]]})
+        self.steps.execute(old_core_step["id"])
+        self.steps.review(old_core_step["id"], "confirmed", reviewer="audit-3", reason="Old core version")
+
+        banded = self.steps.band_proposal(
+            snap,
+            "integer.product",
+            {"steps": [field_steps[0], field_steps[0]]},
+            threshold=0.8,
+            execute_act_now=False,
+        )
+        rh = banded["signals"]["review_history"]
+        self.assertEqual(rh["in_task_confirmed"], 1)
+        self.assertEqual(rh["point_agreement_rate"], 1.0)
+        self.assertEqual(rh["threshold_rational"], "4/5")
+        self.assertEqual(rh["alpha_rational"], "1/20")
+        self.assertEqual(rh["equality_convention"], "mass <= alpha")
+        self.assertEqual(rh["posterior_mass_at_or_below"], "16/25")
+        conds = rh["admission_conditions"]
+        self.assertEqual(conds["distinct_step_evidence"]["excluded_duplicate_steps"], 1)
+        self.assertEqual(conds["reviewer_independence"]["excluded_self_reviews"], 1)
+        self.assertEqual(conds["exchangeability_scope"]["excluded_core_version_changes"], 1)
+
+        # Fresh process reload preserves persisted decision_record in journaled step.proposed
+        fresh_steps = Steps(Memory(self.root))
+        persisted = fresh_steps.memory.state["steps"][banded["step"]["id"]]["decision_record"]
+        self.assertEqual(persisted["threshold_rational"], "4/5")
+        self.assertEqual(persisted["alpha_rational"], "1/20")
+        self.assertEqual(persisted["equality_convention"], "mass <= alpha")
+        self.assertEqual(persisted["posterior_mass_at_or_below"], "16/25")
+        self.assertEqual(persisted["confirmed"], 1)
 
 
 if __name__ == "__main__":
     unittest.main()
+
 
 

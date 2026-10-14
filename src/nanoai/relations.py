@@ -116,27 +116,159 @@ def query_tensor_enclosure(model, expression):
     }
 
 
+def pack_bit_plane(bits):
+    """Pack binary world bits (0 or 1) at 1 bit per cell into canonical U8 bytes."""
+    out = bytearray()
+    row = list(bits)
+    for i in range(0, len(row), 8):
+        chunk = row[i:i + 8]
+        byte = 0
+        for j, bit in enumerate(chunk):
+            if type(bit) is not int or bit not in (0, 1):
+                raise ValueError("Bit-plane packing requires exact 0/1 bits")
+            byte |= (bit << j)
+        out.append(byte)
+    return bytes(out)
+
+
+def unpack_bit_plane(raw, count):
+    """Unpack 1-bit-per-cell binary world bits from canonical U8 bytes."""
+    if not isinstance(raw, (bytes, bytearray)) or type(count) is not int or count < 0:
+        raise ValueError("Bit-plane extent")
+    if len(raw) != (count + 7) // 8:
+        raise ValueError("Bit-plane byte length mismatch")
+    result = []
+    for i, byte in enumerate(raw):
+        width = min(8, count - 8 * i)
+        if width < 8 and byte >= (1 << width):
+            raise ValueError("Bit-plane contains noncanonical tail bits")
+        for j in range(width):
+            result.append((byte >> j) & 1)
+    return result
+
+
+def pack_indicator_2n(variables, worlds):
+    """Encode a finite relation as its canonical order-free 2^n characteristic bitset."""
+    n = len(variables)
+    if not 1 <= n <= MAX_VARIABLES:
+        raise ValueError("Characteristic indicator variable extent")
+    total_assignments = 1 << n
+    byte_len = (total_assignments + 7) // 8
+    out = bytearray(byte_len)
+    for row in worlds:
+        if len(row) != n:
+            raise ValueError("World row width mismatch")
+        idx = 0
+        for bit in row:
+            if type(bit) is not int or bit not in (0, 1):
+                raise ValueError("Characteristic indicator requires binary worlds")
+            idx = (idx << 1) | bit
+        out[idx >> 3] |= 1 << (idx & 7)
+    return bytes(out)
+
+
+def unpack_indicator_2n(raw, variables):
+    """Decode the canonical lexicographical world set from a 2^n characteristic bitset."""
+    n = len(variables)
+    if not isinstance(raw, (bytes, bytearray)) or not 1 <= n <= MAX_VARIABLES:
+        raise ValueError("Characteristic indicator extent")
+    total_assignments = 1 << n
+    expected_bytes = (total_assignments + 7) // 8
+    if len(raw) != expected_bytes:
+        raise ValueError("Characteristic indicator byte length mismatch")
+    if total_assignments < 8 and raw and raw[0] >= (1 << total_assignments):
+        raise ValueError("Characteristic indicator contains noncanonical tail bits")
+    worlds = []
+    for idx in range(total_assignments):
+        if (raw[idx >> 3] >> (idx & 7)) & 1:
+            worlds.append([(idx >> (n - 1 - j)) & 1 for j in range(n)])
+    return worlds
+
+
+def indicator_expression_mask(variables, expression) -> int:
+    """Compile an admitted boolean expression into a 2^n bitmask over assignment indices."""
+    n = len(variables)
+    mask = 0
+    for idx in range(1 << n):
+        assignment = {variables[j]: (idx >> (n - 1 - j)) & 1 for j in range(n)}
+        if evaluate(expression, assignment) == 1:
+            mask |= 1 << idx
+    return mask
+
+
+def indicator_query_verdict(raw_indicator: bytes, variables: list[str], expression) -> str:
+    """Bitwise query evaluation directly over a 2^n characteristic vector."""
+    state_int = int.from_bytes(raw_indicator, "little")
+    if state_int == 0:
+        raise ValueError("Empty characteristic indicator has no consistent worlds")
+    expr_mask = indicator_expression_mask(variables, expression)
+    has_true = (state_int & expr_mask) != 0
+    has_false = (state_int & ~expr_mask) != 0
+    if has_true and not has_false:
+        return "yes"
+    if has_false and not has_true:
+        return "no"
+    return "maybe"
+
+
+def indicator_dalal_revise(prior_indicator: bytes, incoming_indicator: bytes, variables: list[str]) -> tuple[bytes, int | None]:
+    """Bitwise Dalal minimal-Hamming belief revision over 2^n characteristic vectors."""
+    n = len(variables)
+    total = 1 << n
+    byte_len = (total + 7) // 8
+    p_int = int.from_bytes(prior_indicator, "little")
+    m_int = int.from_bytes(incoming_indicator, "little")
+    if m_int == 0:
+        return bytes(byte_len), None
+    if p_int == 0:
+        return incoming_indicator, None
+    overlap = p_int & m_int
+    if overlap != 0:
+        return overlap.to_bytes(byte_len, "little"), 0
+    p_indices = [i for i in range(total) if (p_int >> i) & 1]
+    m_indices = [i for i in range(total) if (m_int >> i) & 1]
+    best_d = n + 1
+    selected_mask = 0
+    for w in m_indices:
+        d = min((w ^ v).bit_count() for v in p_indices)
+        if d < best_d:
+            best_d = d
+            selected_mask = 1 << w
+        elif d == best_d:
+            selected_mask |= 1 << w
+    return selected_mask.to_bytes(byte_len, "little"), best_d
+
+
 def encode_relation_tensor(model, *, mode="bf16_support", open_questions=()):
     """Encode a non-empty finite relation into exact BF16 words or compact packed bit/trit carriers."""
     from .judgments import pack
     validate_model(model)
     if not model["worlds"]:
         raise ValueError("An inconsistent relation has no non-empty world tensor")
-    if mode not in {"bf16_support", "bf16_signed", "pack5", "support2"}:
-        raise ValueError("Unsupported relation tensor mode")
     variables = list(model["variables"])
     worlds = [list(row) for row in model["worlds"]]
+    if mode == "auto_compact":
+        n_vars = len(variables)
+        bit_plane_len = (len(worlds) * n_vars + 7) // 8
+        ind_len = ((1 << n_vars) + 7) // 8
+        mode = "indicator_2n" if ind_len <= bit_plane_len else "bit_plane"
+    if mode not in {"bf16_support", "bf16_signed", "pack5", "support2", "bit_plane", "indicator_2n"}:
+        raise ValueError("Unsupported relation tensor mode")
     words = []
+    flat_bits = []
     flat_trits = []
     flat_support = []
     for row in worlds:
         for bit in row:
+            flat_bits.append(bit)
             flat_trits.append("yes" if bit else "no")
             flat_support.append(2 if bit else 1)
             if mode == "bf16_support":
                 words.extend((BF16_ONE, BF16_ZERO) if bit == 0 else (BF16_ZERO, BF16_ONE))
             elif mode == "bf16_signed":
                 words.append(BF16_ONE if bit else BF16_NEG_ONE)
+    packed_worlds_bits = pack_bit_plane(flat_bits)
+    packed_worlds_indicator = pack_indicator_2n(variables, worlds)
     packed_worlds_trits = pack(flat_trits)
     packed_worlds_support2 = pack_support2(flat_support)
     if mode in {"bf16_support", "bf16_signed"}:
@@ -148,8 +280,16 @@ def encode_relation_tensor(model, *, mode="bf16_support", open_questions=()):
         raw = packed_worlds_trits
         shape = [len(raw)]
         dtype = "u8"
-    else:
+    elif mode == "support2":
         raw = packed_worlds_support2
+        shape = [len(raw)]
+        dtype = "u8"
+    elif mode == "bit_plane":
+        raw = packed_worlds_bits
+        shape = [len(raw)]
+        dtype = "u8"
+    else:
+        raw = packed_worlds_indicator
         shape = [len(raw)]
         dtype = "u8"
     box_codes = []
@@ -172,10 +312,12 @@ def encode_relation_tensor(model, *, mode="bf16_support", open_questions=()):
         "box_marginals": dict(zip(variables, box_labels)),
         "packed_box_trits_hex": pack(box_labels).hex(),
         "packed_box_support2_hex": pack_support2(box_codes).hex(),
+        "packed_worlds_bits_hex": packed_worlds_bits.hex(),
+        "packed_worlds_indicator_2n_hex": packed_worlds_indicator.hex(),
         "packed_worlds_trits_hex": packed_worlds_trits.hex(),
         "packed_worlds_support2_hex": packed_worlds_support2.hex(),
         "questions": questions,
-        "meaning": "Exact joint relation worlds carried in BF16 and packed ternary/support planes",
+        "meaning": "Exact joint relation worlds carried in BF16 or binary/ternary/support planes with pack5 box marginals",
     }
     return raw, shape, metadata
 
@@ -190,15 +332,17 @@ def decode_relation_tensor(raw, shape=None, metadata=None):
     mode = metadata.get("mode")
     variables = metadata.get("variables")
     world_count = metadata.get("world_count")
-    if (mode not in {"bf16_support", "bf16_signed", "pack5", "support2"} or not isinstance(variables, list)
+    if (mode not in {"bf16_support", "bf16_signed", "pack5", "support2", "bit_plane", "indicator_2n"}
+            or not isinstance(variables, list)
             or not 1 <= len(variables) <= MAX_VARIABLES or type(world_count) is not int
             or not 1 <= world_count <= MAX_WORLDS or not isinstance(raw, bytes)):
         raise ValueError("Relational tensor metadata extent")
-    expected_dtype = "u8" if mode in {"pack5", "support2"} else "bf16"
-    if metadata.get("dtype", expected_dtype) != expected_dtype:
-        raise ValueError("Relational tensor metadata dtype differs from mode")
+    expected_dtype = "u8" if mode in {"pack5", "support2", "bit_plane", "indicator_2n"} else "bf16"
+    if metadata.get("dtype") != expected_dtype:
+        raise ValueError("Relational tensor metadata dtype is missing or differs from mode")
     count = world_count * len(variables)
     worlds = []
+    flat_bits = []
     flat_trits = []
     flat_support = []
     if mode in {"bf16_support", "bf16_signed"}:
@@ -227,6 +371,7 @@ def decode_relation_tensor(raw, shape=None, metadata=None):
                     else:
                         raise ValueError("Noncanonical BF16 signed trit in relational tensor")
                 row.append(bit)
+                flat_bits.append(bit)
                 flat_trits.append("yes" if bit else "no")
                 flat_support.append(2 if bit else 1)
             worlds.append(row)
@@ -249,9 +394,10 @@ def decode_relation_tensor(raw, shape=None, metadata=None):
                 else:
                     raise ValueError("World tensor cannot contain unresolved marginal trit in a concrete world row")
                 row.append(bit)
+                flat_bits.append(bit)
                 flat_support.append(2 if bit else 1)
             worlds.append(row)
-    else:
+    elif mode == "support2":
         expected_bytes = (count + 3) // 4
         if list(shape) != [expected_bytes] or len(raw) != expected_bytes:
             raise ValueError("Relational support2 tensor shape or byte count differs")
@@ -270,13 +416,58 @@ def decode_relation_tensor(raw, shape=None, metadata=None):
                 else:
                     raise ValueError("World tensor cannot contain non-atomic support code in a concrete world row")
                 row.append(bit)
+                flat_bits.append(bit)
                 flat_trits.append("yes" if bit else "no")
             worlds.append(row)
+    elif mode == "bit_plane":
+        expected_bytes = (count + 7) // 8
+        if list(shape) != [expected_bytes] or len(raw) != expected_bytes:
+            raise ValueError("Relational bit_plane tensor shape or byte count differs")
+        flat_bits = unpack_bit_plane(raw, count)
+        for r in range(world_count):
+            row = flat_bits[r * len(variables):(r + 1) * len(variables)]
+            for bit in row:
+                flat_trits.append("yes" if bit else "no")
+                flat_support.append(2 if bit else 1)
+            worlds.append(row)
+    else:
+        expected_bytes = ((1 << len(variables)) + 7) // 8
+        if list(shape) != [expected_bytes] or len(raw) != expected_bytes:
+            raise ValueError("Relational indicator_2n tensor shape or byte count differs")
+        ind_worlds = unpack_indicator_2n(raw, variables)
+        if len(ind_worlds) != world_count:
+            raise ValueError("Decoded indicator_2n world count differs from metadata")
+        if isinstance(metadata.get("packed_worlds_bits_hex"), str):
+            candidate_bits = unpack_bit_plane(bytes.fromhex(metadata["packed_worlds_bits_hex"]), count)
+            candidate_worlds = [
+                candidate_bits[r * len(variables):(r + 1) * len(variables)]
+                for r in range(world_count)
+            ]
+            if (len({tuple(r) for r in candidate_worlds}) != world_count
+                    or sorted(candidate_worlds) != ind_worlds
+                    or pack_indicator_2n(variables, candidate_worlds) != raw):
+                raise ValueError("Packed binary world bit-plane differs from the decoded indicator_2n world set")
+            worlds = candidate_worlds
+        else:
+            worlds = ind_worlds
+        for row in worlds:
+            for bit in row:
+                flat_bits.append(bit)
+                flat_trits.append("yes" if bit else "no")
+                flat_support.append(2 if bit else 1)
     if (not isinstance(metadata.get("packed_worlds_trits_hex"), str)
             or not isinstance(metadata.get("packed_worlds_support2_hex"), str)
             or unpack(bytes.fromhex(metadata["packed_worlds_trits_hex"]), count) != flat_trits
             or unpack_support2(bytes.fromhex(metadata["packed_worlds_support2_hex"]), count, labels=False) != flat_support):
         raise ValueError("Packed ternary/support planes differ from the decoded relational tensor")
+    if "packed_worlds_bits_hex" in metadata:
+        if (not isinstance(metadata["packed_worlds_bits_hex"], str)
+                or unpack_bit_plane(bytes.fromhex(metadata["packed_worlds_bits_hex"]), count) != flat_bits):
+            raise ValueError("Packed binary world bit-plane differs from the decoded relational tensor")
+    if "packed_worlds_indicator_2n_hex" in metadata:
+        if (not isinstance(metadata["packed_worlds_indicator_2n_hex"], str)
+                or bytes.fromhex(metadata["packed_worlds_indicator_2n_hex"]) != pack_indicator_2n(variables, worlds)):
+            raise ValueError("Packed 2^n characteristic indicator differs from the decoded relational tensor")
     model = validate_model({"type": RELATION, "variables": list(variables),
                             "worlds": worlds, "scope": metadata.get("model_scope")})
     expected_box_codes = []
@@ -301,6 +492,62 @@ def decode_relation_tensor(raw, shape=None, metadata=None):
                 or q["correlation_loss"] != enc["correlation_loss"]):
             raise ValueError("Relational tensor question verdict disagrees with the decoded worlds")
     return model
+
+
+def benchmark_relation_carriers(model, *, expression=None, incoming_model=None) -> dict:
+    """Measure payload bytes, metadata/container bytes, round-trip fidelity, bitwise query and Dalal revision across all relational tensor carriers."""
+    import json
+    from .tensor_store import pack_safetensors
+    validate_model(model)
+    modes = ("bf16_support", "bf16_signed", "pack5", "support2", "bit_plane", "indicator_2n")
+    byte_sizes = {}
+    metadata_bytes = {}
+    container_bytes = {}
+    for m in modes:
+        raw, shape, meta = encode_relation_tensor(model, mode=m)
+        decoded = decode_relation_tensor(raw, shape, meta)
+        if decoded["worlds"] != model["worlds"] or decoded["variables"] != model["variables"]:
+            raise ValueError(f"Carrier {m} round-trip mismatch")
+        serial = json.dumps(meta, sort_keys=True, separators=(",", ":"))
+        archive = pack_safetensors(
+            {"state": {"dtype": meta["dtype"].upper(), "shape": shape, "data": raw}},
+            metadata={"origin": serial},
+        )
+        byte_sizes[m] = len(raw)
+        metadata_bytes[m] = len(serial.encode("utf-8"))
+        container_bytes[m] = len(archive)
+    auto_raw, _, auto_meta = encode_relation_tensor(model, mode="auto_compact")
+    out = {
+        "variables": len(model["variables"]),
+        "worlds": len(model["worlds"]),
+        "cells": len(model["variables"]) * len(model["worlds"]),
+        "bytes": byte_sizes,
+        "payload_bytes": byte_sizes,
+        "metadata_utf8_bytes": metadata_bytes,
+        "complete_safetensors_bytes": container_bytes,
+        "auto_compact_mode": auto_meta["mode"],
+        "auto_compact_bytes": len(auto_raw),
+        "storage_note": "payload_bytes measures raw tensor data only; complete_safetensors_bytes includes JSON header and sidecar metadata",
+    }
+    ind_raw = pack_indicator_2n(model["variables"], model["worlds"])
+    if expression is not None:
+        enc = query_tensor_enclosure(model, expression)
+        ind_verdict = indicator_query_verdict(ind_raw, model["variables"], expression)
+        if ind_verdict != enc["exact_verdict"]:
+            raise ValueError("Characteristic indicator bitwise query disagrees with world-table query")
+        out["query_verdict"] = ind_verdict
+        out["query_parity"] = True
+    if incoming_model is not None:
+        validate_model(incoming_model)
+        inc_ind = pack_indicator_2n(incoming_model["variables"], incoming_model["worlds"])
+        rev_ind, rev_d = indicator_dalal_revise(ind_raw, inc_ind, model["variables"])
+        rev_worlds_ind = unpack_indicator_2n(rev_ind, model["variables"])
+        rev_worlds_table, table_d = km_revise_worlds(model["worlds"], incoming_model["worlds"])
+        if rev_worlds_ind != rev_worlds_table or rev_d != table_d:
+            raise ValueError("Characteristic indicator bitwise Dalal revision disagrees with km_revise_worlds")
+        out["revision_min_hamming_distance"] = rev_d
+        out["revision_parity"] = True
+    return out
 
 
 def expression_variables(expression):
@@ -405,8 +652,20 @@ def validate_arguments(operator, arguments):
     return [arguments["step"]]
 
 
+KM_ASSUMPTIONS = {
+    "reference": "Katsuno & Mendelzon (1991), Propositional Knowledge Base Revision and Minimal Change, AIJ 52(3):263-294, Theorem 3.3; Dalal (1988) Hamming preorder",
+    "theorem_reference": "Katsuno & Mendelzon (1991) Theorem 3.3 + Dalal (1988) uniform Hamming distance",
+    "policy_guidance": "Use policy='replace' for authoritative source corrections that supersede prior state; use policy='km' for partial new evidence under minimal Hamming change",
+    "domain": "Finite boolean worlds W = {0,1}^n over fixed shared variable identities",
+    "preconditions": "Prior psi != empty and incoming evidence mu != empty for KM1-KM8; when psi is empty (conflict), replacement adopts mu with reopened_conflict=True",
+    "metric": "Uniform unit L1 Hamming distance d_H(psi, w) = min_{v in psi} sum_i |w_i - v_i|",
+    "non_claims": "Does not assign domain-specific variable weights or causal intervention semantics (use relation.map for state transitions)",
+}
+
+
+
 def km_revise_worlds(prior_worlds, incoming_worlds):
-    """Katsuno-Mendelzon minimal-Hamming-distance belief revision over finite worlds (KM1-KM6)."""
+    """Katsuno-Mendelzon minimal-Hamming-distance belief revision over finite worlds (KM1-KM8)."""
     psi = {tuple(row) for row in prior_worlds}
     mu = {tuple(row) for row in incoming_worlds}
     if not mu:
@@ -597,6 +856,7 @@ def calculate(operator, arguments, parent, extra_inputs=()):
                 "added_world_count": len(new_set - old_set),
                 "km_minimal_worlds": km_worlds,
                 "km_min_hamming_distance": km_min_distance,
+                "km_assumptions": deepcopy(KM_ASSUMPTIONS),
                 "monotone": new_set <= old_set,
                 "reopened_conflict": len(old_set) == 0 and len(new_set) > 0,
             },
