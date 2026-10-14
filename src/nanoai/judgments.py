@@ -187,8 +187,10 @@ class Judgments:
                               *(0x3F80 if channel == value else 0 for value in values for channel in CHANNELS))
         # tensor() takes the process lock and revalidates this complete snapshot.
         # Releasing the read lock here avoids recursive OS-lock acquisition.
+        from .relations import pack_support2
         tensor = self.board.tensor(snapshot, raw, shape=[len(values), 3], origin={
             "operation": "judgment.one_hot", "channels": list(CHANNELS), "judgments": node_ids,
+            "packed_support2_hex": pack_support2(values).hex(),
             "meaning": "Discrete judgment indicators, not probabilities or trained semantic vectors"})
         return {"packed": pack(values), "count": len(values), "channels": list(CHANNELS), "tensor": tensor,
                 "meaning": "Exact carriers; the referenced question, role, reason and evidence determine interpretation"}

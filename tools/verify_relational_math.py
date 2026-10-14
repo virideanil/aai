@@ -161,12 +161,49 @@ def main(output=None):
           {"tested_polynomial_orders":12,"hypothetical_rational":"22/7",
            "scope":"Polynomial identities only; the contradiction for pi uses the written analytic proof"})
 
+    import sys
+    sys.path.insert(0, str(Path(__file__).resolve().parents[1] / "src"))
+    from nanoai.relations import (
+        RELATION, decode_relation_tensor, encode_relation_tensor, query_tensor_enclosure,
+    )
+    expressions = [
+        0, 1, "x", "y",
+        {"not": "x"}, {"not": "y"},
+        {"and": ["x", "y"]}, {"or": ["x", "y"]},
+        {"xor": ["x", "y"]}, {"eq": ["x", "y"]},
+        {"implies": ["x", "y"]}, {"implies": ["y", "x"]},
+    ]
+    enclosure_cases = 0
+    correlation_losses = 0
+    tensor_roundtrips = 0
+    for mask in range(1, 16):
+        w_list = [list(w) for i, w in enumerate(worlds) if mask & (1 << i)]
+        rel = {"type": RELATION, "variables": ["x", "y"], "worlds": w_list, "scope": f"mask-{mask}"}
+        for mode in ("bf16_support", "bf16_signed", "pack5", "support2"):
+            encoded = encode_relation_tensor(rel, mode=mode)
+            decoded = decode_relation_tensor(encoded)
+            assert decoded["variables"] == ["x", "y"] and decoded["worlds"] == w_list
+            tensor_roundtrips += 1
+        for expr in expressions:
+            enc = query_tensor_enclosure(rel, expr)
+            assert enc["enclosure_holds"]
+            enclosure_cases += 1
+            if enc["correlation_loss"]:
+                correlation_losses += 1
+    check("2-bit support lattice over-approximates exact relational queries without false exclusion",
+          enclosure_cases == 180 and correlation_losses > 0,
+          {"enclosure_cases": enclosure_cases, "correlation_loss_cases": correlation_losses})
+    check("BF16 support, BF16 signed, pack5, and support2 relational tensors round-trip losslessly",
+          tensor_roundtrips == 60,
+          {"roundtrips": tensor_roundtrips, "modes": ["bf16_support", "bf16_signed", "pack5", "support2"]})
+
     result = {"scope": "Finite mathematical reference and counterexamples; no model training, runtime speed, human psychology or universal-world claim.",
               "checks": checks, "passed": len(checks),
               "source_digest": "shake256:" + hashlib.shake_256(Path(__file__).read_bytes()).hexdigest(64)}
     if output is not None:
         output.write_text(json.dumps(result, indent=2)+"\n")
-    print(json.dumps({"passed": len(checks), "relational_answers": labels, "refinement_cases": compared}))
+    print(json.dumps({"passed": len(checks), "relational_answers": labels, "refinement_cases": compared,
+                      "enclosure_cases": enclosure_cases, "tensor_roundtrips": tensor_roundtrips}))
 
 
 if __name__ == "__main__":

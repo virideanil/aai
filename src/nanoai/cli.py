@@ -118,6 +118,14 @@ def main():
     board_note.add_argument("step_id")
     board_note.add_argument("--open-step", action="append", default=[])
     board_note.add_argument("--language", choices=("en", "tr"), default="en")
+    board_relation_tensor = sub.add_parser("board-relation-tensor")
+    board_relation_tensor.add_argument("step_id")
+    board_relation_tensor.add_argument("--open-step", action="append", default=[])
+    board_relation_tensor.add_argument("--mode", choices=("bf16_support", "bf16_signed", "pack5", "support2"), default="bf16_support")
+    board_archive = sub.add_parser("board-archive-tensors")
+    board_archive.add_argument("node_ids", nargs="+")
+    board_archive.add_argument("--recipe", default="scratchboard-tensor-archive-v1")
+    board_archive.add_argument("--parent")
     board_document = sub.add_parser("board-document")
     board_document.add_argument("node_id")
     board_document.add_argument("--filename")
@@ -182,6 +190,7 @@ def main():
     inquiry.add_argument("--observation", action="append", default=[])
     inquiry.add_argument("--board", action="append", default=[])
     inquiry.add_argument("--source", action="append")
+    inquiry.add_argument("--carry-tensor", action="store_true")
     worker = sub.add_parser("run")
     worker.add_argument("task_id")
     worker.add_argument("--core-config", type=Path, required=True)
@@ -373,6 +382,11 @@ def main():
                     raise ValueError("Open relational questions apply to relation.query notes")
                 node = board.quantity(args.step_id, language=args.language)
             output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command == "board-relation-tensor":
+            node = board.relation_tensor(args.step_id, open_step_ids=args.open_step, mode=args.mode)
+            output = {"node": node, "view": board.describe(node["id"])}
+        elif args.command == "board-archive-tensors":
+            output = board.archive_tensors(args.node_ids, recipe=args.recipe, parent=args.parent)
         else:
             proposal = board.propose_document(args.node_id, filename=args.filename)
             receipt = memory.commit(proposal["id"], core_identity=proposal["snapshot"]["core_identity"]) if args.commit else None
@@ -386,7 +400,7 @@ def main():
             elif args.command == "inquire":
                 output = inquire(memory, core, args.task_id, state_step_id=args.state_step_id,
                                  selected_ids=args.source, observation_ids=args.observation,
-                                 scratchboard_ids=args.board)
+                                 scratchboard_ids=args.board, carry_tensor=args.carry_tensor)
             else:
                 output = run(memory, core, args.task_id, commit=args.commit, observation_ids=args.observation,
                              scratchboard_ids=args.board, selected_ids=args.source)

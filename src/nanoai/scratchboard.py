@@ -400,6 +400,140 @@ class Scratchboard:
                 raise ValueError("Node does not hold tensor data")
             return self._tensor_bytes(node["spec"], core_identity)
 
+    def relation_tensor(self, step_id, *, open_step_ids=(), mode="bf16_support"):
+        """Carry a relational state and its open questions as an exact BF16 and bit/trit tensor."""
+        from .relations import encode_relation_tensor, validate_model
+        open_ids = list(open_step_ids)
+        if len(open_ids) > 16 or len(set(open_ids)) != len(open_ids) or step_id in open_ids:
+            raise ValueError("Open relational question step selection")
+        with self.memory.locked():
+            step = self.memory.state["steps"].get(step_id)
+            obs = self.memory.state["step_observations"].get(step_id)
+            if not step or not obs:
+                raise ValueError("Relation tensor requires an observed relational step")
+            if step["operator"] == "relation.query":
+                state_id = step["arguments"]["step"]
+                state_obs = self.memory.state["step_observations"].get(state_id)
+                if not state_obs:
+                    raise ValueError("Relation query parent state is unobserved")
+                model = validate_model(deepcopy(state_obs["result"].get("value")))
+                questions = [deepcopy(step["arguments"]["expression"])]
+                bound_ids = [state_id, step_id]
+            else:
+                model = validate_model(deepcopy(obs["result"].get("value")))
+                questions = []
+                bound_ids = [step_id]
+            for oid in open_ids:
+                open_step = self.memory.state["steps"].get(oid)
+                open_obs = self.memory.state["step_observations"].get(oid)
+                if not open_step or not open_obs or open_step["operator"] != "relation.query":
+                    raise ValueError("Open question carrier requires observed relation.query steps")
+                if any(open_step["snapshot"][k] != step["snapshot"][k]
+                       for k in ("task_id", "task_revision", "identity", "core_identity")):
+                    raise StaleState("Open question step belongs to another task or basis")
+                questions.append(deepcopy(open_step["arguments"]["expression"]))
+                bound_ids.append(oid)
+            snapshot = deepcopy(step["snapshot"])
+            snapshot.setdefault("observations", {}).update({
+                sid: self.memory.state["step_observations"][sid]["digest"] for sid in bound_ids})
+            self.memory._validate_snapshot(snapshot)
+            raw, shape, meta = encode_relation_tensor(model, mode=mode, open_questions=questions)
+        return self.tensor(snapshot, raw, shape=shape, dtype="bf16",
+                           origin={**meta, "step_id": step_id, "open_step_ids": open_ids})
+
+    def decode_relation_tensor(self, node_id, *, core_identity):
+        """Reconstruct and verify the finite relation model from a scratchboard tensor node."""
+        from .relations import decode_relation_tensor
+        with self.memory.locked():
+            node = self._validate(node_id)
+            if node["spec"]["kind"] != "tensor":
+                raise ValueError("Node does not hold tensor data")
+            raw = self._tensor_bytes(node["spec"], core_identity)
+            origin = deepcopy(node["origin"])
+        model = decode_relation_tensor(raw, node["spec"]["shape"], origin)
+        questions = deepcopy(origin["questions"])
+        settled = [{"question": q["expression"], "verdict": q["verdict"], "box_verdict": q["box_verdict"],
+                    "correlation_loss": q["correlation_loss"]}
+                   for q in questions if q["verdict"] in ("yes", "no")]
+        open_q = [{"question": q["expression"], "verdict": q["verdict"], "box_verdict": q["box_verdict"],
+                   "correlation_loss": q["correlation_loss"]}
+                  for q in questions if q["verdict"] == "maybe"]
+        return {
+            "node_id": node_id,
+            "model": model,
+            "variables": list(model["variables"]),
+            "worlds": [list(r) for r in model["worlds"]],
+            "mode": origin["mode"],
+            "box_marginals": origin["box_marginals"],
+            "questions": questions,
+            "settled_questions": settled,
+            "open_questions": open_q,
+            "packed_box_trits_hex": origin["packed_box_trits_hex"],
+            "packed_box_support2_hex": origin["packed_box_support2_hex"],
+            "step_id": origin.get("step_id"),
+            "open_step_ids": origin.get("open_step_ids", []),
+        }
+
+    def archive_tensors(self, node_ids, *, recipe="scratchboard-tensor-archive-v1", parent=None):
+        """Package validated scratchboard tensors into safetensors and register in SQLite TensorStore."""
+        import json
+        from .tensor_store import TensorStore, pack_safetensors
+        node_ids = list(node_ids)
+        if not 1 <= len(node_ids) <= 64 or len(set(node_ids)) != len(node_ids):
+            raise ValueError("Select one to 64 distinct tensor nodes")
+        bounded_text(recipe, "tensor archive recipe", 256)
+        with self.memory.locked():
+            nodes = [self._validate(nid) for nid in node_ids]
+            if any(n["spec"]["kind"] != "tensor" for n in nodes):
+                raise ValueError("Tensor archive requires tensor scratchboard nodes")
+            snapshot = deepcopy(nodes[0]["snapshot"])
+            for n in nodes:
+                self._compatible(n, snapshot)
+                snapshot.setdefault("scratchboard", {})[n["id"]] = n["digest"]
+            self.memory._validate_snapshot(snapshot)
+            tensors = {}
+            for i, n in enumerate(nodes):
+                raw = self._tensor_bytes(n["spec"], snapshot["core_identity"])
+                name = f"t{i:02d}_{n['id'].replace('-', '')[:12]}"
+                tensors[name] = {"dtype": n["spec"]["dtype"].upper(),
+                                 "shape": list(n["spec"]["shape"]), "data": raw}
+            container = pack_safetensors(tensors, metadata={
+                "task_id": str(snapshot["task_id"]),
+                "core_identity": str(snapshot["core_identity"]),
+                "node_ids": json.dumps(node_ids),
+            })
+            artifact_id = digest_bytes(container)
+            hex_id = artifact_id.split(":")[1]
+            path = self.memory._artifact_path(f"scratchboard/archives/{hex_id}.safetensors")
+            path.parent.mkdir(parents=True, exist_ok=True, mode=0o700)
+            self.memory._artifact_path(f"scratchboard/archives/{hex_id}.safetensors")
+            temporary = None
+            try:
+                if not path.exists():
+                    with tempfile.NamedTemporaryFile(dir=path.parent, prefix=".staging-", delete=False) as stream:
+                        temporary = Path(stream.name)
+                        stream.write(container); stream.flush(); os.fsync(stream.fileno())
+                    os.link(temporary, path)
+                    self.memory.fs.sync_directory(path.parent)
+                if file_digest(path) != artifact_id:
+                    raise ValueError("Published safetensors archive bytes differ")
+                core_id = str(snapshot["core_identity"])
+                basis_id = (core_id if core_id.startswith("shake256:") and len(core_id) == 136
+                            else digest_bytes(core_id.encode()))
+                store = TensorStore(self.memory.root / "tensors.sqlite3", create=True)
+                ref = store.register(path, expected=artifact_id, basis=basis_id,
+                                     recipe=recipe, source="scratchboard:" + ",".join(node_ids),
+                                     parent=parent)
+                ref["database"] = "tensors.sqlite3"
+                resolved = store.resolve(ref["version"], path=path)
+                return {"reference": ref, "version_id": ref["version"], "recipe": recipe,
+                        "artifact": artifact_id, "basis": basis_id,
+                        "path": str(path), "archive_path": str(path), "node_ids": node_ids,
+                        "tensor_count": resolved["tensor_count"], "tensors": resolved["tensors"]}
+            finally:
+                if temporary is not None:
+                    temporary.unlink(missing_ok=True)
+
     def _validate(self, node_id, *, _depth=0, _checked=None):
         if _depth > 16:
             raise StaleState("Scratchboard dependency depth exceeds the contract")
@@ -486,7 +620,9 @@ class Scratchboard:
         with self.memory.locked():
             node = self._validate(node_id)
             cache = {}
-            return {"id": node_id, "kind": node["spec"]["kind"], **self._stats(node_id, cache),
+            extra = ({"dtype": node["spec"]["dtype"].upper(), "shape": list(node["spec"]["shape"])}
+                     if node["spec"]["kind"] == "tensor" else {})
+            return {"id": node_id, "kind": node["spec"]["kind"], **extra, **self._stats(node_id, cache),
                     "stored_node_bytes": len(canonical(node)), "reachable_nodes": len(cache),
                     "model_calls": 0, "content_status": "Symbolic addresses and bindings; unresolved slots have no invented content"}
 

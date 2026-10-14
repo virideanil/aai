@@ -525,7 +525,163 @@ class RelationConsumers(unittest.TestCase):
         with self.assertRaisesRegex(ProposalError, "ended before completion"):
             inquire(self.memory, truncated, "work", state_step_id=state["step_id"], max_attempts=1)
 
+    def test_support2_lattice_enclosure_and_bf16_relation_tensor_roundtrip(self):
+        from nanoai.relations import (
+            SUPPORT_BOTH, SUPPORT_CONFLICT, SUPPORT_NO, SUPPORT_YES,
+            decode_relation_tensor, encode_relation_tensor, evaluate_support2,
+            pack_support2, query_tensor_enclosure, unpack_support2,
+        )
+        from nanoai.scratchboard import Scratchboard
+        from nanoai.tensor_store import TensorStore
+
+        codes = [SUPPORT_NO, SUPPORT_BOTH, SUPPORT_YES, SUPPORT_CONFLICT, SUPPORT_YES]
+        packed = pack_support2(codes)
+        self.assertEqual(unpack_support2(packed, len(codes), labels=False), codes)
+        self.assertEqual(evaluate_support2({"eq": ["x", "y"]}, {"x": SUPPORT_BOTH, "y": SUPPORT_BOTH}), SUPPORT_BOTH)
+
+        state = self.decode()
+        q_eq = self.perform("relation.query", step=state["step_id"], expression={"eq": ["x", "y"]})
+        q_x = self.perform("relation.query", step=state["step_id"], expression="x")
+        self.assertEqual(q_eq["result"]["value"]["verdict"], "yes")
+        self.assertEqual(q_eq["result"]["value"]["box_verdict"], "maybe")
+        self.assertTrue(q_eq["result"]["value"]["correlation_loss"])
+        enclosure = query_tensor_enclosure(state["result"]["value"], {"eq": ["x", "y"]})
+        self.assertTrue(enclosure["enclosure_holds"])
+        self.assertEqual(enclosure["exact_code"] & enclosure["box_code"], enclosure["exact_code"])
+
+        for mode in ("bf16_support", "bf16_signed", "pack5", "support2"):
+            tensor = encode_relation_tensor(state["result"]["value"], mode=mode)
+            decoded = decode_relation_tensor(tensor)
+            self.assertEqual(decoded["variables"], ["x", "y"])
+            self.assertEqual(decoded["worlds"], [[0, 0], [1, 1]])
+            self.assertEqual(tensor[2]["box_marginals"], {"x": "maybe", "y": "maybe"})
+
+        board = Scratchboard(self.memory)
+        node_support = board.relation_tensor(q_eq["step_id"], open_step_ids=[q_x["step_id"]], mode="bf16_support")
+        node_signed = board.relation_tensor(state["step_id"], mode="bf16_signed")
+        roundtripped = board.decode_relation_tensor(node_support["id"], core_identity="test-core")
+        self.assertEqual(roundtripped["worlds"], [[0, 0], [1, 1]])
+        self.assertEqual(roundtripped["settled_questions"][0]["verdict"], "yes")
+        self.assertEqual(roundtripped["open_questions"][0]["question"], "x")
+
+        archived = board.archive_tensors([node_support["id"], node_signed["id"]], recipe="relational-tensor-test-v1")
+        self.assertEqual(len(archived["tensors"]), 2)
+        store = TensorStore(self.root / "tensors.sqlite3")
+        described = store.resolve(archived["version_id"])
+        self.assertEqual(described["recipe"], "relational-tensor-test-v1")
+        self.assertEqual(len(described["tensors"]), 2)
+
+    def test_relation_extend_relational_constraints_and_hidden_narrowing_rejection(self):
+        state = self.decode()
+        extended = self.perform(
+            "relation.extend",
+            step=state["step_id"],
+            variable="z",
+            expression={"or": [{"eq": ["z", "x"]}, {"eq": ["z", 1]}]},
+        )
+        self.assertEqual(extended["result"]["value"]["variables"], ["x", "y", "z"])
+        self.assertEqual(extended["result"]["value"]["worlds"], [[0, 0, 0], [0, 0, 1], [1, 1, 1]])
+
+        with self.assertRaisesRegex(ValueError, "narrows existing alternatives"):
+            self.perform(
+                "relation.extend",
+                step=state["step_id"],
+                variable="z",
+                expression={"and": ["x", "z"]},
+            )
+
+    def test_relation_project_revise_and_curiosity_with_inquire_tensor_carry(self):
+        from nanoai.agent import inquire
+
+        state = self.decode()
+        extended = self.perform("relation.extend", step=state["step_id"], variable="z", expression=None)
+        projected = self.perform("relation.project", step=extended["step_id"], variables=["x", "y"])
+        self.assertEqual(projected["result"]["value"]["variables"], ["x", "y"])
+        self.assertEqual(projected["result"]["value"]["worlds"], [[0, 0], [1, 1]])
+        self.assertEqual(projected["result"]["projection"]["eliminated_variables"], ["z"])
+        self.assertFalse(projected["result"]["projection"]["exact_box"])
+        self.assertEqual(projected["result"]["projection"]["fiber_counts"], {"[0,0]": 2, "[1,1]": 2})
+
+        r1 = self.perform("relation.refine", step=state["step_id"], expression="x", expected=1)
+        conflict = self.perform("relation.refine", step=r1["step_id"], expression="y", expected=0)
+        self.assertEqual(conflict["result"]["value"]["worlds"], [])
+
+        alt_model = {"type": RELATION, "variables": ["x", "y"], "worlds": [[0, 1], [1, 1]], "scope": "Updated switch table"}
+        self.memory.put_source("alt_rel", json.dumps(alt_model))
+        snap = context(self.memory, "work", "test-core", selected_ids=[self.source, "alt_rel"])["snapshot"]
+        alt_read = self.steps.execute(self.steps.propose(snap, "source.read", {"source": "alt_rel"})["id"])
+        alt_dec = self.steps.execute(self.steps.propose(snap, "relation.decode", {"step": alt_read["step_id"]})["id"])
+        revised = self.steps.execute(
+            self.steps.propose(
+                snap,
+                "relation.revise",
+                {"step": conflict["step_id"], "replacement": alt_dec["step_id"], "reason": "Replace contradicted branch with updated switch table"},
+            )["id"]
+        )
+        rev_val = revised["result"]["value"]
+        rev_meta = revised["result"]["revision"]
+        self.assertEqual(rev_val["worlds"], [[0, 1], [1, 1]])
+        self.assertTrue(rev_meta["reopened_conflict"])
+        self.assertEqual(rev_meta["added_worlds"], [[0, 1], [1, 1]])
+
+        curiosity = self.perform(
+            "relation.curiosity",
+            step=extended["step_id"],
+            questions=["x", "z", {"eq": ["x", "y"]}],
+            observations=["x", "z", {"eq": ["x", "y"]}],
+        )
+        c_val = curiosity["result"]["value"]
+        self.assertEqual(c_val["open_questions"], ["x", "z"])
+        self.assertEqual(c_val["settled_questions"], [{"expression": {"eq": ["x", "y"]}, "verdict": "yes"}])
+        self.assertEqual(c_val["recommended_observation"]["observation"], "x")
+        self.assertEqual(c_val["recommended_observation"]["information_bits"], 1.0)
+        self.assertEqual(c_val["candidates"][-1]["observation"], {"eq": ["x", "y"]})
+        self.assertEqual(c_val["candidates"][-1]["information_bits"], 0.0)
+
+        class PlanCore:
+            identity = "test-core"
+            def __init__(self, plan):
+                self.plan = plan
+            def generate(self, messages, max_tokens=None, schema=None):
+                return {"output": json.dumps(self.plan), "elapsed_ms": 1, "tokens": 5, "finish_reason": "stop"}
+
+        inq = inquire(
+            self.memory,
+            PlanCore({"operator": "relation.curiosity", "questions": ["x", "y"], "observations": ["x", {"eq": ["x", "y"]}]}),
+            "work",
+            state_step_id=state["step_id"],
+            carry_tensor=True,
+        )
+        self.assertEqual(inq["next_state_step_id"], state["step_id"])
+        self.assertIn("tensor_node_id", inq)
+        self.assertEqual(inq["result"]["value"]["recommended_observation"]["observation"], "x")
+
+    def test_cli_board_relation_tensor_and_archive_tensors(self):
+        state = self.decode()
+        q_eq = self.perform("relation.query", step=state["step_id"], expression={"eq": ["x", "y"]})
+        q_x = self.perform("relation.query", step=state["step_id"], expression="x")
+        tensor_run = subprocess.run(
+            [sys.executable, "-m", "nanoai.cli", "--state", str(self.root),
+             "board-relation-tensor", q_eq["step_id"], "--open-step", q_x["step_id"], "--mode", "bf16_support"],
+            check=True, capture_output=True, text=True,
+        )
+        tensor_out = json.loads(tensor_run.stdout)
+        node_id = tensor_out["node"]["id"]
+        self.assertEqual(tensor_out["view"]["kind"], "tensor")
+        self.assertEqual(tensor_out["view"]["dtype"], "BF16")
+        self.assertEqual(tensor_out["view"]["shape"], [2, 4])
+
+        archive_run = subprocess.run(
+            [sys.executable, "-m", "nanoai.cli", "--state", str(self.root),
+             "board-archive-tensors", node_id, "--recipe", "cli-tensor-archive-v1"],
+            check=True, capture_output=True, text=True,
+        )
+        archive_out = json.loads(archive_run.stdout)
+        self.assertEqual(archive_out["recipe"], "cli-tensor-archive-v1")
+        self.assertTrue(Path(archive_out["archive_path"]).is_file())
+
 
 if __name__ == "__main__":
     unittest.main()
+
 

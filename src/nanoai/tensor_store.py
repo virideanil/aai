@@ -106,6 +106,39 @@ def inventory(path):
     return "safetensors", sorted(rows, key=lambda r: r["name"])
 
 
+def pack_safetensors(tensors, *, metadata=None):
+    """Serialize named tensor bytes into a canonical safetensors container."""
+    if not isinstance(tensors, dict) or not 1 <= len(tensors) <= 256:
+        raise ValueError("Safetensors container requires one to 256 named tensors")
+    if metadata is not None and (not isinstance(metadata, dict)
+            or any(not isinstance(k, str) or not k or not isinstance(v, str) for k, v in metadata.items())):
+        raise ValueError("Safetensors metadata requires string key/value pairs")
+    header = {}
+    if metadata:
+        header["__metadata__"] = {k: metadata[k] for k in sorted(metadata)}
+    payload = bytearray()
+    cursor = 0
+    for name in sorted(tensors):
+        if not isinstance(name, str) or not name or name == "__metadata__":
+            raise ValueError("Safetensors tensor name contract")
+        spec = tensors[name]
+        if not isinstance(spec, dict) or set(spec) != {"dtype", "shape", "data"}:
+            raise ValueError("Safetensors tensor entry needs dtype, shape and data")
+        dtype, shape, data = spec["dtype"], spec["shape"], spec["data"]
+        if (dtype not in DTYPE_BYTES or not isinstance(shape, list) or not 1 <= len(shape) <= 16
+                or any(type(d) is not int or not 1 <= d <= 2**40 for d in shape)
+                or not isinstance(data, (bytes, bytearray))):
+            raise ValueError("Safetensors tensor dtype or shape contract")
+        expected = math.prod(shape) * DTYPE_BYTES[dtype]
+        if len(data) != expected:
+            raise ValueError("Safetensors tensor byte count differs")
+        header[name] = {"dtype": dtype, "shape": list(shape), "data_offsets": [cursor, cursor + expected]}
+        payload.extend(data)
+        cursor += expected
+    raw_header = canonical(header)
+    return struct.pack("<Q", len(raw_header)) + raw_header + bytes(payload)
+
+
 SCHEMA = (
     "CREATE TABLE artifacts (id TEXT PRIMARY KEY, format TEXT NOT NULL, byte_count INTEGER NOT NULL CHECK(byte_count>0), "
     "inventory_id TEXT NOT NULL, tensor_count INTEGER NOT NULL CHECK(tensor_count>0)) STRICT",

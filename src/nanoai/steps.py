@@ -133,7 +133,8 @@ class Steps:
         if step["operator"] in {"json.field", "quantity.field"}:
             normalized["path"] = step["arguments"]["path"]
         if step["operator"].startswith("relation."):
-            normalized["parameters"] = {k: deepcopy(v) for k, v in step["arguments"].items() if k != "step"}
+            normalized["parameters"] = {k: deepcopy(v) for k, v in step["arguments"].items()
+                                        if k not in {"step", "replacement"}}
         return normalized, observations
 
     def _calculate(self, step, inputs):
@@ -145,7 +146,8 @@ class Steps:
         refs = sorted({ref for row in inputs for ref in row["result"]["sources"]})
         if operator.startswith("relation."):
             from .relations import calculate
-            return calculate(operator, args, inputs[0]["result"])
+            return calculate(operator, args, inputs[0]["result"],
+                             [row["result"] for row in inputs[1:]])
         if operator in {"json.field", "quantity.field"}:
             text = inputs[0]["result"]["value"]
             if not isinstance(text, str):
