@@ -104,6 +104,62 @@ class GeneratedExperienceTests(unittest.TestCase):
         self.assertTrue(result["checks"]["complete_generation"])
         self.assertEqual(result["observed_outcome"], "no")
 
+    def test_empty_answer_fails_even_when_the_task_rubric_only_checks_absence(self):
+        row = self.record(""); self.owner.execute(row["id"])
+        result = self.owner.assess_generation(row["id"], rubric={
+            "scope": "A notice omits the obsolete room", "criteria": {}, "training_target": None},
+            evaluator_identity="absence-only", evaluate=lambda text, _: {"old_room_absent": "west room" not in text})
+        self.assertTrue(result["checks"]["old_room_absent"])
+        self.assertFalse(result["checks"]["nonempty_final"])
+        self.assertEqual(result["observed_outcome"], "no")
+
+    def test_failed_generation_never_completes_an_obligation_after_recovery(self):
+        for text, finish, assessed in (("", "length", False), ("", "stop", False),
+                                     ("Meet in the east hall.", "length", True),
+                                     ("Meet in the west room.", "stop", True)):
+            with self.subTest(text=text, finish=finish, assessed=assessed):
+                row = self.record(text, finish)
+                receipt = self.owner.execute(row["id"])
+                if assessed:
+                    self.assess(row)
+                path = Path(self.tmp.name) / receipt["path"]
+                before = (path.read_bytes(), path.stat().st_mtime_ns)
+                fresh = Memory(self.tmp.name)
+                fresh.recover()
+                self.assertEqual(fresh.completed("tour")["remaining"], ["notice.md"])
+                status = fresh.status()
+                self.assertEqual(status["obligations"]["tour"]["remaining"], ["notice.md"])
+                artifact = next(a for a in status["artifacts"] if a["operation_id"] == receipt["operation_id"])
+                self.assertTrue(artifact["bytes_verified"])
+                self.assertFalse(artifact["outcome"]["allows_completion"])
+                self.assertEqual(artifact["outcome"]["status"], "failed")
+                self.assertEqual((path.read_bytes(), path.stat().st_mtime_ns), before)
+
+    def test_unassessed_artifact_and_passed_task_keep_their_distinct_scope(self):
+        row = self.record()
+        self.owner.execute(row["id"])
+        unassessed = Memory(self.tmp.name).completed("tour")
+        self.assertEqual(unassessed["remaining"], [])
+        self.assertEqual(unassessed["artifacts"]["notice.md"]["outcome"]["status"], "unassessed")
+        result = self.assess(row)
+        fresh = Memory(self.tmp.name)
+        assessed = fresh.completed("tour")
+        outcome = assessed["artifacts"]["notice.md"]["outcome"]
+        self.assertEqual(outcome["status"], "passed")
+        self.assertEqual(outcome["scope"], result["scope"])
+        self.assertEqual(outcome, fresh.status()["artifacts"][0]["outcome"])
+
+    def test_failed_later_attempt_preserves_a_current_successful_artifact(self):
+        good = self.record(); receipt = self.owner.execute(good["id"]); self.assess(good)
+        bad = self.record("Meet in the west room.")
+        self.owner.execute(bad["id"]); self.assess(bad)
+        fresh = Memory(self.tmp.name)
+        completed = fresh.completed("tour")
+        self.assertEqual(completed["remaining"], [])
+        self.assertEqual(completed["artifacts"]["notice.md"]["receipt"], receipt)
+        self.memory.put_source("notice", json.dumps({"observations": ["The tour was cancelled."]}), expected_revision=1)
+        self.assertEqual(fresh.completed("tour")["remaining"], ["notice.md"])
+
     def test_source_and_prompt_must_match_before_recording(self):
         before = self.memory.sequence
         with self.assertRaises(ValueError):

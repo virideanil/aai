@@ -310,7 +310,7 @@ class Experience:
             result = evaluate(text, deepcopy(rubric["criteria"]))
             if (not isinstance(result, dict) or not 1 <= len(result) <= 32
                     or any(not isinstance(k, str) or not k or type(v) is not bool for k, v in result.items())
-                    or "complete_generation" in result):
+                    or {"complete_generation", "nonempty_final"} & result.keys()):
                 raise ValueError("The evaluator must return named Boolean task checks")
             return result
 
@@ -330,6 +330,7 @@ class Experience:
             observed = actual[:len(row["generation"]["text"])]
             results = checks(observed)
             results["complete_generation"] = row["generation"]["finish_reason"] == "stop"
+            results["nonempty_final"] = bool(row["generation"]["text"].strip())
             success = all(results.values())
             assessment = {"experience_id": experience_id, "evaluator_identity": evaluator_identity,
                 "scope": rubric["scope"], "observed_outcome": "yes" if success else "no",

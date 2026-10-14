@@ -380,6 +380,43 @@ class Memory:
             self._validate_snapshot(snapshot)
         return snapshot
 
+    def _artifact_outcome(self, proposal, receipt):
+        """Project recorded action evidence separately from artifact integrity.
+
+        Callers verify current dependencies and bytes. An unassessed artifact
+        fulfils its delivery contract without acquiring a semantic pass.
+        """
+        linked = [key for key, value in self.state["experience_proposals"].items()
+                  if value == proposal["id"]]
+        outcome = {"status": "artifact-only", "allows_completion": True,
+                   "scope": "Current artifact delivery; task quality assessed separately",
+                   "experience_id": None, "reason": None}
+        if not linked and "experience_id" not in proposal["metrics"]:
+            return outcome
+        if len(linked) != 1 or proposal["metrics"].get("experience_id") != linked[0]:
+            return {**outcome, "status": "unresolved", "allows_completion": False,
+                    "reason": "The artifact has no unique bound experience"}
+        experience_id = linked[0]
+        row = self.state["experiences"][experience_id]
+        outcome.update(status="unassessed", experience_id=experience_id)
+        if row["schema"] == "nanoai.generated-experience.v1":
+            generation = row["generation"]
+            if generation["finish_reason"] != "stop" or not generation["text"].strip():
+                return {**outcome, "status": "failed", "allows_completion": False,
+                        "reason": "Generation did not finish with a nonempty final answer"}
+        assessment = self.state["experience_assessments"].get(experience_id)
+        if assessment is None:
+            return outcome
+        if (assessment["receipt"] != receipt
+                or assessment["observed_content_digest"] != receipt["digest"]):
+            return {**outcome, "status": "unresolved", "allows_completion": False,
+                    "reason": "Assessment and observed artifact differ"}
+        passed = assessment["observed_outcome"] == "yes"
+        return {**outcome, "status": "passed" if passed else "failed",
+                "allows_completion": passed, "scope": assessment["scope"],
+                "evaluator_identity": assessment["evaluator_identity"],
+                "reason": assessment["reason"]}
+
     def completed(self, task_id):
         """Observe completed current task artifacts without loading a model.
 
@@ -399,13 +436,25 @@ class Memory:
                     verified = self._verify_receipt(receipt)
                 except (ValueError, OSError):
                     continue
+                outcome = self._artifact_outcome(proposal, verified)
+                if not outcome["allows_completion"]:
+                    continue
                 outputs[proposal["output"]["filename"]] = {
                     "receipt": verified, "content": proposal["output"]["content"],
-                    "artifact_path": str(self.root / verified["path"])}
+                    "artifact_path": str(self.root / verified["path"]), "outcome": outcome}
             return {"task_id": task_id, "task_revision": task["revision"],
                     "identity": deepcopy(self.state["identity"]), "artifacts": outputs,
                     "remaining": [name for name in task["filenames"] if name not in outputs],
                     "mode": "observed completed work", "model_calls": 0}
+
+    def artifact_outcome(self, operation_id):
+        """Read action evidence only after verifying its current observed bytes."""
+        with self.locked():
+            receipt = self._verify_receipt(self.state["receipts"][operation_id])
+            operation = self.state["operations"][operation_id]
+            proposal = self.state["proposals"][operation["proposal_id"]]
+            self._validate_snapshot(proposal["snapshot"])
+            return self._artifact_outcome(proposal, receipt)
 
     def record_rejection(self, snapshot, output, reason, *, metrics=None):
         if not isinstance(output, str) or len(output.encode()) > 32768:
@@ -561,11 +610,13 @@ class Memory:
             task_id = proposal["snapshot"]["task_id"]
             filename = proposal["output"]["filename"]
             selection_current = self._selection_current(proposal["snapshot"])
-            if current and observed and selection_current:
+            outcome = self._artifact_outcome(proposal, receipt)
+            if current and observed and selection_current and outcome["allows_completion"]:
                 completed[task_id].add(filename)
             artifacts.append({**receipt, "dependency_current": current,
                               "bytes_verified": observed, "observation_error": observation_error,
                               "filename": filename,
+                              "outcome": outcome,
                               "selection_current": selection_current,
                               "task_id": task_id})
         obligations = {task_id: {"completed": sorted(completed[task_id]),

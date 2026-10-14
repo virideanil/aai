@@ -137,6 +137,14 @@ explicit `board-import` or the current generated-source contract.
 Repeating a completed phase with the same current inputs verifies and reuses the
 observed artifact before worker startup. A relevant source or working-unit
 correction requires fresh generation, and the prior artifact remains available.
+Repeating a retained failed attempt also avoids another model call and returns
+its failure. `write-phase` reports `generation_finished` separately from
+`complete` and the scoped `outcome`. `resume` and `status` share that outcome
+boundary: empty, truncated or assessed-failed work cannot fulfil the remaining
+filename. Finished unassessed artifacts retain their explicit delivery-only
+scope. Generated assessment requires a nonempty final even when the task rubric
+only checks for an unwanted phrase's absence. [Execution wiring](wiring.md)
+describes these states and their use by the next operation.
 `assemble` joins selected current generated sources into an editable local
 manuscript. The [writing contract](agentic-writing.md) distinguishes execution,
 brief compliance, causal coherence, literary judgment and parameter learning.

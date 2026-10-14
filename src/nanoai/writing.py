@@ -105,9 +105,11 @@ class Writing:
                 derived_from=basis)
             LanguageCatalogue(self.memory).observe(f"{phase_id}-tokens-{output['revision']}",
                 phase_id, output["id"], self.tokenizer)
+        outcome = self.memory.artifact_outcome(receipt["operation_id"])
         return {"phase": phase_id, "experience_id": row["id"], "model_calls": model_calls,
                 "generation": deepcopy(row["generation"]), "receipt": receipt,
-                "source": output, "complete": row["generation"]["finish_reason"] == "stop",
+                "source": output, "complete": outcome["allows_completion"], "outcome": outcome,
+                "generation_finished": row["generation"]["finish_reason"] == "stop",
                 "artifact_path": str(self.memory.root / receipt["path"])}
 
     def practice(self, phase_id, instruction, source_ids, core, *, criteria, evaluate,
@@ -132,6 +134,8 @@ class Writing:
                 rubric={"scope": scope, "criteria": criteria, "training_target": None},
                 evaluator_identity=evaluator_identity, evaluate=evaluate)
             row["assessment"] = assessment
+            row["outcome"] = self.memory.artifact_outcome(row["receipt"]["operation_id"])
+            row["complete"] = row["outcome"]["allows_completion"]
             attempts.append(row)
             if assessment["observed_outcome"] == "yes":
                 selected = row

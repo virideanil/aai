@@ -8,6 +8,7 @@ import unittest
 
 from nanoai.agent import DEFAULT_IDENTITY
 from nanoai.catalogue import LanguageCatalogue
+from nanoai.experience import Experience
 from nanoai.memory import Memory, StaleState
 from nanoai.scratchboard import Scratchboard
 from nanoai.steps import Steps
@@ -53,6 +54,34 @@ class WritingTests(unittest.TestCase):
         view = LanguageCatalogue(fresh.memory).view("opening")
         self.assertTrue(view["observations"][0]["current"])
         self.assertEqual(result["source"]["text"], core.text)
+
+    def test_recovered_failure_agrees_with_status_and_never_restarts_the_core(self):
+        core = FixedCore("")
+        first = self.owner.run("opening", "Write one sentence.", ["canon"], core)
+        self.assertTrue(first["generation_finished"])
+        self.assertFalse(first["complete"])
+        self.assertEqual(first["outcome"]["status"], "failed")
+        fresh = Memory(self.root)
+        again = Writing(fresh).run("opening", "Write one sentence.", ["canon"], core)
+        self.assertFalse(again["complete"])
+        self.assertEqual(core.calls, 1)
+        self.assertEqual(again["model_calls"], 0)
+        self.assertEqual(again["outcome"], fresh.status()["artifacts"][0]["outcome"])
+        self.assertEqual(fresh.completed("opening")["remaining"], ["text.md"])
+
+    def test_recovered_assessed_failure_preserves_the_draft_and_its_verdict(self):
+        core = FixedCore()
+        first = self.owner.run("opening", "Write one sentence.", ["canon"], core)
+        self.assertEqual(first["outcome"]["status"], "unassessed")
+        Experience(self.memory).assess_generation(first["experience_id"], rubric={
+            "scope": "Draft length", "criteria": {}, "training_target": None},
+            evaluator_identity="length-test", evaluate=lambda text, _: {"short": len(text) < 5})
+        again = Writing(Memory(self.root)).run("opening", "Write one sentence.", ["canon"], core)
+        self.assertFalse(again["complete"])
+        self.assertTrue(again["generation_finished"])
+        self.assertEqual(again["receipt"], first["receipt"])
+        self.assertEqual(again["outcome"]["status"], "failed")
+        self.assertEqual(core.calls, 1)
 
     def test_late_correction_invalidates_descendants_and_history_remains_quotable(self):
         core = FixedCore()

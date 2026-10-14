@@ -2,6 +2,11 @@
 
 Status: implementation contract, 14 October 2026. The parent research package retains the consolidated architecture in `NANOAI-ARCHITECTURE.md`; this repository carries its implementation contract. [System Zero and Quantum tokening](system-zero.md) supplies detailed representation and probability contracts; [measured results](results.md) distinguish the working foundation from proposed neural computation.
 
+[Execution wiring](wiring.md) specifies the chosen division of work, shared
+completion evidence and next native qualification boundary. It preserves the
+complete design while distinguishing current consumers from proposed routing
+and numerical continuity.
+
 ## Purpose
 
 nano'ai should understand unfamiliar work, reason and create, act within entrusted scope, inspect consequences and learn from correction. It retains identity, history and commitments across parameter and runtime changes. The research ambition includes exceeding strong existing systems in useful capability and efficiency. Each claimed improvement needs a named comparator, matched inputs and costs.

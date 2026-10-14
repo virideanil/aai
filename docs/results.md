@@ -469,3 +469,45 @@ Receipts: `../../audit/harmonization-20261014/DECISION.md`,
 `native-direct/summary.json`, `direct-request-candidate/restoration.json`,
 `retained-v1/native-source-integrity.json`, `template-continuation.json` and
 `shared-training-extent.json`.
+
+## Shared completion evidence, 14 October 2026
+
+The proper-use review reproduced a further boundary error in the installed CLI.
+`resume` and `status` marked the three attribution-only files from the actual
+failed native attempts as completed work. The generation and assessment records
+already recorded the failures; the obligation readers ignored them.
+
+One artifact-outcome projection now connects those records to `completed`,
+`status`, writing and writing practice. Empty or truncated generations and
+assessed failures leave their filenames open. Artifact readback, source freshness
+and the assessment's byte binding remain required. An unassessed finished draft
+keeps its delivery-only scope; a passed assessment exposes its actual scope and
+evaluator. A later failure preserves an earlier current successful artifact.
+Generated assessment also requires a nonempty final answer, so an absence-only
+rubric cannot reward an empty response. Historical records retain their original
+implementation identity and the existing current-training eligibility rules.
+
+The full source suite passes **197 tests, zero skips**, in 31.768 test seconds
+and 32.759 wrapper seconds. Targeted experience and writing checks cover failed,
+successful, unassessed, corrected and freshly recovered work. The saved failing
+regression log records five assertion failures and one missing-outcome error
+before the owner repair.
+
+The refreshed installed package matches all 32 runtime modules. Its actual
+`resume`, `status` and `recover` commands now leave `text.md` pending on the
+preserved native state, with all three failed artifacts and both source and
+consumer journal bytes unchanged. Recovery makes zero model calls. A separate
+fresh installed writing consumer starts workers 1/0/1 for initial, repeated and
+corrected work and preserves the old artifact. Its repeat took 0.09647 seconds;
+this single deterministic-worker observation is neither neural speed nor a
+controlled performance comparison.
+
+The [wiring decision](wiring.md) retains the complete learned-core and state
+design. No new neural run or parameter update occurred in this repair. The three
+earlier unsuccessful native tasks and host startup limits remain the relevant
+constraints on generative capability and complete-task speed.
+
+Evidence: `../../audit/proper-use-20261014/DECISION.md`,
+`completion-baseline.json`, `regression-before.log`, `full-tests.json`,
+`installed-consumer.json`, `resume-after.json`, `status-after.json` and
+`installed-writing/result.json` at that evidence owner.

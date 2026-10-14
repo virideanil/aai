@@ -62,6 +62,11 @@ class ExperienceTests(unittest.TestCase):
         result = self.owner.assess(row["id"], rubric=self.rubric, evaluator_identity="rubric")
         self.assertEqual(result["observed_outcome"], "no")
         self.assertEqual(self.owner.export(row["id"])["eligibility"]["status"], "checked")
+        fresh = Memory(self.tmp.name)
+        self.assertEqual(fresh.completed("reading")["remaining"], ["answer.md"])
+        status = fresh.status()
+        self.assertEqual(status["obligations"]["reading"]["remaining"], ["answer.md"])
+        self.assertEqual(status["artifacts"][0]["outcome"]["status"], "failed")
 
     def test_input_and_real_propensity_are_bound_before_mutation(self):
         before = self.memory.sequence

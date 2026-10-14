@@ -1,0 +1,147 @@
+# Using the whole system coherently
+
+14 October 2026. This is the execution placement for the existing
+[design](design.md), with the retained whole-system requirements. The current
+request asks for better wiring while preserving their substance. The repair and
+installed-consumer observations are in [measured results](results.md#shared-completion-evidence-14-october-2026).
+
+## The organizing decision
+
+Use one continuing task, one durable evidence/work journal and one capable
+generative core. Route each operation to the component that can perform it under
+its actual contract. The core interprets, creates and proposes; exact operators
+execute declared mathematics and transformations; the journal preserves sources,
+dependencies, attempts and consequences. Assessed experience returns to the same
+task and supplies separately reviewed candidate learning.
+
+```mermaid
+flowchart TD
+    T[Current task, identity, grants and source revisions] --> J[Shared work and evidence journal]
+    J --> H[Harmonizer: selected eligible context]
+    H --> R{What does the current obligation need?}
+    R -->|Previously observed work| U[Verify dependencies, bytes and recorded outcome]
+    R -->|Declared exact operation| E[Typed Steps executor]
+    R -->|Interpretation or new creation| C[Original-precision generative core]
+    C --> P[Proposed action or editable work]
+    E --> O[Observed result]
+    U --> O
+    P --> V[Current dependency and effect checks]
+    V --> O
+    O --> A[Scoped task assessment]
+    A --> J
+    A --> L[Attributed experience and checked correction]
+    L --> B[Candidate learning with replay]
+    B --> G[Quality, retention, recovery and total-cost evaluation]
+    G -->|Admitted version| C
+```
+
+The diagram is the target operating loop. The current CLI exposes the individual
+routes and `Writing.practice` executes caller-selected phases. General learned
+action selection across these routes and continuous numerical writing state
+remain unqualified. A new coordinator class alone would not supply either.
+
+## Give each component its proper job
+
+| Component | Proper use | Evidence that must return |
+|---|---|---|
+| Task and journal | Preserve the full goal, authority, revisions, open obligations and independent completed work | Exact event sequence and source/effect identities |
+| System Zero and tokenizer | Recover bytes, literal references, explicit rules and native tokenizer witnesses | Exact spans, declared types and reversible encoding |
+| Harmonizer and memory views | Supply relevant eligible sources, unresolved alternatives, reviewed results and selected working units | Selection/dependency identity and a route back to source detail |
+| Learned core and workspace | Interpret unfamiliar language, choose useful operations, create and revise | Actual input, sampled output, proposed action, compatible state and uncertainty |
+| Steps and editable work | Execute declared operations and preserve connected editable units | Actual result, operator version, dependencies and invariant checks |
+| Effect owner and assessment | Observe what happened and whether it satisfies the named task criteria | Verified materialization plus an independently attributed verdict and scope |
+| Teaching and learning | Use the recorded decision context, consequence and checked correction | Immutable candidate, split provenance, retention, transfer and total cost |
+
+Byte equality does not establish shared meaning. An exact multiplication does not
+establish that multiplication answered the request. A teacher's preferred answer
+does not replace observation. These distinctions are needed at the interfaces,
+where the next component can actually use them.
+
+## Close the loop at its real outcome
+
+Artifact integrity, natural generation termination and task quality have
+different observations. The shared artifact outcome now reports:
+
+| Status | Meaning and completion scope |
+|---|---|
+| `artifact-only` | Current verified delivery through a producer without an experience assessment; quality keeps that producer's explicit contract |
+| `unassessed` | A finished, nonempty experience artifact is available; delivery can be recovered, while semantic quality is unassessed |
+| `passed` | The recorded independent assessment passed its named scope on these observed bytes |
+| `failed` | Generation was incomplete or empty, or the recorded assessment failed; this artifact cannot satisfy the remaining filename |
+| `unresolved` | The experience/assessment cannot be bound uniquely to these observed bytes; completion remains open |
+
+`Memory.completed`, `status`, `Writing.run` and `Writing.practice` use this shared
+boundary. `generation_finished` reports the decoder stop separately. Current
+dependencies and actual artifact bytes still need verification before reuse.
+An earlier valid success survives a failed later attempt. Corrected dependencies
+reopen affected work; independent completed work remains available. Every failed
+artifact and assessment stays in history.
+
+Generated-experience assessment also checks for a nonempty final answer. A rubric
+that only asks whether a forbidden phrase is absent can otherwise reward an
+empty response. Failure remains usable learning evidence with its original input
+and separate corrective target. Updated assessment code has a new implementation
+identity; older learning records retain their source version and require the
+existing eligibility check before current training use.
+
+## Spend computation where it changes the work
+
+1. Reconcile unfinished publication and inspect current obligations. Reuse exact
+   observed work only after dependency, byte and outcome checks. A recovered
+   failure returns its status without repeating the same generation.
+2. Read the smallest sufficient current evidence view, with access to exact
+   detail. Open obligations, exceptions and unresolved conflicts retain their
+   place even when a relevance scorer ranks them poorly.
+3. Use the existing typed executor for an explicitly specified or reviewed
+   operation. For example, the selected period and count can be multiplied and
+   the confirmed result rendered through `note` without another model pass.
+   Learned interpretation is still needed when the choice of operation is open.
+4. Invoke the generative core for the remaining interpretation, creation or
+   revision. An earlier unsuccessful native call is evidence to change the
+   mechanism or inputs, rather than a reason to schedule an identical retry.
+5. Feed the actual result and scoped feedback into the next decision. Practice
+   changes the task context; parameter learning produces a separate candidate.
+
+This ordering preserves the original model values and useful work. It removes
+unnecessary computation from eligible cases. It cannot make a new semantic task
+free: retrieval, restoration, prefill, decoding, execution, assessment and
+recording all count toward its latency. Background preparation and learning
+consume the same host resources.
+
+## Numerical continuity needs its own qualification
+
+Reuse a native cache only when the exact token prefix, positions, model/adapter,
+arithmetic, runtime and every recurrent, convolution and attention component are
+compatible. Persist the event cursor and sampling state where needed. A relevant
+correction restores an unaffected checkpoint and replays the valid sequence, or
+rebuilds from current sources. Replaying observed effects reads their receipts.
+
+The current writing template changes the effective input at a new user turn by
+removing earlier reasoning text. Retaining the old numerical cache would retain
+those tokens' effects. A canonical next-phase checkpoint therefore requires
+valid restoration and replay, with those costs charged to the comparison.
+The existing short hybrid-state experiment is a useful primitive; it does not
+qualify this complete thinking-on writing path.
+
+## The next mechanism must earn its place
+
+Keep source fidelity, original BF16/F32 precision, natural thinking, actual effect
+authority and truthful completion as constraints. Compare remaining choices on
+useful complete-task quality and cost. Current-source retrieval and the exact
+work graph are the control. Native recurrent memory and a separately versioned
+adapter use existing computation before an extra memory network is justified.
+The owned byte/patch core, learned refinement, nested capacity, conditional
+operators and compatible ternary computation remain in the full architecture;
+each needs trained behavior and a real consumer.
+
+Three earlier natural-thinking BF16 attempts each used roughly 31 minutes and
+produced no final answer. Prompt presentation changes did not qualify a solution.
+Two mapped Metal startup trials also stopped at the host resource guard. These
+are concrete limits of the tested paths. The present outcome repair changes
+recovery and learning attribution; it does not repair those neural failures.
+
+Before another large rollout, a consequential execution or core change must
+finish an accurate unfamiliar task under the retained constraints, then survive
+source correction and fresh recovery at acceptable total cost. Learned admission
+also needs diverse replay, held-out transfer and retained language/conduct. This
+gate preserves the full ambition while making the next experiment decisive.

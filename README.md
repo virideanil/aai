@@ -97,6 +97,10 @@ their declared BF16/F32 precision. The [design](docs/design.md) and
 [System Zero contract](docs/system-zero.md) explain the chosen interfaces and
 which neural mechanisms still need training.
 
+The [execution wiring](docs/wiring.md) assigns each component its role and
+separates artifact delivery, natural generation termination and assessed task
+success. Recovery retains failed attempts while keeping their obligations open.
+
 ## Native models and experiments
 
 Real generation needs an explicitly qualified original-BF16 model and a compatible
